@@ -55,6 +55,7 @@ public class SplashScreen implements Screen{
     private void throwCards() {
         for(int i=0; i<deck1.getCards().size(); i++) {
             Card card = deck1.getCards().get(i);
+            card.setVisible(true);
             card.setScale(3,3);
             card.setPosition(rand.nextInt((int) stage.getWidth() - 100) - 25, -Card.CARD_HEIGHT * 2);
             card.setFaceUp(rand.nextBoolean());
@@ -65,6 +66,7 @@ public class SplashScreen implements Screen{
         }
         for(int i=0; i<deck2.getCards().size(); i++) {
             Card card = deck2.getCards().get(i);
+            card.setVisible(true);
             card.setScale(3,3);
             card.setPosition(rand.nextInt((int) stage.getWidth() - 100) - 25, (int) stage.getHeight() + Card.CARD_HEIGHT * 2);
             card.setFaceUp(rand.nextBoolean());
@@ -79,7 +81,9 @@ public class SplashScreen implements Screen{
     public void show() {
         for(int i=0; i<54; i++) {
             stage.addActor(deck1.getCards().get(i));
+            deck1.getCards().get(i).setVisible(false);
             stage.addActor(deck2.getCards().get(i));
+            deck2.getCards().get(i).setVisible(false);
         }
         splashImage = new Image(assets.getTexture(Assets.TEX_NAME.SPLASH_TITLE));
         splashImage.addAction(Actions.sequence(
