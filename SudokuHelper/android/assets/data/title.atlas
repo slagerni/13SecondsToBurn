@@ -1,0 +1,19 @@
+
+title.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+title
+  rotate: false
+  xy: 1, 1
+  size: 270, 90
+  orig: 270, 90
+  offset: 0, 0
+  index: -1
+13stb
+  rotate: false
+  xy: 273, 52
+  size: 270, 39
+  orig: 270, 39
+  offset: 0, 0
+  index: -1
