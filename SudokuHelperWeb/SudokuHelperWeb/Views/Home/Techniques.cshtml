@@ -1,0 +1,760 @@
+﻿@{
+    ViewBag.Title = "Techniques";
+}
+
+<h2>Techniques</h2>
+<p>
+    Sudoku Helper generates puzzles based on human solvable techniques. The techniques shown here are the ones used, except for guessing.
+    Guessing is only included here in case of user error since the Hint functionality will try to guess before giving up.
+</p>
+<p>
+    For all of the examples below, when you see numbers in () like (1,9) it's referring to row 1, column 9.
+</p>
+
+<div data-role="collapsible-set">
+    <div data-role="collapsible">
+        <h3>Single Naked Candidate</h3>
+        <p>
+            The Single Naked Candidate technique is the simplest technique used for solving sudoku.
+        </p>
+        <h4>Definition</h4>
+        <p>
+            A possibility can be selected as the solution to a box if it is the only possibility in the cell.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/SingleNakedCandidate1.png" />
+            <figcaption>31286459.598731426746529831651973284279458163483612759865347912927186345.3429567.</figcaption>
+        </figure>
+        <p>
+            This sudoku shows three ways that you can come across a single naked candidate, by row, by column and by house.
+            A single naked candidate occurs when at least one of every other possibility has been placed in the box's row, column or house.
+            In this case, we know that the box at (1,9) must have a 7 as the only possibility, since the other values in row 1 have been used.
+            The same is true for the box at (9,1) where all of the values except for 1 have been used in column 1. The 8 in box (9,9) can be
+            determined by all of the other values in house 9 being used.
+        </p>
+        <div class="clearFloat"></div>
+        <h3>Example 2</h3>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/SingleNakedCandidate2.png" />
+            <figcaption>9..3..2....6985.3.......4.....2...8..1..4......3...9...5.8...7.12........3......1</figcaption>
+        </figure>
+        <p>
+            Single naked candidates can arise much sooner in puzzles than just the end as shown in example 1. As you can see, the box at (2,9)
+            shows that 7 is the only possibility. You can come to this conclusion by first looking at column 9. Since there is already a 1 in the solution,
+            box (2,9) cannot have a 1. Looking at house 3, where box (2,9) resides already contains a 2, 3 and 4, so box (2,9) cannot be 2, 3 or 4.
+            Finally, looking at row 2, the numbers 5, 6, 8 and 9 are already part of the solution and in the same row as box (2,9).
+            Therefore, we can safely conclude that 7 is the solution for box (2,9).
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Single Candidate</h3>
+        <h4>Definition</h4>
+        <p>
+            A possibility can be selected as the solution to a box if it is only found in one box in a given row, column or house.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/SingleCandidate.png" />
+            <figcaption>.6.51......9.....4..4..8.7...........536..1....7..1.45....6...7...18.3....5..981.</figcaption>
+        </figure>
+        <p>
+            As possibilities are removed, it often happens that only one box in a given row, column or house can be the acceptable solution
+            for that box. In this example, we can see two such cases highlighted by the possibility highlighting feature. If we focus on the
+            the box at (1,6) we can see that 4 has to be the solution for this box since it it the only 4 left in this row.
+        </p>
+        <p>
+            But how did we get to 4 being the only possibility? As you can see, the puzzle started out with 4 as a solution to box (2,9)
+            and box (3,3). This means that the 4 slot has been occupied for rows 2 and 3. This leaves us looking at house 2. Since house 1
+            and house 3 took up the other 2 rows, we know that the 4 in house 2 must be in row 1. Boxes (1,4) and (1,5) already have
+            solutions to them. Therefore, the only place left for a 4 to be in house 2 is at box (1,6).
+        </p>
+        <p>
+            It is not always the case that a solution number will be the cause of a single candidate. Utilizing other techniques that
+            eliminate possibilies may also leave a single candidate in a row, column or house.
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Single Sector Candidate</h3>
+        <p>
+            The Single Sector Candidate technique is the first technique used to remove
+            possibilities instead of selecting a solution.
+        </p>
+        <h4>Definition</h4>
+        <p>
+            <ol>
+                <li>
+                    If there is only one house in a row or column that contains a given
+                    possibility, the remainder of the house may be cleared.
+                </li>
+                <li>
+                    If a possiblily in a house is only in one row or column, then the
+                    possibilites can be removed from other houses sharing that row or column.
+                </li>
+            </ol>
+        </p>
+        <p>
+            The easiest way to catch onto this pattern is to look at some diagrams (these
+            are some of the possibilities, not all):
+        </p>
+        <p>
+            <table id="Table7" cellspacing="1" cellpadding="1" border="0">
+                <tr>
+                    <td valign="top">
+                        <table height="0" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td>
+                                    <table id="Table1" cellspacing="0" cellpadding="0" border="1">
+                                        <tr>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="Table2" cellspacing="0" cellpadding="0" border="1">
+                                        <tr>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="Table3" cellspacing="0" cellpadding="0" border="1">
+                                        <tr>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="20" rowspan="2"></td>
+                    <td rowspan="2">
+                        <table id="Table5" cellspacing="0" cellpadding="0" border="1">
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                            </tr>
+                        </table>
+                        <table id="Table4" cellspacing="0" cellpadding="0" border="1">
+                            <tr>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                            </tr>
+                        </table>
+                        <table id="Table6" cellspacing="0" cellpadding="0" border="1">
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="20" rowspan="2"></td>
+                    <td rowspan="2">
+                        <table id="Table12" cellspacing="0" cellpadding="0" border="1">
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                            </tr>
+                        </table>
+                        <table id="Table13" cellspacing="0" cellpadding="0" border="1">
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                            </tr>
+                        </table>
+                        <table id="Table14" cellspacing="0" cellpadding="0" border="1">
+                            <tr>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td valign="top">
+                        <table id="Table8" height="0" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td>
+                                    <table id="Table10" cellspacing="0" cellpadding="0" border="1">
+                                        <tr>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="Table9" cellspacing="0" cellpadding="0" border="1">
+                                        <tr>
+                                            <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="pink">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightgreen">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="Table11" cellspacing="0" cellpadding="0" border="1">
+                                        <tr>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                            <td align="center" width="20" bgcolor="lightblue">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                            <td align="center" width="20">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            The four diagrams above all show both potential cases. Assume the
+            pink boxes have at least 2 of them with a possibility. If the blue boxes
+            do not contain the possibility in question, then the possibity in the boxes
+            that are colored green can be safely be removed. The inverse is true as
+            well. If the green boxes do not contain the possibility, then the possibility
+            can be removed from the blue boxes.
+        </p>
+        <p>
+            As you can see from the two diagrams above, the order of the rows, columns and
+            houses is irrelevant.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/SingleSectorCandidate1.png" />
+            <figcaption>..257.1.....19.2781.72..9...7.9615325613278..239845617.2......1..671.32..1..52.8.</figcaption>
+        </figure>
+        <p>
+            This example shows how rule #1 of the single sector candidate technique can be
+            used to make eliminations. Looking at 4 as a possibility, we can see that by
+            looking at column 7, only house 9 contains spots where a 4 can be, (7,7) and
+            (9,7). Since we know that a 4 needs to be placed in one of those two boxes,
+            that the 4s at (7,8), (8,9) and (9,9) can be eliminated. This is an example of
+            eliminating possibilities out of green boxes because no possibility lies in the
+            blue boxes.
+        </p>
+        <h4>Example 2</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/SingleSectorCandidate2.png" />
+            <figcaption>....7..3.5.8...7...7..5...6.6274..5...3....17...9.....2..468.7..8....2.....237..4</figcaption>
+        </figure>
+        <p>
+            In this example, we can see that house 8 does not have a 1 set yet. However,
+            the only possible places for the 1 to fall are in row 8 at (8,4), (8,5) or
+            (8.6). By using the second rule of the single sector candidate technique
+            we can remove the 1s at (8,1), (8,3) and (8,9) since a row can
+            only have a number once, and we know it must be somewhere in the row in house
+            8. This is an example of eliminating possibilities out of blue boxes because no
+            possibility lies in the green boxes.
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>X-Wing</h3>
+        <h4>Definition</h4>
+        <p>
+            If two rows have only two boxes with a possibility in the same columns,
+            then all other boxes in those columns that contain that possiblity can
+            have that possibility removed from them. The same is true if you exchange
+            rows and columns.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/XWing.png" />
+            <figcaption>8...1.......5......1.34..29481...9...7.49..31953...2.416827439539.8...42........8</figcaption>
+        </figure>        
+        <p>
+            This example of the X-Wing technique is unique since there are actually 2
+            distinct X-Wings that will remove the same possibilities, one by row and one by
+            column.
+        </p>
+        <p>
+            Starting with the row example, you can see that rows 3 and 5 only contain the
+            possibility 8 in columns 6 and 7. Since there are no other places in these rows
+            that an 8 can appear, we know that each one must contain one or the other.
+            Therefore we can remove all other possibilities from columns 6 and 7. In this
+            case boxes (2,6), (2,7) and (6,6) all contain an 8 as a possibility in columns
+            6 or 7 and can be removed.
+        </p>
+        <p>
+            The column example works equally well to remove 8 as a possiblity in boxes
+            (2,6), (2,7) and (6,6). Columns 5 and 8 contain the possiblity 8 only in rows 2
+            and 6. Therefore we can remove 8 as a possibility from any boxes in rows 2 or
+            6.
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Swordfish</h3>
+        <h4>Definition</h4>
+        <p>
+            Swordfish is an extention of the X-Wing technique to use
+            three rows or colums instead of two. So, if three rows have a possibility in
+            only three distinct columns between them, then all other boxes in these columns
+            that are not part of the three rows can have the possibility removed. The
+            inverse of rows and columns works as well. The rows (or columns) in question do
+            not need to have all three columns have the possibility, they can have only
+            two.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/Swordfish.png" />
+            <figcaption>..4357...752896143368124975..5.13..44...8..3..3..4.7...239714...41238..7...4653..</figcaption>
+        </figure> 
+        <p>
+            This swordfish example uses rows 1, 4 and 8 to make it's deductions. Row 1 has 9
+            as a possibility in only columns 1 and 2. Row 4 has 9 as a possibility in only
+            columns 1, 2 and 8. Row 8 only has 9 as a possibility in columns 1 and 8. As
+            you can see, this means that 3 rows have their only possibilities in 3 columns
+            (1, 2 and 8). Therefore, we know that eventually these three rows will have 9
+            as a possibility in all three of these columns. This means that we can remove 9
+            from column 1 at (6,1) and (9,1), from column 2 at (5,2) and (9,2), and from
+            column 8 at (6,8) and (9,8).
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Naked Pair</h3>
+        <h4>Definition</h4>
+        <p>
+            If two boxes in a row, column or house only contain the same two possibilities,
+            then these two possibilities may be removed from the other boxes in that row,
+            column or house.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/NakedPair.png" />
+            <figcaption>732169548159482673.4.57329137.2..819.21.38754.847..3262.3....8....3..46.46.8...3.</figcaption>
+        </figure> 
+        <p>
+            If we look at row 7 in the above example, we can see that boxes (7,2) and (7,7)
+            both contain only the possibilities 1 and 9. Since putting a 1 in box (7,2)
+            will force a 9 in box (7,7) and putting a 9 in box (7,2) will force a 1 at
+            box (7,7) every other instance of 1 or 9 can be removed from row 7. A 9 is
+            removed from (7,4), 1 and 9 are both removed from (7,5) and a 9 is removed from
+            (7,6).
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Hidden Pair</h3>
+        <h4>Definition</h4>
+        <p>
+            If only two boxes in a row, column or house contain the same two
+            possibilities, then these two possibilities are the only possibilities for the
+            box and any other possibilities may be removed from the box.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/HiddenPair.png" />
+            <figcaption>52.6.7..8.6...2...4......3..3.....2...1......28..6.7.9..6...4758574...1..42.7....</figcaption>
+        </figure> 
+        <p>
+            If we look at row 3 in the above example, we can see that the possibilities 2
+            and 6 each exist in only 2 boxes in the row, and they only exist in the same
+            boxes. Since we know that row 3 still needs both of these possibilities and
+            there are only 2 boxes which they can go into, all of the other possibilities
+            in these boxes can be removed. In this case, 1, 5 and 9 can be removed vrom box
+            (3,7) and 1 and 7 can be removed from (3,9).
+        </p>
+        <p>
+            The same logic could have been used for house 3 instead of row 3 as well to
+            obtain the same results.
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Naked Subset</h3>
+        <h4>Definition</h4>
+        <p>
+            If any row, column or house contains X possibilities in X boxes without any
+            other possibilities in those boxes, then these possibilities can be removed
+            from the rest of the boxes in the row, column or house. X will always be either
+            3 or 4. It is important to note that not all the boxes need to contain all of
+            the possibilities for this technique to work.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/NakedSubset1.png" />
+            <figcaption>....843..43...796818.9.3745....3.8..3.97.8.5..68.4.1....1....8..74...2....3....9.</figcaption>
+        </figure>
+        <p>
+            Row 4 contains our first example of a naked subset.If we look at boxes (4,1),
+            (4,3) and (4,8) we can see that these three boxes contain only the possibilites
+            2, 5 and 7. Box (4,1) contains all three. Box (4,3) only has 5 and 7. Box (4,8)
+            only has 7 and 2. You can see that choosing any of the possibilities in Box
+            (4,1) will allow you to use simple techniques to solve boxes (4,3) and (4,8).
+            Since we know that these three boxes are the only possibility for 2,5 and 7
+            they can be eliminated from boxes (4,4), (4,6) and (4,9)
+        </p>
+        <h4>Example 2</h4>
+        <p>....843..43...796818.9.3745....3.8..3.97.8.5..68.4.1....1....8..74...2....3....9.</p>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/NakedSubset2.png" />
+            <figcaption>52.6.7..8.6...2...4......3..3.....2...1......28..6.7.9..6...4758574...1..42.7....</figcaption>
+        </figure>
+        <p>
+            Expanding on Example 1 a few steps later, another naked subset appears. Unlike
+            our first example that contained 3 boxes, this one needs four. Looking at
+            column 4, boxes (1,4), (2,4), (4,4) and (6,4) all only contain a subset of the
+            possibilities 1, 2, 5 and 6. We can therefore eliminate these as possibilites
+            from (7,4), (8,4) and (9,4).
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Hidden Subset</h3>
+
+        <h4>Definition</h4>
+        <p>
+            If X number of the same possibilities are only found in X number of boxes in a
+            row, column or house, the all other possibilities can be removed from these
+            boxes. X will always be 3 or 4. All X possibilities do not need to be in all of
+            the boxes. Sets like 1,2 - 1,3 - 2,3 will all still count for X = 3.
+            The important thing is that the set of possibilites only exist in the same
+            number of boxes as there are possibilities in the set.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/HiddenSubset.png" />
+            <figcaption>8..6.7.......8..6..6.31........43..17.1..5...58.1.69..3.5..84......32.7.27...13..</figcaption>
+        </figure>
+        <p>
+            Looking at house 3, we can see that only boxes (1,8), (1,9) and (2,9)
+            contain the possibilities 3, 4 and 9. Since there are only three possible
+            boxes for these three possibilities we can eliminate all possibilities that are
+            not 3, 4 and 9. In this example we can remove 1 and 2 from (1,8), 2 from (1,9)
+            and 2 and 7 from (2,9).
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Coloring</h3>
+        <p>
+            Before getting to the definition of coloring, it is important to go over how to
+            make coloring work. The basic idea is to look at one possibility at a time and
+            find all of the conjugate pairs (only 2 of a possibility in a row, column or
+            house). Congugate pairs are important because if one of them is the correct
+            solution, we know for certain that the other one is not the solution and vice
+            versa. Coloring is a way to visualize these pairs by assigning one color to one
+            of them, and another color to the other one. Usually this is done with a dark
+            and light version of the same color.
+        </p>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/Coloring1.png" />
+        </figure>
+        <p>
+            As you can see in the above example of basic coloring we have found 4
+            opportunities to apply coloring to the possibility 3. Looking at column 4, you
+            can see that there are only two possibilties for that column. Therefore, we
+            color one of them dark red, and the other one light red. Why do we have
+            multiple colors on the form? Each conjugate pair get's its own color to start
+            with. First we used red for column 4, then green for column 9. But what about
+            the blue 3s?
+        </p>
+        <p>
+            The power of coloring comes when we start chaining conjugate pairs together. We
+            can start to see this by looking at row 8. It has a conjugate pair that we have
+            colored blue, and light blue. Our next step would be to color the conjugate
+            pair in house 9. However, one of the 3's is already colored light blue. When
+            one of the pairs is already colored, simply reuse the color and take the
+            opposite. In this case, since the 3 in box (8,7) is light blue, we make the 3
+            in (7,7) dark blue.
+        </p>
+        <p>
+            While we were able to apply coloring to the set above, we were not able to make
+            any conclusions just yet. The chains were too short.
+        </p>
+        <h4>Definition</h4>
+        <p>
+            Coloring is a technique that makes deductions off of conjugate pair chains.
+            There are 2 different deductions that can be made using the coloring technique.
+        </p>
+        <ol>
+            <li>
+                If a non-colored possibility shared a row, column or house with both a light
+                version, and a dark version of a color, it can be removed as a possibility.
+            <li>
+                If the same version of a color (light or dark) is in the same row, column or
+                house more then once, all of that version may be removed as
+                possibilities. The opposite version can be used as a solution in the
+                puzzle.
+            </li>
+        </ol>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/Coloring2.png" />
+            <figcaption>..35.6.78...38....18...7..5...73928..3.2.89.48921.4..7.5.8.37.9..8.7...33..6.58.2</figcaption>
+        </figure>
+
+        <p>
+            Looking at the red chain in this example will show us the benefit of the first
+            rule of coloring. Box (8,7) is not part of any conjugate pair chains. However,
+            it shares a row with box (8,6) and a column with box (1,7). Both of these boxes
+            have a color, one dark and one light (in the same color chain). Since there is
+            no contradition in the red chain, it is safe to say that either box (8,6) or
+            box (1,7) will have a 1 in it eventually. This means that the 1 at (8,7) can be
+            eliminated as a possibility.
+        </p>
+        <p>
+            It is very important to note that you can not make any inferences between the
+            two different major colors (red and green in this case). For example you can
+            not remove the ones in boxes (2,7) and (2,8) because the box at (2,6) is light
+            and the box at (2,9) is dark. If the dark red and light green were eventually
+            determined to be correct, then at least one of the boxes at (2,7) and (2,8)
+            would have to be correct as well.
+        </p>
+        <h4>Example 2</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/Coloring3.png" />
+            <figcaption>591..7..2.6..591...........48.79.2159.51.4..817.5..9346..37...13..9.2...8..4.....</figcaption>
+        </figure>
+
+        <p>
+            This example of coloring shows the contraditions in the conjugate pairs of
+            the possiblity 3. Row 3, column 2 and Row 3, column 3 both have two dark blue boxes in them.
+            Since we have a contradition, all of the dark blue boxes can be removed as
+            possibilities and the light blue boxes can be set to solutions.
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Multicoloring</h3>
+        <h4>Definition</h4>
+        <p>
+            Multicoloring is a way to reduce multiple coloring
+            chains down into one larger chain that the <a href='coloring.htm'>coloring technique</a> can then be used
+            on. Chains are combinded when one variation of the first color shares a row, column or house with one variation of the second color and
+            then the opposite variations of each of the colors also share the same row,
+            column or house.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/MulticoloringBefore.png" />
+            <figcaption>Before</figcaption>
+        </figure>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/MulticoloringAfter.png" />
+            <figcaption>After</figcaption>
+        </figure>
+        <p>.8...319.......2.8...182.6.5.32687.9.984.75.6.6.9.58..8513.6.72.2.871.5.37.52.681</p>
+        <p>
+            By looking at the before and after pictures above, you
+            can see that the red and green colors have been combined. How was this done? In
+            row 2, box (2,6) is colored dark green and box (2,8) is colored dark red. This
+            satisfied the first condition where a version of each color is in the same row,
+            column or house. Now, looking at column 7, we can see that there is both a light
+            green and a light red sharing a column. This satisfies the second condition
+            needed for joining chains since the opposite colors of each chain are in a
+            common row, column or house.
+        </p>
+        <p>
+            Now that we know they can be joined, how do we join them? You can now treat
+            all of the instances where the the two colors meet as being conjugate pairs.
+            Since the red chain was shorter, the red color is converted to green. The
+            colors are easy to switch now that we know were the two color chains intersect.
+            Since the row 2 green variation was dark, we know that the dark red variation
+            will need to be changed to light green. This can be done for all of the dark red
+            variations. The light red variation is then switched to the dark green
+            variation. We end up with a nice long coloring chain shown in green in the after
+            picture.
+        </p>
+        <p>
+            The coloring technique can now be used to make eliminations on the
+            non-colored possibilities. In this case possibilities in boxed (1,3), (2,1),
+            (2,2), (2,3), (2,5) and (8,7) can all be removed.
+        </p>
+        <p>
+            Remember that the actual light/dark value associated with a color is just an
+            indicator. The example above would have worked just as well if the light and
+            dark values in the red chain had been switched (2 light and 1 dark).
+        </p>
+        <p>
+            You might be tempted to merge the blue chain into the green chain as well, but
+            remember, you need opposite of both to be merged. Dark blue / light green and
+            light blue / light green is not a valid way to combine strings.
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>XY-Wing</h3>
+
+        <h4>Definition</h4>
+        <p>
+            XY-Wing is a pivot based technique involving 3 pairs of possibilities. The pivot
+            of the three pairs will have possibilities (A,B) the two wing pairs will have
+            possibilities (A,C) and (B,C). The wing pairs must share a row, column or house
+            with the piviot pair. Possibility C can then be removed from the intersection
+            of the rows, columns or houses of the two wing pair boxes. The boxes that you
+            are looking at must have only 2 possibilities in them for this technique to
+            work.
+        </p>
+        <h4>Example 1</h4>
+        <figure>
+            <img class="fixedWidth" src="~/Content/images/techniques/XYWing.png" />
+            <figcaption>1.....2..4..2....8..7.9.....5.3.1.4..31.6.7.5......381.....6.5.5.2..7..39.6......</figcaption>
+        </figure>
+        <p>
+            The piviot pair in this example is found at box (5,1). This box contains the
+            possibilities 2 and 8. We are now looking for two other pairs that share a row,
+            column or house with box (5,1), each of which have one of the possibilities
+            (and not the same possibility). The box at (4,3) fills the need for the first
+            wing since it has an 8 as one of it's possibilites. The box at (5,8) fits for
+            our other pair since it has a 2 as one of it's possibilites. Now, we can use
+            this as an XY-Wing pattern since they both contain 9 as their other
+            possibility. This is really just a tricky way to do a naked subset where the
+            constraint of being in a row, column or house has been removed.
+        </p>
+        <p>
+            The removals are now where the rows, columns and houses of the wings intersects.
+            In both cases, the rows of the wing boxes intersect the houses of the other
+            wing boxes. This intersection would include the boxes (4,7), (4,8), (4,9),
+            (5,1), (5,2) and (5,3). Now you are never going to be able to remove
+            possibilities from all of these boxes, however it is important to note that
+            there are usually a bunch of places you can look. In the example above, boxes
+            (4,7) and (4,9) both contain possibility 9 which can be removed since we know
+            that either row 4 or house 6 will already have a 9 in it.
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Guessing</h3>
+        If you generated your sudoku using Sudoku Helper then you will only get to guessing if you did something wrong.
+        However, if you entered your sudoku manually it is entierly possible that the only way to solve it is to guess.
+        Sudoku Helper has psychic powers and will always guess correctly with a Hint. However, you can always take a guess
+        and if it doesn't work out use the Undo button and try again.
+        <div class="clearFloat"></div>
+    </div>
+</div>

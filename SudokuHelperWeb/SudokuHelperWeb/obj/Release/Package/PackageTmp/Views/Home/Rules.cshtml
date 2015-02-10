@@ -1,0 +1,409 @@
+﻿<h2>How to Solve Sudoku</h2>
+<p>
+    Sudoku is a 9 by 9 grid that needs to be filled in with the numbers 1 through 9.
+    The goal of sudoku is to place one number in each box so that each row, column
+    and house have all of the numbers between 1 and 9 without repeating.
+</p>
+<p>
+    A typical Sudoku puzzle will start off looking like this:
+</p>
+<table cellspacing="0" cellpadding="0" border="0">
+    <tr>
+        <td>
+            <table id="Table1" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">8</td>
+                    <td align="center" width="20">2</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">3</td>
+                    <td align="center" width="20">&nbsp;</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table2" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">3</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">7</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">2</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table3" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">5</td>
+                    <td align="center" width="20">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">7</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table id="Table4" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">5</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">2</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">4</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table5" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">3</td>
+                    <td align="center" width="20">4</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">8</td>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table6" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">8</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">9</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table id="Table7" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">1</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">3</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table8" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">4</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">2</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">&nbsp;</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table9" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">3</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">5</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">&nbsp;</td>
+                    <td align="center" width="20">1</td>
+                    <td align="center" width="20">&nbsp;</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<p>
+    Before I get any farther I should probably start defining some terms. I've
+    already used four in the first two sentances. If you've worked with sudoku
+    before, you probably already know what I'm talking about, but then, you
+    wouldn't be reading this section either.
+</p>
+<p>
+    <h3>
+        Box:<br>
+    </h3>A box is where you put a number. There are 81 boxes on a sudoku board.
+</p>
+<p>
+    <h3>
+        Row:<br>
+    </h3>A row is a horizontal group of 9 boxes. There are 9 rows on a sudoku
+    board. They are numbered from top to bottom starting at 1. So, in the above
+    example row 7 contains a 1, 4 and 3.
+</p>
+<p>
+    <h3>
+        Column:<br>
+    </h3>Much like a row, a column is a group of 9 boxes. However, they line
+    up vertically. Columns are also numbered from 1 to 9 starting from
+    the left. In the above example, column 2 contains 8, 3, 5, 2 and 4.
+</p>
+<p>
+    <h3>
+        House:<br>
+    </h3>A house is also a collection of 9 boxes and there are 9 houses on the
+    board. The big difference from rows and columns is that each house is a 3
+    by 3 grid. The top three houses are 1, 2 and 3. The middle three houses are 4,
+    5 and 6. The bottom three houses are 7, 8 and 9. In the above example, house 4
+    contains 5, 2 and 4. These are the same 5, 2 and 4 from column 2. Odd houses have a
+    white background and even houses have a gray background. This is simply to help 
+    differentiate the houses.
+</p>
+<p>
+    Every sudoku that is generated has exactly one solution. To learn how to solve the
+    puzzles logically, look at @Html.ActionLink("the techniques section", "Techniques", "Home").
+    By following these techniques (and really just the first two in the example above)
+    the solution to this sudoku will look like this:
+</p>
+<table cellspacing="0" cellpadding="0" border="0" id="Table10">
+    <tr>
+        <td>
+            <table id="Table11" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20">6</td>
+                    <td align="center" width="20">8</td>
+                    <td align="center" width="20">2</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">7</td>
+                    <td align="center" width="20">1</td>
+                    <td align="center" width="20">4</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">9</td>
+                    <td align="center" width="20">3</td>
+                    <td align="center" width="20">5</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table12" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">3</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">7</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">5</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">6</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">8</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">9</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">4</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">1</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">2</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table13" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20">1</td>
+                    <td align="center" width="20">4</td>
+                    <td align="center" width="20">9</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">3</td>
+                    <td align="center" width="20">5</td>
+                    <td align="center" width="20">2</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">6</td>
+                    <td align="center" width="20">8</td>
+                    <td align="center" width="20">7</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table id="Table14" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">3</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">5</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">7</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">8</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">2</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">6</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">1</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">4</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">9</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table15" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20">2</td>
+                    <td align="center" width="20">6</td>
+                    <td align="center" width="20">1</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">9</td>
+                    <td align="center" width="20">3</td>
+                    <td align="center" width="20">4</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">8</td>
+                    <td align="center" width="20">5</td>
+                    <td align="center" width="20">7</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table16" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">8</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">9</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">4</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">5</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">7</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">1</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">2</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">3</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">6</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table id="Table17" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20">5</td>
+                    <td align="center" width="20">6</td>
+                    <td align="center" width="20">1</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">4</td>
+                    <td align="center" width="20">9</td>
+                    <td align="center" width="20">8</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">2</td>
+                    <td align="center" width="20">7</td>
+                    <td align="center" width="20">3</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table18" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">7</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">4</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">8</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">1</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">2</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">3</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20" bgcolor="#aaaaaa">5</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">9</td>
+                    <td align="center" width="20" bgcolor="#aaaaaa">6</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table id="Table19" cellspacing="0" cellpadding="0" border="1">
+                <tr>
+                    <td align="center" width="20">9</td>
+                    <td align="center" width="20">2</td>
+                    <td align="center" width="20">3</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">7</td>
+                    <td align="center" width="20">6</td>
+                    <td align="center" width="20">5</td>
+                </tr>
+                <tr>
+                    <td align="center" width="20">4</td>
+                    <td align="center" width="20">1</td>
+                    <td align="center" width="20">8</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>

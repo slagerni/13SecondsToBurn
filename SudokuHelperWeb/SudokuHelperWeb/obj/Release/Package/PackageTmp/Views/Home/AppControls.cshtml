@@ -1,0 +1,188 @@
+﻿@{
+    ViewBag.Title = "How to Use the App";
+}
+
+<h2>Using Sudoku Helper</h2>
+
+<p>
+    Sudoku Helper has a number of different screens to help you generate and solve a sudoku and get help when you need it.
+    <ul>
+        <li>Menu Screen - This allows you to quickly generate a sudoku or navigate for some help. It's the entry point for all the fun!</li>
+        <li>Main Screen - This is where all the fun happens! You will solve sudoku puzzles here.</li>
+        <li>Manual Entry Screen - Want to try that sudoku from the daily paper? Enter it using this form.</li>
+        <li>Coloring Form - Coloring is one of the @Html.ActionLink("techniques", "Techniques", "Home") you can use to help you solve a sudoku and it has its own form.</li>
+    </ul>
+</p>
+<p>Click on one of the sections below for more help on how to use the individual screens.</p>
+<div data-role="collapsible-set">
+    <div data-role="collapsible">
+        <h3>Menu Screen</h3>
+        <img src="~/Content/images/MenuScreen.png" class="textWrap" />
+        <p> 
+            This is the first screen you will see when running the Sudoku Helper app.
+            It contains 5 buttons get you where you need to go. 
+        </p>
+        <p>
+            At the top is the Quick Play section. Select a difficulty from the dropdown list and touch the Play button to
+            generate a new sudoku puzzle and get to solving. The difficulties come in 5 varieties, Any, Beginner, Easy, Medium and Hard.
+            These levels are based on which techniques are used to solve the sudoku. Many of the techniques have a range of values so the
+            difficulty is mostly just a guideline. However, Beginner will always have a rating of 0 so it will only use the Single Naked Candidate
+            and Single Candidate techniques. Please see the @Html.ActionLink("techniques", "Techniques", "Home") page for more information on solving
+            techniques.
+        </p>
+        <p>
+            The Manual Entry button is your access to entering any sudoku puzzle you may have seen. Touching this button will open up the manual entry screen which has it's own section below.
+        </p>
+        <p>
+            You probably already know what the App help button does. It brings you to this web site so you can figure out how to use Sudoku Helper.
+        </p>
+        <p>
+            Technique Help is your quick link button to the @Html.ActionLink("techniques", "Techniques", "Home") secton of the web site. Use it when you need to
+            check if you are using a technique correctly or when you click on the Hint button and want to know why it chose the technique it did.
+        </p>
+        <p>
+            The Resume Last Game button is only visible if you had exited the application while still in the middle of a solvable sudoku. If you made an error and the sudoku is invalid you
+            won't be able to return to it since closing the application removes the undo and redo states.
+        </p>
+        <div class="clearFloat"></div>
+    </div>
+    <div data-role="collapsible">
+
+        <h3>Main Screen</h3>
+        <div>
+            <img src="~/Content/images/MainScreen.png" class="textWrap"/>
+            <p>
+                <h2>Yea! Sudoku!</h2>
+            </p>
+            <h3>Overview</h3>
+            <p>
+                Before talking about how to use Sudoku Helper, it is important to know what Sudoku Helper is trying to do. Sudoku Helper is set up to 
+                be as user friendly as possible. It is going to try to do a lot of the tedious tasks for you so that you can get down to what you are 
+                really trying to do. Get to the solution. 
+            </p>
+            <p>
+                As you can see when you look at a freshly generated sudoku, somewhere around 25% of the numbers will already be filled in. To aid in
+                your job of filling in the rest of them, Sudoku Helper is tracking what the possibilities are for the remaining boxes. Sudoku Helper
+                makes it easy to remove possibilities and select the number that you want to put in a box. When you do select a number for a box, that
+                possibility is removed from the rest of the columns, rows and houses for you. This saves you from making the mistake of not removing
+                something. Since a majority of techniques are based on removing possibilies to get to a Single Candidate this is not solving the
+                sudoku for you. It is just helping you be more efficient and concentrating on the real problems at hand.
+            </p>
+            <p>
+                The other quick helper that Sudoku Helper provides is that Single Naked Candidates get highlighted and simply touching the box will
+                fill in the number for you. When I initially wrote the app for myself I found them tedious and wanted a quick fix. An example of this
+                is the box where the only possibility is 7 in the image shown.
+            </p>
+            <h3>Solving</h3>
+            <p>
+                <figure class="textWrapRight"><img src="~/Content/images/ZoomedIn.png" /><figcaption>Zoomed in view</figcaption></figure> 
+                Where you solve the sudoku is the middle of the screen where the 9 houses are. When you want to make a change to a box, the first thing
+                you want to do is touch the box. This will bring you into a zoomed in view. 
+                Once zoomed in on a box, you can interact with its content. Touching a
+                number will remove it. Touching where a number should be will put it back in place (you shouldn't do this often). Touching an holding a
+                number for more then a second will select it as the number that you want for the box. Selecting a number will automatically zoom you back
+                out. If you were just removing possibilities then clicking on the green arrows will bring you back to the normal view.
+            </p>
+            <p>
+                If you wanted to stop there, you could solve any sudoku that gets generated. However, this would not be a very helpful app if that was
+                all it did.
+            </p>
+            <h2>Features</h2>
+            <p>
+                The top of the screen has a number of buttons to help you along the way. 4 of these buttons are pretty unremarkable by themselves but
+                are helpful when you need them.
+                <h3>Undo</h3>
+                The Undo button will take you back a move if you think you made a mistake.
+                <h3>Redo</h3>
+                The Redo button will allow you to make the change again if it really was what you wanted to do.
+                <h3>Help</h3>
+                The Help button gets you to this web site for any help you might need.
+                <h3>Main Menu</h3>
+                The Main Menu button simply gets you back to the main page. Did you give up on this sudoku? Well, it happens.
+                <h3>Hint</h3>
+                The Hint button is the power player of the top buttons. If you're stuck, you can ask Sudoku Helper for the next move it would make.
+                It will search the sudoku in its current state by going through the list of @Html.ActionLink("techniques", "Techniques", "Home") and
+                suggesting the next move. If it wants you to select a number it will circle it. If it wants you to remove 1 or more possibilities
+                it will put an X over them. When it makes its suggestion it will put the name of the technique it chose in the status bar above
+                the sudoku. If you've done something horribly wrong and another move can not be found then Sudoku Helper will do it's best Jon
+                Stuart impression and tell you "I got nothing."
+            </p>
+            <p>
+                The bottom of the screen are some tools to help you solve the puzzle.
+                <h3>The Selector</h3>
+                There is a grid of numbers, 1 through 9, in the middle of the bottom section. When you touch one of these numbers, that number will be
+                highlighted in the sudoku puzzle above. Each number has its own color to help it stand out when selected. It is possible to select multiple
+                numbers at the same time. If you don't understand why this might be useful, check out the @Html.ActionLink("techniques", "Techniques", "Home") section.
+                <h3>Cycle</h3>
+                The Cycle button is a quick way to interact with the selector. It will allow you to quickly cycle through possibilities one at a time.
+                Regardless of what you did on the selector itself, it will always start at 1 and move to the next number. When at 9 and cycled it will deselect
+                everything. Cycle will overwrite selector selections as it moves along.
+                <h3>Selcted Only</h3>
+                The Selected Only checkbox changes the functionality of the selector. Some times it is nicer to look at ONLY the selected possibility. By selecting
+                this option, none of the other possibilities for a box will be shown except those selected by the selector. In this mode the possibilities are no
+                longer highlighted.
+                <h3>Coloring</h3>
+                One of the @Html.ActionLink("techniques", "Techniques", "Home") that can be used to solve a sudoku is Coloring. This button opens the form. See the
+                section below for more information about how to use the coloring form.
+            </p>
+            <div class="clearFloat"></div>
+        </div>
+    </div>
+    <div data-role="collapsible">
+        <h3>Manual Entry Screen</h3>
+        <div>
+            <img src="~/Content/images/ManualEntry.png" class="textWrap" />
+            <img src="~/Content/images/ManualEntry2.png" class="textWrap" />
+            <img src="~/Content/images/ManualEntry3.png" class="textWrap" />
+            <p>
+                The manual entry screen is a way for you to get an external sudoku into Sudoku Helper. It is laid out exactly like the normal Sudoko board.
+                Touch a box that you want to enter a number into. A new form will open up that allows you to select the number that you want to put in the box.
+                Touching the number selects it. If you want to change or remove a selection, simply touch the number that you want to change. The same form will
+                be opened again and the number that was selected will be highlighted. Selecting another number will choose it. Selecting the same number again
+                will remove the number from the board.
+            </p>
+            <p>
+                An alternate method to entering a sudoku is to touch the Paste From Clipboard button. This requires you to have selected a string and used your
+                device to copy the text to the clipboard. This is useful if you want to quickly enter one of the sample sudoku from the techniques. But really this
+                is more of a pain in the neck to create the string and get it onto your clipboard.
+            </p>
+            <p>
+                Once the sudoku has been filled to your liking touch the Play button to go to the Main Screen and start solving.
+            </p>
+        </div>
+        <div class="clearFloat"></div>
+
+    </div>
+    <div data-role="collapsible">
+        <h3>Coloring Form</h3>
+        <div>
+            <img src="~/Content/images/ColoringForm1.png" class="textWrap" />
+            <p>
+                If you have not read about the coloring technique in the @Html.ActionLink("techniques", "Techniques", "Home") section you should do that
+                first. Otherwise you will not understand the point of the form.
+            </p>
+            <p>
+                There are two sections to the coloring form. The controls at the top and the main layout.
+                <h3>The main layout</h3>
+                Initially, the form will show with the possibility 1 selected. All congugate pairs will be colored for you since Sudoku Helper is here to help!
+                Since the form is colored, all you need to do is check for Coloring or Multi-Coloring. When you click on a box on this form the item will toggle through
+                four states depending on what the current state is. 
+                <ul>
+                    <li>Uncolored box becomes the dark color selected.</li>
+                    <li>Dark colored box becomes the light color selected.</li>
+                    <li>Light color box becomes a removed possibility. This is reflected on the main sudoku as well and is subject to undo behavior.</li>
+                    <li>Removed possibility will come back as an uncolored possibility. Also reflected on the main sudoku and is subject to undo behavior.</li>
+                </ul>
+                <h3>Close</h3>
+                When done with the coloring form, touching the Close button will return you to the main sudoku screen.
+                <h3>The Middle Colors</h3>
+                In the middle of the top row of controls there is are two colors, a light and a dark version, next to each other. Touching these colors will
+                change the colorset that the main coloring form will be using.
+                <h3>Possibility Selection</h3>
+                Clicking on the Select at the right of the top navigation will cycle through the possibilities one at a time.
+            </p>
+        </div>
+        <div class="clearFloat"></div>
+
+    </div>
+</div>

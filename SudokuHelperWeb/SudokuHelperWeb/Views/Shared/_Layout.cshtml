@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>@ViewBag.Title</title>
+        <meta name="viewport" content="width=device-width" />
+        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+        @Styles.Render("~/Content/mobileCss", "~/Content/css")
+        @Scripts.Render("~/bundles/modernizr")
+    </head>
+    <body>
+        <div data-role="page" data-theme="b">
+            <div data-role="header">
+                @if (IsSectionDefined("Header")) {
+                    @RenderSection("Header")
+                }
+                else
+                {
+                    <img class="centered" src="~/Content/images/title.png" />
+                    <h1>@ViewBag.Title</h1>
+                    @*@Html.Partial("_LoginPartial")*@
+                }
+            </div>
+            <div data-role="content">
+                @RenderBody()
+                <nav>
+                    <ul data-role="listview" data-inset="true">
+                        <li data-role="list-divider">Select a Help Topic</li>
+                        <li>@Html.ActionLink("Rules of Sudoku", "Rules", "Home")</li>
+                        <li>@Html.ActionLink("Using Sudoku Helper", "AppControls", "Home")</li>
+                        <li>@Html.ActionLink("Techniques", "Techniques", "Home")</li>
+                        <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                        <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    </ul>
+                </nav>
+            </div>
+            <div data-role="footer">
+                <h1><img src="~/Content/images/13stb.png" /></h1>
+            </div>
+        </div>
+        @Scripts.Render("~/bundles/jquery")
+        <script>
+            $(document).on("mobileinit", function () {
+                $.mobile.ajaxEnabled = false;
+            });
+
+            $(document).on("expand", "[data-role=collapsible]", function () {
+                var position = $(this).offset().top;
+                $.mobile.silentScroll(position);
+            });
+        </script>
+        @Scripts.Render("~/bundles/jquerymobile")
+        @RenderSection("scripts", required: false)
+    </body>
+</html>
