@@ -1,0 +1,417 @@
+
+CardDeck.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+10C
+  rotate: false
+  xy: 1, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+10D
+  rotate: false
+  xy: 1, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+10H
+  rotate: false
+  xy: 229, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+10S
+  rotate: false
+  xy: 1, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+2C
+  rotate: false
+  xy: 229, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+2D
+  rotate: false
+  xy: 457, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+2H
+  rotate: false
+  xy: 229, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+2S
+  rotate: false
+  xy: 457, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+3C
+  rotate: false
+  xy: 685, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+3D
+  rotate: false
+  xy: 457, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+3H
+  rotate: false
+  xy: 685, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+3S
+  rotate: false
+  xy: 685, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+
+CardDeck2.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+4C
+  rotate: false
+  xy: 1, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+4D
+  rotate: false
+  xy: 1, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+4H
+  rotate: false
+  xy: 229, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+4S
+  rotate: false
+  xy: 1, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+5C
+  rotate: false
+  xy: 229, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+5D
+  rotate: false
+  xy: 457, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+5H
+  rotate: false
+  xy: 229, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+5S
+  rotate: false
+  xy: 457, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+6C
+  rotate: false
+  xy: 685, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+6D
+  rotate: false
+  xy: 457, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+6H
+  rotate: false
+  xy: 685, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+6S
+  rotate: false
+  xy: 685, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+
+CardDeck3.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+7C
+  rotate: false
+  xy: 1, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+7D
+  rotate: false
+  xy: 1, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+7H
+  rotate: false
+  xy: 229, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+7S
+  rotate: false
+  xy: 1, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+8C
+  rotate: false
+  xy: 229, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+8D
+  rotate: false
+  xy: 457, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+8H
+  rotate: false
+  xy: 229, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+8S
+  rotate: false
+  xy: 457, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+9C
+  rotate: false
+  xy: 685, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+9D
+  rotate: false
+  xy: 457, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+9H
+  rotate: false
+  xy: 685, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+9S
+  rotate: false
+  xy: 685, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+
+CardDeck4.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+AC
+  rotate: false
+  xy: 1, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+AD
+  rotate: false
+  xy: 1, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+AH
+  rotate: false
+  xy: 229, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+AS
+  rotate: false
+  xy: 1, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+Back1
+  rotate: false
+  xy: 229, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+Back2
+  rotate: false
+  xy: 457, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+JC
+  rotate: false
+  xy: 229, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+JD
+  rotate: false
+  xy: 457, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+JH
+  rotate: false
+  xy: 685, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+JokerBlack
+  rotate: false
+  xy: 457, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+JokerRed
+  rotate: false
+  xy: 685, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+JS
+  rotate: false
+  xy: 685, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+
+CardDeck5.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+KC
+  rotate: false
+  xy: 1, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+KD
+  rotate: false
+  xy: 1, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+KH
+  rotate: false
+  xy: 229, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+KS
+  rotate: false
+  xy: 1, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+QC
+  rotate: false
+  xy: 229, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+QD
+  rotate: false
+  xy: 457, 633
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+QH
+  rotate: false
+  xy: 229, 1
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
+QS
+  rotate: false
+  xy: 457, 317
+  size: 226, 314
+  orig: 226, 314
+  offset: 0, 0
+  index: -1
