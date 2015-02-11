@@ -34,23 +34,13 @@ import java.util.List;
 /**
  * Created by Nick on 1/30/2015.
  */
-public class CrazyFourPokerScreen implements Screen, ActionCompletedListener {
+public class CrazyFourPokerScreen extends TableScreen implements ActionCompletedListener {
     public static final float HAND_X_START = (CasinoPracticeGame.SCREEN_WIDTH - Card.CARD_WIDTH * 3) / 2;
 
-    public Color backgroundColor = new Color().valueOf("265614FF");
-    public Color mainColor = Color.YELLOW;
-
-    Stage stage = new Stage(new FitViewport(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT));
     Deck deck;
 
     boolean isFirstDeck = true;
     boolean canBet = true;
-
-    CasinoPracticeGame game;
-    Assets assets;
-    Sprite background;
-
-    LeftSide leftSide;
 
     ChipStack anteStack;
     ChipStack superBonusStack;
@@ -60,7 +50,6 @@ public class CrazyFourPokerScreen implements Screen, ActionCompletedListener {
     Image superBonusCircle;
     Image queensUpCircle;
     Image playCircle;
-
 
     TableButton dealButton;
     TableButton oneTimesButton;
@@ -89,25 +78,11 @@ public class CrazyFourPokerScreen implements Screen, ActionCompletedListener {
     BestHand bestHandPlayer = null;
 
     public CrazyFourPokerScreen(CasinoPracticeGame game) {
-        this.game = game;
-        assets = game.getAssets();
+        super(game);
     }
 
     @Override
-    public void show() {
-        Gdx.input.setInputProcessor(stage);
-        stage.addAction(Actions.alpha(1));
-
-        Texture back = assets.getTexture(Assets.TEX_NAME.BACKGROUND);
-        back.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-        background = new Sprite(back, (int)stage.getWidth(), (int)stage.getHeight());
-        background.setSize(stage.getWidth(), stage.getHeight());
-        background.setColor(backgroundColor);
-
-        leftSide = new LeftSide(game, assets);
-        leftSide.setSize(256, stage.getHeight());
-        leftSide.setColor(mainColor);
-
+    public void setup() {
         paytable = new Image(assets.getTexture(Assets.TEX_NAME.CRAZY_FOUR_POKER_PAYTABLE));
         paytable.setScale(.75f, .75f);
         paytable.setColor(1, 1, 1, .75f);
@@ -288,7 +263,6 @@ public class CrazyFourPokerScreen implements Screen, ActionCompletedListener {
         superBonusPopup = new WinLosePopup(assets);
         playPopup = new WinLosePopup(assets);
 
-        stage.addActor(leftSide);
         stage.addActor(paytable);
         stage.addActor(title);
 
@@ -316,20 +290,6 @@ public class CrazyFourPokerScreen implements Screen, ActionCompletedListener {
         stage.addActor(antePopup);
         stage.addActor(superBonusPopup);
         stage.addActor(playPopup);
-    }
-
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(43f/255f,96f/255f,22f/255f,1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        Batch batch = stage.getBatch();
-        batch.begin();
-        background.draw(batch);
-        batch.end();
-
-        stage.act(delta);
-        stage.draw();
     }
 
     private void dealHand() {
@@ -658,31 +618,6 @@ public class CrazyFourPokerScreen implements Screen, ActionCompletedListener {
             default:
                 return firstFaceValue.getSingleText() + " high";
         }
-    }
-
-    @Override
-    public void resize(int width, int height) {
-
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
-
     }
 
     class BestHand {

@@ -15,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
-import com.thirteensecondstoburn.CasinoPractice.Actors.BetButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Card;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStack;
 import com.thirteensecondstoburn.CasinoPractice.Actors.LeftSide;
@@ -33,29 +32,19 @@ import java.util.List;
 /**
  * Created by Nick on 1/14/2015.
  */
-public class ThreeCardPokerScreen implements Screen, ActionCompletedListener {
+public class ThreeCardPokerScreen extends TableScreen implements ActionCompletedListener {
     public static final float HAND_X_START = (CasinoPracticeGame.SCREEN_WIDTH - Card.CARD_WIDTH * 3) / 2;
-
-    public Color backgroundColor = new Color().valueOf("265614FF");
-    public Color mainColor = Color.YELLOW;
-
-    Stage stage = new Stage(new FitViewport(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT));
     Deck deck;
 
     boolean isFirstDeck = true;
     boolean canBet = true;
 
-    CasinoPracticeGame game;
-    Assets assets;
-    Sprite background;
-    
     ChipStack anteStack;
     ChipStack pairPlusStack;
     ChipStack playStack;
     Image anteCircle;
     Image pairPlusCircle;
     Image playCircle;
-
 
     TableButton dealButton;
     TableButton playButton;
@@ -64,8 +53,6 @@ public class ThreeCardPokerScreen implements Screen, ActionCompletedListener {
     
     Hand dealerHand;
     Hand playerHand;
-    
-    LeftSide leftSide;
     
     Image paytable;
     Image title;
@@ -82,12 +69,11 @@ public class ThreeCardPokerScreen implements Screen, ActionCompletedListener {
     int lastPairPlusBet = 0;
 
     public ThreeCardPokerScreen(CasinoPracticeGame game) {
-        this.game = game;
-        assets = game.getAssets();
+        super(game);
     }
 
     @Override
-    public void show() {
+    public void setup() {
         Gdx.input.setInputProcessor(stage);
         stage.addAction(Actions.alpha(1));
 
@@ -96,10 +82,6 @@ public class ThreeCardPokerScreen implements Screen, ActionCompletedListener {
         background = new Sprite(back, (int)stage.getWidth(), (int)stage.getHeight());
         background.setSize(stage.getWidth(), stage.getHeight());
         background.setColor(backgroundColor);
-
-        leftSide = new LeftSide(game, assets);
-        leftSide.setSize(256, stage.getHeight());
-        leftSide.setColor(mainColor);
 
         paytable = new Image(assets.getTexture(Assets.TEX_NAME.THREE_CARD_POKER_PAYTABLE));
         paytable.setScale(.75f, .75f);
@@ -247,7 +229,6 @@ public class ThreeCardPokerScreen implements Screen, ActionCompletedListener {
         antePopup = new WinLosePopup(assets);
         playPopup = new WinLosePopup(assets);
 
-        stage.addActor(leftSide);
         stage.addActor(paytable);
         stage.addActor(title);
 
@@ -272,21 +253,7 @@ public class ThreeCardPokerScreen implements Screen, ActionCompletedListener {
         stage.addActor(playPopup);
     }
 
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(43f/255f,96f/255f,22f/255f,1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        Batch batch = stage.getBatch();
-        batch.begin();
-        background.draw(batch);
-        batch.end();
-
-        stage.act();
-        stage.draw();
-    }
-
-    private void dealHand() {
+     private void dealHand() {
         if(playerHand != null) playerHand.remove();
         if(dealerHand != null) dealerHand.remove();
         playStack.setTotal(0);
@@ -359,8 +326,6 @@ public class ThreeCardPokerScreen implements Screen, ActionCompletedListener {
     }
 
     private void foldHand() {
-//        int amount = anteStack.getTotal() + queensUpStack.getTotal();
-//        leftSide.setWonText("-" + amount);
         calculateWinner(true);
         canBet = true;
         toggleButtons(false);
@@ -665,30 +630,5 @@ public class ThreeCardPokerScreen implements Screen, ActionCompletedListener {
         // last two
         if(cards.get(1).getFaceValue().getStraightValue() == cards.get(2).getFaceValue().getStraightValue()) return cards.get(1).getFaceValue();
         return Card.FaceValue.NULL;
-    }
-
-    @Override
-    public void resize(int width, int height) {
-
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
-
     }
 }
