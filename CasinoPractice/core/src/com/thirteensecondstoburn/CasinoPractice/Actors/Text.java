@@ -17,6 +17,7 @@ public class Text extends Actor {
     String text;
     float scale;
     boolean showBackground = false;
+    BitmapFont font;
 
     Texture backgroundTex;
 
@@ -28,16 +29,18 @@ public class Text extends Actor {
         this.text = text;
         this.scale = scale;
 
+        this.font = assets.getFont();
+
         this.showBackground = showBackground;
         backgroundTex = assets.getTexture(Assets.TEX_NAME.BLACK_50_ALPHA);
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        drawFont(batch, assets.getFont());
+        drawFont(batch, parentAlpha);
     }
 
-    private void drawFont(Batch batch, BitmapFont font) {
+    private void drawFont(Batch batch, float parentAlpha) {
         font.setScale(scale);
 
         batch.setShader(assets.getDistanceFieldShader());
@@ -57,5 +60,12 @@ public class Text extends Actor {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public void setTextCentered(String text) {
+        setText(text);
+        BitmapFont.TextBounds bounds = font.getBounds(text);
+        setSize(bounds.width * scale + 10, bounds.height * scale + 10);
+        setPosition((getStage().getWidth() - bounds.width + 10)/2f, (getStage().getHeight() + bounds.height + 10)/2f );
     }
 }

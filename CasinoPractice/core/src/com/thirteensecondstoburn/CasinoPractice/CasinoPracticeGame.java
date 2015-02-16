@@ -21,8 +21,8 @@ public class CasinoPracticeGame extends Game {
 
     public static final boolean ALLOW_HINTS = true;
     // TODO allow a user to actually change these on a setting screen
-    public boolean showHints = false;
-    public boolean preBetHints = false;
+    private boolean showHints = false;
+    private boolean preBetHints = false;
 
     public SplashScreen getSplashScreen() {
         if(splashScreen == null) splashScreen = new SplashScreen(this);
@@ -60,12 +60,14 @@ public class CasinoPracticeGame extends Game {
         } else {
             showHints = false;
         }
+        showHints = true;
 
         if(saveData.contains("preBetHints")) {
             preBetHints = saveData.getBoolean("preBetHints");
         } else {
             preBetHints = false;
         }
+        preBetHints = true;
 
         setScreen(getSplashScreen());
 	}
@@ -98,5 +100,13 @@ public class CasinoPracticeGame extends Game {
 
     public long getBalance() {
         return balance;
+    }
+
+    public boolean usePreBetHints() {
+        return ALLOW_HINTS && showHints && preBetHints;
+    }
+
+    public boolean useHintText() {
+        return ALLOW_HINTS && showHints;
     }
 }

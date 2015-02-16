@@ -11,8 +11,14 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.thirteensecondstoburn.CasinoPractice.Actors.LeftSide;
+import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
+
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 
 /**
  * Created by Nick on 2/11/2015.
@@ -20,6 +26,7 @@ import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 abstract public class TableScreen implements Screen {
     public Color backgroundColor = new Color().valueOf("265614FF");
     public Color mainColor = Color.YELLOW;
+    public Color hintColor = Color.GREEN;
 
     Stage stage = new Stage(new FitViewport(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT));
     CasinoPracticeGame game;
@@ -27,6 +34,7 @@ abstract public class TableScreen implements Screen {
     Sprite background;
 
     LeftSide leftSide;
+    Text hintText;
 
     public TableScreen(CasinoPracticeGame game) {
         this.game = game;
@@ -48,12 +56,21 @@ abstract public class TableScreen implements Screen {
         leftSide.setSize(256, stage.getHeight());
         leftSide.setColor(mainColor);
 
+        hintText = new Text(assets, "", 1.5f, true);
+        hintText.setVisible(false);
+
         stage.addActor(leftSide);
 
         // let the subclass setup what they need
         setup();
+        stage.addActor(hintText);
 
+    }
 
+    public void showHint(String text) {
+        hintText.setTextCentered(text);
+        hintText.setZIndex(1000);
+        hintText.addAction(sequence(Actions.moveTo(stage.getWidth(), hintText.getY()), Actions.show(), Actions.moveTo(-hintText.getWidth(), hintText.getY(), 7f), Actions.hide()));
     }
 
     protected abstract void setup();

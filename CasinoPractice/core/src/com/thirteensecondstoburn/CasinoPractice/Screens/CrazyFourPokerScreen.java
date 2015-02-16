@@ -1,24 +1,14 @@
 package com.thirteensecondstoburn.CasinoPractice.Screens;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
-import com.thirteensecondstoburn.CasinoPractice.Actors.BetButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Card;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStack;
-import com.thirteensecondstoburn.CasinoPractice.Actors.LeftSide;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Actors.WinLosePopup;
@@ -125,6 +115,9 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
                     subtractFromBalance(betAmount);
                     calculateWager();
                     dealButton.setVisible(true);
+                    if(game.useHintText()) {
+                        showHint("Queens Up bet is a sucker bet!");
+                    }
                 }
             }
         });
@@ -179,11 +172,12 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
 
         oneTimesButton = new TableButton(assets, "Bet 1x", mainColor);
         oneTimesButton.setPosition(stage.getWidth() - TableButton.BUTTON_WIDTH, 0);
+        oneTimesButton.setName("1xButton");
         oneTimesButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (oneTimesButton.isInside(x, y) && !canBet) {
-                    playHand(1);
+                    playHand(1, oneTimesButton);
                     oneTimesButton.setVisible(false);
                 }
             }
@@ -192,6 +186,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
 
         twoTimesButton = new TableButton(assets, "Bet 2x", mainColor);
         twoTimesButton.setPosition(stage.getWidth() - TableButton.BUTTON_WIDTH * 2 - 10, TableButton.BUTTON_HEIGHT + 10);
+        twoTimesButton.setName("2xButton");
         twoTimesButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
@@ -200,7 +195,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
                         playerHandText.setText("Insufficient funds to make that bet");
                         return;
                     }
-                    playHand(2);
+                    playHand(2, twoTimesButton);
                     twoTimesButton.setVisible(false);
                 }
             }
@@ -209,6 +204,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
 
         threeTimesButton = new TableButton(assets, "Bet 3x", mainColor);
         threeTimesButton.setPosition(stage.getWidth() - TableButton.BUTTON_WIDTH * 2 - 10, 0);
+        threeTimesButton.setName("3xButton");
         threeTimesButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
@@ -217,7 +213,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
                         playerHandText.setText("Insufficient funds to make that bet");
                         return;
                     }
-                    playHand(3);
+                    playHand(3, threeTimesButton);
                     threeTimesButton.setVisible(false);
                 }
             }
@@ -238,6 +234,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
 
         foldButton = new TableButton(assets, "Fold", mainColor);
         foldButton.setPosition(stage.getWidth() - TableButton.BUTTON_WIDTH, TableButton.BUTTON_HEIGHT + 10);
+        foldButton.setName("foldButton");
         foldButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
@@ -356,7 +353,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         playerHandText.setText("");
     }
 
-    private void playHand(int bet) {
+    private void playHand(int bet, TableButton buttonPressed) {
         playStack.setTotal(anteStack.getTotal() * bet);
         subtractFromBalance(anteStack.getTotal() * bet);
         calculateWager();
@@ -364,6 +361,19 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         calculateWinner(false);
         canBet = true;
         toggleButtons(false);
+        if(game.useHintText()) {
+            TableButton correctButton = getCorrectButtonForHint();
+            if(correctButton != buttonPressed) {
+                System.out.println("Correct: " + correctButton + " Pressed: " + buttonPressed);
+                if(correctButton == threeTimesButton) {
+                    showHint("Always bet 3x when possible");
+                } else if(correctButton == oneTimesButton) {
+                    showHint("Always bet with K, Q, 8, 4 or better");
+                } else {
+                    showHint("Always fold with worse than K, Q, 8, 4");
+                }
+            }
+        }
     }
 
     private void addToBalance(int amount) {
@@ -382,6 +392,16 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         showDealerHand();
         anteStack.clearTotal();
         queensUpStack.clearTotal();
+        if(game.useHintText()) {
+            TableButton correctButton = getCorrectButtonForHint();
+            if(correctButton != foldButton) {
+                if(threeTimesButton.isVisible()) {
+                    showHint("Always bet 3x when possible");
+                } else {
+                    showHint("Always bet with K, Q, 8, 4 or better");
+                }
+            }
+        }
     }
 
     private void clearHand() {
@@ -437,7 +457,11 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             playerHand.setVisible(true);
             playerHand.dealAction(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT);
         } else if(caller == playerHand) {
+
             toggleButtons(true);
+            if(game.usePreBetHints()) {
+                setPreBetHint();
+            }
         }
     }
 
@@ -618,6 +642,45 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             default:
                 return firstFaceValue.getSingleText() + " high";
         }
+    }
+
+    private void setPreBetHint() {
+        foldButton.setColor(mainColor);
+        oneTimesButton.setColor(mainColor);
+        threeTimesButton.setColor(mainColor); // even though that should never happen I guess
+
+        TableButton button = getCorrectButtonForHint();
+        button.setColor(hintColor);
+    }
+
+    private TableButton getCorrectButtonForHint() {
+        boolean qualifies = (bestHandPlayer != null &&
+                ((bestHandPlayer.bestFourHand.getHandType().ordinal() > 1) ||
+                        (bestHandPlayer.bestFourHand.getHandType().ordinal() == 1 && bestHandPlayer.bestFourHand.getStraightValues().get(0) == 14))
+        );
+
+        if (qualifies) return threeTimesButton;
+
+        BestFourHand fourHand = bestHandPlayer.bestFourHand;
+
+        if(fourHand.getHandType().ordinal() > HandType.HIGH_CARD.ordinal()) return oneTimesButton;
+
+        // better than K,Q,8,4?
+        ArrayList<Integer> compVals = new ArrayList<Integer>();
+        compVals.add(13);
+        compVals.add(12);
+        compVals.add(8);
+        compVals.add(4);
+        ArrayList<Integer> vals = fourHand.getStraightValues();
+        for(int i = 0; i<vals.size(); i++) {
+            if (vals.get(i) > compVals.get(i)) {
+                return oneTimesButton;
+            } else if (vals.get(i) < compVals.get(i)) {
+                return foldButton;
+            }
+        }
+        // everything's equal to the min. bet it.
+        return oneTimesButton;
     }
 
     class BestHand {
