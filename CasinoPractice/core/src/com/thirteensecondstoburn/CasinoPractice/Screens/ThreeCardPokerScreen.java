@@ -1,23 +1,17 @@
 package com.thirteensecondstoburn.CasinoPractice.Screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Card;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStack;
-import com.thirteensecondstoburn.CasinoPractice.Actors.LeftSide;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Actors.WinLosePopup;
@@ -27,6 +21,7 @@ import com.thirteensecondstoburn.CasinoPractice.Deck;
 import com.thirteensecondstoburn.CasinoPractice.Hand;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -67,6 +62,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 
     int lastAnteBet = 5;
     int lastPairPlusBet = 0;
+    BestThreeHand bestHandPlayer = null;
 
     public ThreeCardPokerScreen(CasinoPracticeGame game) {
         super(game);
@@ -90,7 +86,6 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 
         title = new Image(assets.getTexture(Assets.TEX_NAME.THREE_CARD_POKER_TITLE));
         title.setColor(mainColor);
-//        title.setPosition(270, stage.getHeight() - title.getImageHeight() - 10);
         title.setPosition(315, stage.getHeight() - 270);
 
 
@@ -124,6 +119,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
                     subtractFromBalance(betAmount);
                     calculateWager();
                     dealButton.setVisible(true);
+                    showHint("Pairplus bet is a suckers bet!");
                 }
             }
         });
@@ -161,7 +157,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (playStack.isInside(x, y) && !canBet) {
-                    playHand();
+                    playHand(playButton);
                 }
             }
         });
@@ -184,7 +180,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (playButton.isInside(x, y) && !canBet) {
-                    playHand();
+                    playHand(playButton);
                     playButton.setVisible(false);
                 }
             }
@@ -277,22 +273,20 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 
         dealerHand = new Hand(deck.getCards().subList(0, 3), Card.CARD_WIDTH);
         dealerHand.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - Card.CARD_HEIGHT - 50);
-        if(dealerHand.hasFaceValue(Card.FaceValue.TWO ) && dealerHand.hasFaceValue(Card.FaceValue.THREE )) {
-            dealerHand.sortLowAce();
-        } else {
-            dealerHand.sort();
-        }
         dealerHand.dealAction(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT);
         dealerHand.addActionListener(this);
 
-        playerHand = new Hand(deck.getCards().subList(3, 6), Card.CARD_WIDTH);
+
+         // TEST
+//        ArrayList<Card> playerTestCards = new ArrayList<Card>();
+//        playerTestCards.add(new Card(Card.FaceValue.TWO, Card.Suit.HEART, Card.Back.BACK1, true, assets));
+//        playerTestCards.add(new Card(Card.FaceValue.THREE, Card.Suit.SPADE, Card.Back.BACK1, true, assets));
+//        playerTestCards.add(new Card(Card.FaceValue.ACE, Card.Suit.DIAMOND, Card.Back.BACK1, true, assets));
+//        bestHandPlayer = new BestThreeHand(playerTestCards);
+        bestHandPlayer = new BestThreeHand(deck.getCards().subList(3, 6));
+        playerHand = new Hand(bestHandPlayer.sortedCards, Card.CARD_WIDTH);
         playerHand.setPosition(HAND_X_START, 50);
         playerHand.setVisible(false);
-        if(playerHand.hasFaceValue(Card.FaceValue.TWO ) && playerHand.hasFaceValue(Card.FaceValue.THREE )) {
-            playerHand.sortLowAce();
-        } else {
-            playerHand.sort();
-        }
         playerHand.showHand();
         playerHand.addActionListener(this);
 
@@ -306,7 +300,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         playerHandText.setText("");
     }
     
-    private void playHand() {
+    private void playHand(TableButton buttonPressed) {
         playStack.setTotal(anteStack.getTotal());
         subtractFromBalance(anteStack.getTotal());
         calculateWager();
@@ -314,6 +308,18 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         calculateWinner(false);
         canBet = true;
         toggleButtons(false);
+        if(game.useHintText()) {
+            TableButton correctButton = getCorrectButtonForHint();
+            if(correctButton != buttonPressed) {
+                System.out.println("Correct: " + correctButton + " Pressed: " + buttonPressed);
+                if(correctButton == playButton) {
+                    showHint("Always bet with Q, 6, 4 or better");
+                } else {
+                    showHint("Always fold with worse than Q, 6, 4");
+                }
+            }
+        }
+
     }
 
     private void addToBalance(int amount) {
@@ -332,6 +338,13 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         showDealerHand();
         anteStack.clearTotal();
         pairPlusStack.clearTotal();
+        if(game.useHintText()) {
+            TableButton correctButton = getCorrectButtonForHint();
+            if(correctButton != foldButton) {
+                showHint("Always bet with Q, 6, 4 or better");
+            }
+        }
+
     }
 
     private void clearHand() {
@@ -378,72 +391,69 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
             playerHand.dealAction(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT);
         } else if(caller == playerHand) {
             toggleButtons(true);
+            if(game.usePreBetHints()) {
+                setPreBetHint();
+            }
         }
     }
 
-    enum HandType {HIGH_CARD, PAIR, FLUSH, STRAIGHT, THREE_OF_A_KIND, STRAIGHT_FLUSH};
+    private void setPreBetHint() {
+        foldButton.setColor(mainColor);
+        playButton.setColor(mainColor);
+
+        TableButton button = getCorrectButtonForHint();
+        button.setColor(hintColor);
+    }
+
+    private TableButton getCorrectButtonForHint() {
+        if(bestHandPlayer.getHandType().ordinal() > HandType.HIGH_CARD.ordinal()) return playButton;
+
+        // better than Q,6,4?
+        ArrayList<Integer> compVals = new ArrayList<Integer>();
+        compVals.add(12);
+        compVals.add(6);
+        compVals.add(4);
+        ArrayList<Integer> vals = bestHandPlayer.getStraightValues();
+        for(int i = 0; i<vals.size(); i++) {
+            if (vals.get(i) > compVals.get(i)) {
+                return playButton;
+            } else if (vals.get(i) < compVals.get(i)) {
+                return foldButton;
+            }
+        }
+        // everything's equal to the min. bet it.
+        return playButton;
+    }
+
+
     private void calculateWinner(boolean playerFolded) {
+        BestThreeHand bestHandDealer = new BestThreeHand(dealerHand.getCards());
+        dealerHand.setCards(bestHandDealer.sortedCards);
+
         int dealerHighValue = 1;
         int playerHighValue = 1;
         Card.FaceValue dealerHighFaceValue;
         Card.FaceValue playerHighFaceValue;
 
-        HandType dealerHandType, playerHandType;
-
-        // check for straight
-        List<Card> dealerCards = dealerHand.getCards();
-        ArrayList<Object> dealerHandResult = getHandType(dealerCards);
-        dealerHandType = (HandType)dealerHandResult.get(0);
-        dealerHighValue = (Integer)dealerHandResult.get(1);
-        dealerHighFaceValue = (Card.FaceValue)dealerHandResult.get(2);
-        boolean dealerQualifies = false;
-        if(dealerHandType.ordinal() > HandType.HIGH_CARD.ordinal() || dealerCards.get(0).getFaceValue().ordinal() >= Card.FaceValue.QUEEN.ordinal()) {
-            dealerQualifies = true;
-        }
-
-        List<Card> playerCards = playerHand.getCards();
-        ArrayList<Object> playerHandResult = getHandType(playerCards);
-        playerHandType = (HandType)playerHandResult.get(0);
-        playerHighValue = (Integer)playerHandResult.get(1);
-        playerHighFaceValue = (Card.FaceValue)playerHandResult.get(2);
 
         // ok, now that we know what they both have, who won and how much?
-        int playerWon = playerHandType.ordinal() - dealerHandType.ordinal();
+        int playerWon = bestHandPlayer.getHandType().ordinal() - bestHandDealer.getHandType().ordinal();
         if(playerFolded) playerWon = -1;
 
         if(playerWon == 0) {
-            switch (playerHandType) {
-                case STRAIGHT_FLUSH:
-                case THREE_OF_A_KIND:
-                case STRAIGHT:
-                    // we know all of these are the same and can be determined by the top card
-                    playerWon = playerHighValue - dealerHighValue;
+            // run through the top values
+            for(int i=0; i<bestHandPlayer.getStraightValues().size(); i++) {
+                if(bestHandPlayer.getStraightValues().get(i) > bestHandDealer.getStraightValues().get(i)) {
+                    playerWon = 1;
                     break;
-                case FLUSH:
-                case HIGH_CARD:
-                    // since the hands are sorted, just go down the list together comparing until something is different
-                    int temp = playerCards.get(0).getFaceValue().getStraightValue() - dealerCards.get(0).getFaceValue().getStraightValue();
-                    if(temp != 0) { playerWon = temp; break;}
-                    temp = playerCards.get(1).getFaceValue().getStraightValue() - dealerCards.get(1).getFaceValue().getStraightValue();
-                    if(temp != 0) { playerWon = temp; break;}
-                    temp = playerCards.get(2).getFaceValue().getStraightValue() - dealerCards.get(2).getFaceValue().getStraightValue();
-                    playerWon = temp; // at this point it's 3rd card or a tie
+                } else if(bestHandPlayer.getStraightValues().get(i) < bestHandDealer.getStraightValues().get(i)) {
+                    playerWon = -1;
                     break;
-                case PAIR:
-                    playerWon = playerHighValue - dealerHighValue; // higher pair wins first
-                    if(playerWon == 0) { // in the unlikely case they both have the same pair..
-                        int playerOther = -1, dealerOther = -1;
-                        for (Card c : playerCards) {
-                            if (c.getFaceValue().getStraightValue() != playerHighValue) playerOther = c.getFaceValue().getStraightValue();
-                        }
-                        for (Card c : dealerCards) {
-                            if (c.getFaceValue().getStraightValue() != playerHighValue) dealerOther = c.getFaceValue().getStraightValue();
-                        }
-                        playerWon = playerOther - dealerOther;
-                    }
-                    break;
+                }
             }
         }
+
+        boolean dealerQualifies = bestHandDealer.getHandType().ordinal() > 0 || bestHandDealer.getStraightValues().get(0) >= 12;
 
         int total = 0;
         if(playerWon > 0 || (!dealerQualifies && !playerFolded)) {
@@ -471,8 +481,8 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         }
 
         // Ante Bonus
-        if(playerHandType.ordinal() >= HandType.STRAIGHT.ordinal()) {
-            switch(playerHandType) {
+        if(bestHandPlayer.getHandType().ordinal() >= HandType.STRAIGHT.ordinal()) {
+            switch(bestHandPlayer.getHandType()) {
                 case STRAIGHT_FLUSH:
                     total += anteStack.getTotal() * 5;
                     break;
@@ -485,10 +495,10 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         }
 
         // Pair Plus
-        if(!playerFolded && pairPlusStack.getTotal() > 0 && playerHandType.ordinal() >= HandType.PAIR.ordinal()) {
+        if(!playerFolded && pairPlusStack.getTotal() > 0 && bestHandPlayer.getHandType().ordinal() >= HandType.PAIR.ordinal()) {
             total += pairPlusStack.getTotal(); // return the initial bet
             pairPlusPopup.pop(true, pairPlusCircle.getX() + 37, pairPlusCircle.getY() + 38);
-            switch(playerHandType) {
+            switch(bestHandPlayer.getHandType()) {
                 case STRAIGHT_FLUSH:
                     total += pairPlusStack.getTotal() * 40;
                     break;
@@ -521,7 +531,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 
         leftSide.setWonText("" + (total - initialBet));
 
-        setHandText(dealerHandType, dealerHighFaceValue, playerHandType, playerHighFaceValue, dealerQualifies, playerFolded);
+        setHandText(bestHandDealer.getHandType(), bestHandDealer.getFaceValues().get(0), bestHandPlayer.getHandType(), bestHandPlayer.getFaceValues().get(0), dealerQualifies, playerFolded);
 
         anteStack.clearTotal();
         pairPlusStack.clearTotal();
@@ -564,71 +574,158 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         }
     }
 
-    public ArrayList<Object> getHandType(List<Card> cards) {
-        int highValue = cards.get(0).getFaceValue().getStraightValue(); // we've already sorted
-        Card.FaceValue highFaceValue = cards.get(0).getFaceValue();
-        boolean straight = isStraight(cards);
-        boolean flush = isFlush(cards);
-        boolean threeOfAKind = isThreeOfAKind(cards);
-        Card.FaceValue pair = Card.FaceValue.NULL;
-        if(!threeOfAKind) pair = checkPair(cards);
-        if(pair.getStraightValue() > 0) {
-            highValue = pair.getStraightValue();
-            highFaceValue = pair;
+    enum HandType {HIGH_CARD, PAIR, FLUSH, STRAIGHT, THREE_OF_A_KIND, STRAIGHT_FLUSH};
+
+    class BestThreeHand implements Comparable<BestThreeHand>{
+        private HandType handType;
+        private ArrayList<Integer> straightValues = new ArrayList<Integer>();
+        private ArrayList<Card.FaceValue> faceValues = new ArrayList<Card.FaceValue>();
+        private List<Card> sortedCards;
+
+        public BestThreeHand(List<Card> threeCards) {
+            sortedCards = new ArrayList<Card>();
+            for(Card c : threeCards) {
+                sortedCards.add(new Card(c));
+            }
+            Collections.sort(sortedCards);
+            calculateHand(sortedCards);
         }
 
-        ArrayList<Object> results = new ArrayList<Object>();
-        if(straight && flush) {
-            results.add(HandType.STRAIGHT_FLUSH);
-        } else if(threeOfAKind) {
-            results.add(HandType.THREE_OF_A_KIND);
-        } else if(straight) {
-            results.add(HandType.STRAIGHT);
-        } else if(flush) {
-            results.add(HandType.FLUSH);
-        } else if(pair.getStraightValue() > 0) {
-            results.add(HandType.PAIR);
-        } else {
-            results.add(HandType.HIGH_CARD);
+        void calculateHand(List<Card> cards) {
+            boolean straight = isStraight(cards);
+            boolean flush = isFlush(cards);
+            boolean threeOfAKind = isThreeOfAKind(cards);
+            boolean pair = isPair(cards);
+
+            if(straight && flush) {
+                handType = HandType.STRAIGHT_FLUSH;
+                // gotta move the ace if it's supposed to be low
+                if(sortedCards.get(0).getFaceValue().getStraightValue() == 14 && sortedCards.get(1).getFaceValue().getStraightValue() == 3) {
+                    Card move = sortedCards.remove(0);
+                    sortedCards.add(move);
+                }
+                faceValues.add(sortedCards.get(0).getFaceValue()); // only the top matters
+                straightValues.add(sortedCards.get(0).getFaceValue().getStraightValue());
+            } else if(threeOfAKind) {
+                handType = HandType.THREE_OF_A_KIND;
+                faceValues.add(sortedCards.get(0).getFaceValue()); // only the top matters
+                straightValues.add(sortedCards.get(0).getFaceValue().getStraightValue());
+            } else if(flush) {
+                handType = HandType.FLUSH;
+                // all the cards matter
+                for(Card c : sortedCards) {
+                    faceValues.add(c.getFaceValue());
+                    straightValues.add(c.getFaceValue().getStraightValue());
+                }
+            } else if(straight) {
+                handType = HandType.STRAIGHT;
+                // gotta move the ace if it's supposed to be low
+                if(sortedCards.get(0).getFaceValue().getStraightValue() == 14 && sortedCards.get(1).getFaceValue().getStraightValue() == 3) {
+                    Card move = sortedCards.remove(0);
+                    sortedCards.add(move);
+                }
+                faceValues.add(sortedCards.get(0).getFaceValue()); // only the top matters
+                straightValues.add(sortedCards.get(0).getFaceValue().getStraightValue());
+            } else if(pair) {
+                handType = HandType.PAIR;
+                // sort the pair to the front
+                if(sortedCards.get(1).compareTo(sortedCards.get(2)) == 0) {
+                    Card c = sortedCards.remove(0);
+                    sortedCards.add(c);
+                }
+                straightValues.add(sortedCards.get(0).getFaceValue().getStraightValue());
+                straightValues.add(sortedCards.get(2).getFaceValue().getStraightValue());
+                faceValues.add(sortedCards.get(0).getFaceValue());
+                faceValues.add(sortedCards.get(2).getFaceValue());
+            } else {
+                handType = HandType.HIGH_CARD;
+                // all the cards matter
+                for(Card c : sortedCards) {
+                    faceValues.add(c.getFaceValue());
+                    straightValues.add(c.getFaceValue().getStraightValue());
+                }
+            }
         }
 
-        results.add(highValue);
-        results.add(highFaceValue);
-        return results;
-    }
-
-    public boolean isThreeOfAKind(List<Card>cards) {
-        int value = cards.get(0).getFaceValue().getStraightValue();
-        for(Card c : cards) {
-            if(c.getFaceValue().getStraightValue() != value) return false;
+        boolean isThreeOfAKind(List<Card>cards) {
+            int value = cards.get(0).getFaceValue().getStraightValue();
+            if(cards.get(0).getFaceValue().getStraightValue() == cards.get(1).getFaceValue().getStraightValue()
+                    && cards.get(0).getFaceValue().getStraightValue() == cards.get(2).getFaceValue().getStraightValue()) {
+                return true;
+            }
+            return false;
         }
-        return true;
-    }
 
-    public boolean isStraight(List<Card> cards) {
-        String straightString = "14,13,12,11,10,9,8,7,6,5,4,3,2,14,";
-        String cardValues = "";
-        for(Card c : cards) {
-            cardValues += c.getFaceValue().getStraightValue() + ",";
+        boolean isStraight(List<Card> cards) {
+            String straightString = "14,13,12,11,10,9,8,7,6,5,4,3,2,";
+            String aceLowString = "14,3,2,";
+            String cardValues = "";
+            for(Card c : cards) {
+                cardValues += c.getFaceValue().getStraightValue() + ",";
+            }
+            return straightString.contains(cardValues) || aceLowString.contains(cardValues);
         }
-        return straightString.contains(cardValues);
-    }
 
-    public boolean isFlush(List<Card> cards) {
-        Card.Suit suit = cards.get(0).getSuit();
-        for(Card c : cards) {
-            if(c.getSuit() != suit) return false;
+        boolean isFlush(List<Card> cards) {
+            Card.Suit suit = cards.get(0).getSuit();
+            for(Card c : cards) {
+                if(c.getSuit() != suit) return false;
+            }
+            return true;
         }
-        return true;
+
+        boolean isPair(List<Card> cards) {
+            // sorted, so just check cards next to each other
+            if(cards.get(0).getFaceValue().getStraightValue() == cards.get(1).getFaceValue().getStraightValue()
+                    || cards.get(1).getFaceValue().getStraightValue() == cards.get(2).getFaceValue().getStraightValue()
+                    ) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public int compareTo(BestThreeHand other) {
+            int returnValue = 0;
+            if(handType.ordinal() != other.handType.ordinal()) {
+                returnValue =  handType.ordinal() - other.handType.ordinal();
+            }
+
+            // if they're the same type, just go to the straight value
+            for(int i = 0; i<straightValues.size(); i++) {
+                if(returnValue == 0) {
+                    returnValue = straightValues.get(i) - other.straightValues.get(i);
+                }
+            }
+
+            return returnValue;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            for(Card c : sortedCards) {
+                sb.append(c.getFaceValue().getStraightValue() + ", ");
+            }
+            sb.append(handType);
+            return sb.toString();
+        }
+
+        public HandType getHandType() {
+            return handType;
+        }
+
+        public ArrayList<Integer> getStraightValues() {
+            return straightValues;
+        }
+
+        public ArrayList<Card.FaceValue> getFaceValues() {
+            return faceValues;
+        }
+
+        public List<Card> getSortedCards() {
+            return sortedCards;
+        }
     }
 
-    public Card.FaceValue checkPair(List<Card> cards) {
-        // first two
-        if(cards.get(0).getFaceValue().getStraightValue() == cards.get(1).getFaceValue().getStraightValue()) return cards.get(0).getFaceValue();
-        // first and last
-        if(cards.get(0).getFaceValue().getStraightValue() == cards.get(2).getFaceValue().getStraightValue()) return cards.get(0).getFaceValue();
-        // last two
-        if(cards.get(1).getFaceValue().getStraightValue() == cards.get(2).getFaceValue().getStraightValue()) return cards.get(1).getFaceValue();
-        return Card.FaceValue.NULL;
-    }
 }
