@@ -7,8 +7,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.thirteensecondstoburn.CasinoPractice.Actors.LeftSide;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
@@ -70,10 +72,26 @@ abstract public class TableScreen implements Screen {
     public void showHint(String text) {
         hintText.setTextCentered(text);
         hintText.setZIndex(1000);
-        hintText.addAction(sequence(Actions.moveTo(stage.getWidth(), hintText.getY()), Actions.show(), Actions.moveTo(-hintText.getWidth(), hintText.getY(), 7f), Actions.hide()));
+        hintText.addAction(sequence(Actions.moveTo(stage.getWidth(), hintText.getY()), Actions.show(), Actions.moveTo(-hintText.getWidth(), hintText.getY(), text.length() / 10), Actions.hide()));
+        hintText.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                hintText.setVisible(false);
+            }
+        });
     }
 
     protected abstract void setup();
+
+    protected void addToBalance(int amount) {
+        game.addToBalance(amount);
+        leftSide.setBalanceText("" + game.getBalance());
+    }
+
+    protected void subtractFromBalance(int amount) {
+        addToBalance(-amount);
+    }
+
 
     @Override
     public void render(float delta) {

@@ -36,9 +36,11 @@ public class MenuScreen implements Screen {
     ScrollPane scrollPane;
     Button tcpButton;
     Button cfpButton;
+    Button cStudButton;
 
     Image tcpTitle;
     Image cfpTitle;
+    Image cStudTitle;
 
     Sprite background;
     public Color backgroundColor = new Color().valueOf("265614FF");
@@ -69,6 +71,8 @@ public class MenuScreen implements Screen {
         tcpTitle.setColor(Color.GREEN);
         cfpTitle = new Image(assets.getTexture(Assets.TEX_NAME.CRAZY_FOUR_POKER_TITLE));
         cfpTitle.setColor(Color.GREEN);
+        cStudTitle = new Image(assets.getTexture(Assets.TEX_NAME.CARIBBEAN_STUD_POKER_TITLE));
+        cStudTitle.setColor(Color.GREEN);
 
         tcpButton = new Button(skin);
         tcpButton.add(tcpTitle).center().expand();
@@ -97,8 +101,23 @@ public class MenuScreen implements Screen {
             }
         });
 
+        cStudButton = new Button(skin);
+        cStudButton.add(cStudTitle).center().expand();
+        cStudButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        game.setScreen(game.getCaribbeanStudPokerScreen());
+                    }
+                })));
+            }
+        });
+
         table.add(tcpButton).width(300).height(300).expand().pad(10);
         table.add(cfpButton).width(300).height(300).expand().pad(10);
+        table.add(cStudButton).width(300).height(300).expand().pad(10);
         scrollPane = new ScrollPane(table, skin);
         scrollPane.setTouchable(Touchable.enabled);
         scrollPane.setWidth(stage.getWidth());

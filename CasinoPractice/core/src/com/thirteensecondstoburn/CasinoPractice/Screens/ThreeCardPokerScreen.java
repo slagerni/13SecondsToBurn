@@ -62,7 +62,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 
     int lastAnteBet = 5;
     int lastPairPlusBet = 0;
-    BestThreeHand bestHandPlayer = null;
+    BestHand bestHandPlayer = null;
 
     public ThreeCardPokerScreen(CasinoPracticeGame game) {
         super(game);
@@ -212,13 +212,13 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         foldButton.setVisible(false);
 
         dealerHandText = new Text(assets, "", 1.5f);
-        dealerHandText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - Card.CARD_HEIGHT - 50 - 10);
+        dealerHandText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - Card.CARD_HEIGHT - 90);
 
         playerHandText = new Text(assets, "", 1.5f);
-        playerHandText.setPosition(HAND_X_START, Card.CARD_HEIGHT + 50 + 60);
+        playerHandText.setPosition(HAND_X_START, Card.CARD_HEIGHT + 60);
 
         qualifyText = new Text(assets, "DEALER QUALIFIES WITH QUEEN HIGH", 1);
-        qualifyText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - 10);
+        qualifyText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - 40);
         qualifyText.setColor(.5f, .5f, .5f, .5f);
 
         pairPlusPopup = new WinLosePopup(assets);
@@ -282,8 +282,8 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 //        playerTestCards.add(new Card(Card.FaceValue.TWO, Card.Suit.HEART, Card.Back.BACK1, true, assets));
 //        playerTestCards.add(new Card(Card.FaceValue.THREE, Card.Suit.SPADE, Card.Back.BACK1, true, assets));
 //        playerTestCards.add(new Card(Card.FaceValue.ACE, Card.Suit.DIAMOND, Card.Back.BACK1, true, assets));
-//        bestHandPlayer = new BestThreeHand(playerTestCards);
-        bestHandPlayer = new BestThreeHand(deck.getCards().subList(3, 6));
+//        bestHandPlayer = new BestHand(playerTestCards);
+        bestHandPlayer = new BestHand(deck.getCards().subList(3, 6));
         playerHand = new Hand(bestHandPlayer.sortedCards, Card.CARD_WIDTH);
         playerHand.setPosition(HAND_X_START, 50);
         playerHand.setVisible(false);
@@ -320,15 +320,6 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
             }
         }
 
-    }
-
-    private void addToBalance(int amount) {
-        game.addToBalance(amount);
-        leftSide.setBalanceText("" + game.getBalance());
-    }
-
-    private void subtractFromBalance(int amount) {
-        addToBalance(-amount);
     }
 
     private void foldHand() {
@@ -427,7 +418,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 
 
     private void calculateWinner(boolean playerFolded) {
-        BestThreeHand bestHandDealer = new BestThreeHand(dealerHand.getCards());
+        BestHand bestHandDealer = new BestHand(dealerHand.getCards());
         dealerHand.setCards(bestHandDealer.sortedCards);
 
         int dealerHighValue = 1;
@@ -575,14 +566,13 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
     }
 
     enum HandType {HIGH_CARD, PAIR, FLUSH, STRAIGHT, THREE_OF_A_KIND, STRAIGHT_FLUSH};
-
-    class BestThreeHand implements Comparable<BestThreeHand>{
+    class BestHand implements Comparable<BestHand>{
         private HandType handType;
         private ArrayList<Integer> straightValues = new ArrayList<Integer>();
         private ArrayList<Card.FaceValue> faceValues = new ArrayList<Card.FaceValue>();
         private List<Card> sortedCards;
 
-        public BestThreeHand(List<Card> threeCards) {
+        public BestHand(List<Card> threeCards) {
             sortedCards = new ArrayList<Card>();
             for(Card c : threeCards) {
                 sortedCards.add(new Card(c));
@@ -685,7 +675,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         }
 
         @Override
-        public int compareTo(BestThreeHand other) {
+        public int compareTo(BestHand other) {
             int returnValue = 0;
             if(handType.ordinal() != other.handType.ordinal()) {
                 returnValue =  handType.ordinal() - other.handType.ordinal();

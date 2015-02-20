@@ -46,14 +46,14 @@ public class Text extends Actor {
         batch.setShader(assets.getDistanceFieldShader());
         font.setColor(this.getColor());
 
+        BitmapFont.TextBounds bounds = font.getBounds(text);
         if(showBackground) {
-            BitmapFont.TextBounds bounds = font.getBounds(text);
             batch.setColor(Color.BLACK);
-            batch.draw(backgroundTex, getX(), getY() - 10 - bounds.height, bounds.width + 10, bounds.height + 10);
+            batch.draw(backgroundTex, getX(), getY() - 10, bounds.width + 10, bounds.height + 10);
         }
 
         assets.getDistanceFieldShader().setSmoothing(1f / 8f / scale);
-        font.draw(batch, text, getX() + 5, getY());
+        font.draw(batch, text, getX() + 5, getY() + bounds.height);
         batch.flush();
         batch.setShader(null);
     }

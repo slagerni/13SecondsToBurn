@@ -82,9 +82,9 @@ public class LeftSide extends Group {
     @Override
     public void setStage(Stage stage) {
         super.setStage(stage);
-        balance.setPosition(30, stage.getHeight() - 65);
-        wager.setPosition(30, stage.getHeight() - 165);
-        won.setPosition(30, stage.getHeight() - 275);
+        balance.setPosition(30, stage.getHeight() - 100);
+        wager.setPosition(30, stage.getHeight() - 215);
+        won.setPosition(30, stage.getHeight() - 325);
         backgroundImage.setColor(this.getColor());
         menuButton.setPosition(30, stage.getHeight() - 500);
         menuButton.setColor(this.getColor());

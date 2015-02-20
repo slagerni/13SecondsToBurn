@@ -18,7 +18,7 @@ public class Assets {
     public enum TEX_NAME {
         BACKGROUND, FONT, BUTTON_BLANK, BUTTON_BLANK_DOWN, LEFT_SIDE, ANTE_CIRCLE, PAIRPLUS_CIRCLE, PLAY_CIRCLE, WIN_POPUP, LOSE_POPUP,
         THREE_CARD_POKER_PAYTABLE, THREE_CARD_POKER_TITLE, QUEENS_UP_CIRCLE, SUPER_BONUS_CIRCLE, CRAZY_FOUR_POKER_PAYTABLE, CRAZY_FOUR_POKER_TITLE,
-        MENU_BUTTON, MENU_BUTTON_DOWN, SPLASH_TITLE, BURN_LOGO, BLACK_50_ALPHA
+        MENU_BUTTON, MENU_BUTTON_DOWN, SPLASH_TITLE, BURN_LOGO, BLACK_50_ALPHA, CARIBBEAN_STUD_POKER_TITLE, CARIBBEAN_STUD_PAYTABLE
     }
     TextureAtlas cardAtlas;
     TextureAtlas chipAtlas;
@@ -144,6 +144,14 @@ public class Assets {
         texture = new Texture(Gdx.files.internal("Black50Alpha.png"));
         texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         textures.put(TEX_NAME.BLACK_50_ALPHA, texture);
+
+        texture = new Texture(Gdx.files.internal("cStudTitle.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.CARIBBEAN_STUD_POKER_TITLE, texture);
+
+        texture = new Texture(Gdx.files.internal("cStudPaytable.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.CARIBBEAN_STUD_PAYTABLE, texture);
 
     }
 

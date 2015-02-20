@@ -3,6 +3,7 @@ package com.thirteensecondstoburn.CasinoPractice;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.thirteensecondstoburn.CasinoPractice.Screens.CaribbeanStudPokerScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CrazyFourPokerScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.MenuScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SplashScreen;
@@ -16,6 +17,7 @@ public class CasinoPracticeGame extends Game {
     private MenuScreen menuScreen;
     private ThreeCardPokerScreen threeCardPokerScreen;
     private CrazyFourPokerScreen crazyFourPokerScreen;
+    private CaribbeanStudPokerScreen caribbeanStudPokerScreen;
     private int balance;
     private Preferences saveData;
 
@@ -42,6 +44,11 @@ public class CasinoPracticeGame extends Game {
     public CrazyFourPokerScreen getCrazyFourPokerScreen() {
         if(crazyFourPokerScreen == null) crazyFourPokerScreen = new CrazyFourPokerScreen(this);
         return crazyFourPokerScreen;
+    }
+
+    public CaribbeanStudPokerScreen getCaribbeanStudPokerScreen() {
+        if(caribbeanStudPokerScreen == null) caribbeanStudPokerScreen = new CaribbeanStudPokerScreen(this);
+        return caribbeanStudPokerScreen;
     }
 
     @Override
@@ -79,6 +86,7 @@ public class CasinoPracticeGame extends Game {
         if(splashScreen != null) try {splashScreen.dispose();} catch (Exception ex) {}
         if(threeCardPokerScreen != null) try {threeCardPokerScreen.dispose();} catch (Exception ex) {}
         if(crazyFourPokerScreen != null) try {crazyFourPokerScreen.dispose();} catch (Exception ex) {}
+        if(caribbeanStudPokerScreen != null) try {caribbeanStudPokerScreen.dispose();} catch (Exception ex) {}
         saveData.putInteger("balance", balance);
         saveData.putBoolean("showHints", showHints);
         saveData.putBoolean("preBetHints", preBetHints);

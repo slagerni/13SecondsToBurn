@@ -246,13 +246,13 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         foldButton.setVisible(false);
 
         dealerHandText = new Text(assets, "", 1.5f);
-        dealerHandText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - Card.CARD_HEIGHT - 50 - 10);
+        dealerHandText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - Card.CARD_HEIGHT - 90);
 
         playerHandText = new Text(assets, "", 1.5f);
-        playerHandText.setPosition(HAND_X_START, Card.CARD_HEIGHT + 50 + 60);
+        playerHandText.setPosition(HAND_X_START, Card.CARD_HEIGHT + 60);
 
         qualifyText = new Text(assets, "DEALER QUALIFIES WITH KING HIGH", 1);
-        qualifyText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - 10);
+        qualifyText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - 40);
         qualifyText.setColor(.5f, .5f, .5f, .5f);
 
         queensUpPopup = new WinLosePopup(assets);
@@ -374,15 +374,6 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
                 }
             }
         }
-    }
-
-    private void addToBalance(int amount) {
-        game.addToBalance(amount);
-        leftSide.setBalanceText("" + game.getBalance());
-    }
-
-    private void subtractFromBalance(int amount) {
-        addToBalance(-amount);
     }
 
     private void foldHand() {
@@ -636,7 +627,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             case STRAIGHT:
                 return "Straight to the " + firstFaceValue.getSingleText();
             case TWO_PAIR:
-                return "Two pair of " + firstFaceValue.getMultiText() + " and " + hand.getSortedCards().get(2).getFaceValue().getMultiText();
+                return "Two pair " + firstFaceValue.getMultiText() + " and " + hand.getSortedCards().get(2).getFaceValue().getMultiText();
             case PAIR:
                 return "Pair of " + firstFaceValue.getMultiText();
             default:

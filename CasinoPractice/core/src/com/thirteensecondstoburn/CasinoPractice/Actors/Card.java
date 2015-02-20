@@ -104,6 +104,10 @@ public class Card extends Actor implements Comparable<Card>{
         return compareCard.faceValue.straightValue - faceValue.straightValue;
     }
 
+    @Override
+    public String toString() {
+        return faceValue.getStrValue() + suit.getStrValue();
+    }
     // stupid aces being either high or low..
     public static Comparator<Card> LowAceComparator = new Comparator<Card>() {
         @Override
@@ -119,14 +123,18 @@ public class Card extends Actor implements Comparable<Card>{
     };
 
     public enum Suit {
-        CLUB ("C"), DIAMOND("D"), HEART("H"), SPADE("S"), JOKER_BLACK("Black"), JOKER_RED("Red");
+        CLUB ("C", "Clubs"), DIAMOND("D", "Diamonds"), HEART("H", "Hearts"), SPADE("S", "Spades"), JOKER_BLACK("Black", "Joker"), JOKER_RED("Red", "Joker");
 
         private final String strValue;
-        Suit(String strValue) {
+        private final String name;
+        Suit(String strValue, String name) {
             this.strValue = strValue;
+            this.name = name;
         }
 
         public String getStrValue() {return strValue;}
+        @Override
+        public String toString() { return name; }
     }
 
     public enum FaceValue {
@@ -164,6 +172,7 @@ public class Card extends Actor implements Comparable<Card>{
         public int getStraightValue() {return straightValue;}
         public String getSingleText() {return singleText;}
         public String getMultiText() {return multiText;}
+        public int getFaceValue() {return faceValue;}
     }
 
     public enum Back {
