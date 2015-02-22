@@ -18,7 +18,9 @@ public class ChipStack extends Actor {
     public static int CHIP_HEIGHT = 71;
     public static int CHIP_BASE_HEIGHT = 10;
     int stackTotal = 0;
-    int maxTotal = 500;
+    public static final int TABLE_MAX = 1000;
+    public static final int TABLE_MIN = 10;
+
     ArrayList<Integer> chipStack = new ArrayList<Integer>();
 
     HashMap<Integer, TextureRegion> regions = new HashMap<Integer, TextureRegion>();
@@ -53,17 +55,13 @@ public class ChipStack extends Actor {
 
     public void increaseTotal(int amount) {
         stackTotal += amount;
-        if (stackTotal > maxTotal) stackTotal = maxTotal;
+        if (stackTotal > TABLE_MAX) stackTotal = TABLE_MAX;
         calculateChips();
     }
 
     public void clearTotal() {
         stackTotal = 0;
         calculateChips();
-    }
-
-    public void setMaxTotal(int max) {
-        maxTotal = max;
     }
 
     public int getTotal() {

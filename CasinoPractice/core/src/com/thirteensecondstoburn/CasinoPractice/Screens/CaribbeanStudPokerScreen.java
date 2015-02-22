@@ -15,7 +15,7 @@ import com.thirteensecondstoburn.CasinoPractice.Actors.WinLosePopup;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 import com.thirteensecondstoburn.CasinoPractice.Deck;
-import com.thirteensecondstoburn.CasinoPractice.Hand;
+import com.thirteensecondstoburn.CasinoPractice.Actors.Hand;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,7 +55,7 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
     WinLosePopup antePopup;
     WinLosePopup playPopup;
 
-    int lastAnteBet = 5;
+    int lastAnteBet = ChipStack.TABLE_MIN;
     BestHand bestHandPlayer = null;
 
     Card visibleCard;
@@ -301,7 +301,7 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
 
     private void clearHand() {
         addToBalance(anteStack.getTotal());
-        lastAnteBet = 5;
+        lastAnteBet = ChipStack.TABLE_MIN;
         anteStack.setTotal(0);
         playStack.setTotal(0);
         leftSide.setWonText("");

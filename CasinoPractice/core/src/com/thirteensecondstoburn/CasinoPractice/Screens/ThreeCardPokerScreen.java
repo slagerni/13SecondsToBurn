@@ -18,7 +18,7 @@ import com.thirteensecondstoburn.CasinoPractice.Actors.WinLosePopup;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 import com.thirteensecondstoburn.CasinoPractice.Deck;
-import com.thirteensecondstoburn.CasinoPractice.Hand;
+import com.thirteensecondstoburn.CasinoPractice.Actors.Hand;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,7 +60,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
     WinLosePopup antePopup;
     WinLosePopup playPopup;
 
-    int lastAnteBet = 5;
+    int lastAnteBet = ChipStack.TABLE_MIN;
     int lastPairPlusBet = 0;
     BestHand bestHandPlayer = null;
 
@@ -340,7 +340,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 
     private void clearHand() {
         addToBalance(anteStack.getTotal() + pairPlusStack.getTotal());
-        lastAnteBet = 5;
+        lastAnteBet = ChipStack.TABLE_MIN;
         lastPairPlusBet = 0;
         anteStack.setTotal(0);
         pairPlusStack.setTotal(0);

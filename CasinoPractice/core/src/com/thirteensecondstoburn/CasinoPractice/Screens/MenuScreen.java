@@ -37,10 +37,12 @@ public class MenuScreen implements Screen {
     Button tcpButton;
     Button cfpButton;
     Button cStudButton;
+    Button blackjackButton;
 
     Image tcpTitle;
     Image cfpTitle;
     Image cStudTitle;
+    Image blackjackTitle;
 
     Sprite background;
     public Color backgroundColor = new Color().valueOf("265614FF");
@@ -73,6 +75,8 @@ public class MenuScreen implements Screen {
         cfpTitle.setColor(Color.GREEN);
         cStudTitle = new Image(assets.getTexture(Assets.TEX_NAME.CARIBBEAN_STUD_POKER_TITLE));
         cStudTitle.setColor(Color.GREEN);
+        blackjackTitle = new Image(assets.getTexture(Assets.TEX_NAME.BLACKJACK_TITLE));
+        blackjackTitle.setColor(Color.WHITE);
 
         tcpButton = new Button(skin);
         tcpButton.add(tcpTitle).center().expand();
@@ -115,9 +119,24 @@ public class MenuScreen implements Screen {
             }
         });
 
+        blackjackButton = new Button(skin);
+        blackjackButton.add(blackjackTitle).center().expand();
+        blackjackButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        game.setScreen(game.getBlackJackScreen());
+                    }
+                })));
+            }
+        });
+
         table.add(tcpButton).width(300).height(300).expand().pad(10);
         table.add(cfpButton).width(300).height(300).expand().pad(10);
         table.add(cStudButton).width(300).height(300).expand().pad(10);
+        table.add(blackjackButton).width(300).height(300).expand().pad(10);
         scrollPane = new ScrollPane(table, skin);
         scrollPane.setTouchable(Touchable.enabled);
         scrollPane.setWidth(stage.getWidth());

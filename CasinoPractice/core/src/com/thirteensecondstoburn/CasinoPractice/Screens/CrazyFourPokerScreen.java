@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Card;
@@ -15,7 +14,7 @@ import com.thirteensecondstoburn.CasinoPractice.Actors.WinLosePopup;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 import com.thirteensecondstoburn.CasinoPractice.Deck;
-import com.thirteensecondstoburn.CasinoPractice.Hand;
+import com.thirteensecondstoburn.CasinoPractice.Actors.Hand;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,7 +62,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
     WinLosePopup superBonusPopup;
     WinLosePopup playPopup;
 
-    int lastAnteBet = 5;
+    int lastAnteBet = ChipStack.TABLE_MIN;
     int lastQueensUpBet = 0;
     BestHand bestHandPlayer = null;
 
@@ -397,7 +396,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
 
     private void clearHand() {
         addToBalance(anteStack.getTotal() + superBonusStack.getTotal() + queensUpStack.getTotal());
-        lastAnteBet = 5;
+        lastAnteBet = ChipStack.TABLE_MIN;
         lastQueensUpBet = 0;
         anteStack.setTotal(0);
         superBonusStack.setTotal(0);

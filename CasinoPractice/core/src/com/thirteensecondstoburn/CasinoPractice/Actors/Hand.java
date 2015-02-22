@@ -1,4 +1,4 @@
-package com.thirteensecondstoburn.CasinoPractice;
+package com.thirteensecondstoburn.CasinoPractice.Actors;
 
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -38,6 +38,11 @@ public class Hand extends Group {
                 notifyListeners();
             }
         }
+    }
+
+    public Hand(float offset) {
+        this.offset = offset;
+        this.cards = new ArrayList<Card>();
     }
 
     public Hand(List<Card> cards, float offset) {
@@ -115,6 +120,21 @@ public class Hand extends Group {
         card.addAction(cardActions.get(index));
     }
 
+    public void dealCards(int fromX, int fromY) {
+        cardActions = new ArrayList<>();
+        for(int i=0; i<cards.size(); i++) {
+            cardActions.add(sequence(
+                    parallel(moveTo(offset * i, getY(), .3f), rotateTo(720f, .3f)),
+                    run(new DealRunnable(cards))));
+        }
+        dealAction(fromX, fromY);
+    }
+
+    public void addCard(Card card) {
+        cards.add(card);
+        positionCards();
+    }
+
     public List<Card> getCards() {
         return cards;
     }
@@ -126,6 +146,13 @@ public class Hand extends Group {
     private void notifyListeners() {
         for(ActionCompletedListener l : listeners) {
             l.actionCompleted(this);
+        }
+    }
+
+    public void clear() {
+        cards.clear();
+        if(cardActions != null ) {
+            cardActions.clear();
         }
     }
 }
