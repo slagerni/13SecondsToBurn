@@ -104,8 +104,8 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
                         dealerHandText.setText("");
                         return;
                     }
-                    if (queensUpStack.getTotal() + betAmount > leftSide.TABLE_MAX) {
-                        playerHandText.setText("Table maximum of " + leftSide.TABLE_MAX);
+                    if (queensUpStack.getTotal() + betAmount > ChipStack.TABLE_MAX) {
+                        playerHandText.setText("Table maximum of " + ChipStack.TABLE_MAX);
                         dealerHandText.setText("");
                         return;
                     }
@@ -134,8 +134,8 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
                         dealerHandText.setText("");
                         return;
                     }
-                    if(anteStack.getTotal() + betAmount > leftSide.TABLE_MAX) {
-                        playerHandText.setText("Table maximum of " + leftSide.TABLE_MAX);
+                    if(anteStack.getTotal() + betAmount > ChipStack.TABLE_MAX) {
+                        playerHandText.setText("Table maximum of " + ChipStack.TABLE_MAX);
                         dealerHandText.setText("");
                         return;
                     }

@@ -28,6 +28,7 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
 
     private boolean isSplit = false;
     private boolean isBlackjack = false;
+    private boolean surrender = false;
 
     public BlackjackHand(final CasinoPracticeGame game, Assets assets) {
         this(game, assets, false);
@@ -82,10 +83,23 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
         return betStack.getTotal();
     }
 
+    public void surrender() {
+        surrender = true;
+    }
+
+    public boolean surrendered() {
+        return surrender;
+    }
+
     public int getHard() { return hard; }
     public int getSoft() { return soft; }
 
     private void setHandTotals() {
+        if(surrender) {
+            setHandText("Surrender");
+            return;
+        }
+
         boolean foundAce = false;
         hard = 0;
         soft = 0;
@@ -115,28 +129,30 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
         }
         // show the running total(s)
         isBlackjack = false;
-        if(hand.getCards().size() == 2 && hard == 21 && !isSplit) {
+        // check blackjack even w/ the facedown card
+        if(hand.getCards().size() == 2 && (hand.getCards().get(0).getFaceValue().getFaceValue() + hand.getCards().get(1).getFaceValue().getFaceValue() == 21) && !isSplit) {
             setHandText("Blackjack!");
             isBlackjack = true;
-        }
-        else if(soft > 21) {
+        } else if(canSplit()) {
+            setHandText(hard + " (tap cards to split)");
+        } else if(soft > 21) {
             setHandText("Bust");
         } else if(hard == soft) {
             setHandText("" + hard);
         } else if (hard > 21) {
             setHandText("" + soft);
         } else {
-            setHandText(hard + " or " + soft);
+            setHandText("" + hard);
         }
     }
 
     public void clear() {
-        System.out.println("Blackjack Hand Cleared: " + this.getName());
         hand.clear();
         betStack.clear();
-        handText.clear();
+        handText.setText("");
         hard = 0;
         soft = 0;
+        surrender = false;
     }
 
     public void deal(int x, int y) {
@@ -176,7 +192,7 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
     public boolean isBlackjack() {return isBlackjack;}
 
     public int bestHandTotal() {
-        if (hard > 21 && soft > 21) {
+        if ((hard > 21 && soft > 21) || surrender) {
             return -1; // BUST
         } else if (hard <= 21 && hard > soft) {
             return hard;

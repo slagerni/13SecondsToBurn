@@ -95,8 +95,8 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
                         dealerHandText.setText("");
                         return;
                     }
-                    if(anteStack.getTotal() + betAmount > leftSide.TABLE_MAX) {
-                        playerHandText.setText("Table maximum of " + leftSide.TABLE_MAX);
+                    if(anteStack.getTotal() + betAmount > ChipStack.TABLE_MAX) {
+                        playerHandText.setText("Table maximum of " + ChipStack.TABLE_MAX);
                         dealerHandText.setText("");
                         return;
                     }

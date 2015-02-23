@@ -19,6 +19,7 @@ public class TableButton extends Actor {
     private boolean isUp = true;
     private Image backgroundDown;
     private Image backgroundUp;
+    private float textScale = 2.0f;
 
     public static int BUTTON_WIDTH = 256;
     public static int BUTTON_HEIGHT = 256;
@@ -58,8 +59,12 @@ public class TableButton extends Actor {
         drawFont(batch, assets.getFont(), text);
     }
 
+    public void setTextScale(float val) {
+        textScale = val;
+    }
+
     private void drawFont(Batch Batch, BitmapFont font, String text) {
-        font.setScale(2f);
+        font.setScale(textScale);
 
         Batch.setShader(assets.getDistanceFieldShader());
         font.setColor(Color.BLACK);
@@ -68,7 +73,7 @@ public class TableButton extends Actor {
         int x = (int) ((getWidth() - bounds.width) / 2);
         int y = (int) ((getHeight() - bounds.height) / 2);
 
-        assets.getDistanceFieldShader().setSmoothing( 1f / 8f / 2f);
+        assets.getDistanceFieldShader().setSmoothing( 1f / 8f / textScale);
         font.draw(Batch, text, getX() + x, getY() - y + getHeight() + getHeight()*.05f);
         Batch.flush();
         Batch.setShader(null);

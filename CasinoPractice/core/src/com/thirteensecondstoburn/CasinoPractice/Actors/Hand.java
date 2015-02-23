@@ -71,7 +71,7 @@ public class Hand extends Group {
     }
 
     public void setCards(List<Card> newCards) {
-        this.cards = new ArrayList<Card>(newCards.size());
+        this.cards = new ArrayList<>(newCards.size());
         for(Card c : newCards) this.cards.add(new Card(c));
         positionCards();
     }
@@ -150,6 +150,9 @@ public class Hand extends Group {
     }
 
     public void clear() {
+        for(Card c : cards) {
+            removeActor(c);
+        }
         cards.clear();
         if(cardActions != null ) {
             cardActions.clear();

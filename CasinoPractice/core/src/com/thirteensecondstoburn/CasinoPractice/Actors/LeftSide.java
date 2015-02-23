@@ -26,9 +26,6 @@ public class LeftSide extends Group {
     BetButton betButton;
     MenuButton menuButton;
 
-    public static final int TABLE_MAX = 500; // TODO MAYBE PUT THIS IN A SETTING AND ALLOW IT TO BE CHANGED?
-
-
     public LeftSide(final CasinoPracticeGame game, Assets assets) {
         this.game = game;
         this.assets = assets;
@@ -42,7 +39,7 @@ public class LeftSide extends Group {
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (betButton.isInside(x, y)) {
                     int amount = betButton.increaseAmount();
-                    if(amount > TABLE_MAX) {
+                    if(amount > ChipStack.TABLE_MAX) {
                         betButton.resetToMin();
                     }
                 }
@@ -60,6 +57,7 @@ public class LeftSide extends Group {
                         if(screen.getStage() != null) {
                             screen.getStage().addAction(Actions.fadeIn(0.5f));
                         }
+                        getStage().clear();
                         game.setScreen(screen);
                     }
                 })));
@@ -81,13 +79,15 @@ public class LeftSide extends Group {
 
     @Override
     public void setStage(Stage stage) {
-        super.setStage(stage);
-        balance.setPosition(30, stage.getHeight() - 100);
-        wager.setPosition(30, stage.getHeight() - 215);
-        won.setPosition(30, stage.getHeight() - 325);
-        backgroundImage.setColor(this.getColor());
-        menuButton.setPosition(30, stage.getHeight() - 500);
-        menuButton.setColor(this.getColor());
+        if(stage != null) {
+            super.setStage(stage);
+            balance.setPosition(30, stage.getHeight() - 100);
+            wager.setPosition(30, stage.getHeight() - 215);
+            won.setPosition(30, stage.getHeight() - 325);
+            backgroundImage.setColor(this.getColor());
+            menuButton.setPosition(30, stage.getHeight() - 500);
+            menuButton.setColor(this.getColor());
+        }
     }
 
     public int getBetAmount() {
