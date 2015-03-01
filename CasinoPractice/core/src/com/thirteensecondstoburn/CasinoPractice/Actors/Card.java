@@ -1,5 +1,6 @@
 package com.thirteensecondstoburn.CasinoPractice.Actors;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -47,6 +48,7 @@ public class Card extends Actor implements Comparable<Card>{
     public void draw(Batch batch, float parentAlpha) {
         if(faceUp) {
             Image card = new Image(assets.getCardTexture(getImageKey()));
+            card.setColor(getColor());
             card.setOrigin(card.getWidth() / 2, card.getHeight() / 2);// origin sets the location to rotate around
             card.setPosition(this.getX(), this.getY());
             card.setRotation(this.getRotation());

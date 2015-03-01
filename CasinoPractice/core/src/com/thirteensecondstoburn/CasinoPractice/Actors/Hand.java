@@ -1,5 +1,6 @@
 package com.thirteensecondstoburn.CasinoPractice.Actors;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -156,6 +157,15 @@ public class Hand extends Group {
         cards.clear();
         if(cardActions != null ) {
             cardActions.clear();
+        }
+    }
+
+    @Override
+    public void setColor(Color color) {
+        super.setColor(color);
+        for(Card c : cards) {
+            System.out.println("Setting card color to :" + color);
+            c.setColor(color);
         }
     }
 }

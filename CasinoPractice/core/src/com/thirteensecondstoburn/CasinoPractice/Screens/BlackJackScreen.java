@@ -79,10 +79,23 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (canBet) {
+                    int betAmount = leftSide.getBetAmount();
+                    if (mainHand.getBetTotal() + leftSide.getBetAmount() > game.getBalance() - betAmount) {
+                        mainHand.setHandText("Insufficient funds to make that bet");
+                        dealerHandText.setText("");
+                        return;
+                    }
+                    if (mainHand.getBetTotal() + betAmount > ChipStack.TABLE_MAX) {
+                        mainHand.setHandText("Table maximum of " + ChipStack.TABLE_MAX);
+                        dealerHandText.setText("");
+                        return;
+                    }
                     mainHand.setBetTotal(mainHand.getBetTotal() + leftSide.getBetAmount());
+                    lastBet = mainHand.getBetTotal();
+                    subtractFromBalance(betAmount);
                     calculateWager();
                 } else {
-                    if(mainHand.canSplit()) {
+                    if (mainHand.canSplit()) {
                         splitHand(mainHand);
                     }
                 }
@@ -178,9 +191,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         stage.addActor(doubleButton);
         stage.addActor(surrenderButton);
 
-        for(BlackjackHand hand : hands) {
-            stage.addActor(hand);
-        }
+        stage.addActor(mainHand);
     }
 
     private void dealHand() {
@@ -188,7 +199,13 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         mainHand.clear();
         currentHand = mainHand;
         currentHandIndex = 0;
-        for(int i = 1; i < hands.size(); i++) { hands.remove(i); } // clear out any split hands from previous rounds
+        for(BlackjackHand hand : hands) {
+            hand.remove();
+        }
+        hands.clear();
+        hands.add(mainHand);
+        stage.addActor(mainHand);
+        setHandPositions();
 
         if(mainHand.getBetTotal() == 0) {
             if(lastBet > game.getBalance()) {
@@ -256,7 +273,13 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         currentHand = mainHand;
         currentHandIndex = 0;
 
-        for(int i = 1; i < hands.size(); i++) { hands.remove(i); } // clear out any split hands from previous rounds
+        for(BlackjackHand hand : hands) {
+            hand.remove();
+        }
+        hands.clear();
+        hands.add(mainHand);
+        stage.addActor(mainHand);
+        setHandPositions();
     }
 
     private void toggleButtons(boolean isPlaying) {
@@ -271,8 +294,21 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
     private void setHandPositions() {
         float totalSpace = stage.getWidth() - leftSide.getWidth();
         int totalHands = hands.size();
-        // TODO fuck it. for now put it somewhere in the middle til it's time to deal with splits
-        hands.get(0).setPosition(totalSpace/2 - 150, 50);
+        if(totalHands == 1) {
+            hands.get(0).setPosition(totalSpace / 2 - 150, 50);
+        } else if (totalHands == 2) {
+            hands.get(0).setPosition(leftSide.getWidth() + 5, 50);
+            hands.get(1).setPosition(totalSpace / 2 + 50, 50);
+        } else if (totalHands == 3) {
+            hands.get(0).setPosition(leftSide.getWidth() + 5, 10);
+            hands.get(1).setPosition(totalSpace / 2 + 50, 10);
+            hands.get(2).setPosition(leftSide.getWidth() + 5, 50 + Card.CARD_HEIGHT);
+        } else if (totalHands == 4) {
+            hands.get(0).setPosition(leftSide.getWidth() + 5, 10);
+            hands.get(1).setPosition(totalSpace / 2 + 50, 10);
+            hands.get(2).setPosition(leftSide.getWidth() + 5, 50 + Card.CARD_HEIGHT);
+            hands.get(3).setPosition(totalSpace / 2 + 50, 50 + Card.CARD_HEIGHT);
+        }
     }
 
     private void stand() {
@@ -284,6 +320,10 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         } else {
             // move to the next split hand
             currentHand = nextHand;
+            if(currentHand != null) {
+                doubleButton.setVisible(true);
+                surrenderButton.setVisible(true);
+            }
         }
     }
 
@@ -302,12 +342,20 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
             } else {
                 // move to the next split hand
                 currentHand = nextHand;
+                if(currentHand != null) {
+                    doubleButton.setVisible(true);
+                    surrenderButton.setVisible(true);
+                }
             }
         }
 
     }
 
     private void doubleDown() {
+        if(currentHand.getBetTotal() > game.getBalance()) {
+            currentHand.setHandText("You don't have enough funds to double down");
+            return;
+        }
         Card card = nextCard();
         card.setRotation(90);
         currentHand.addCard(card);
@@ -341,15 +389,59 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
     }
 
     private void splitHand(BlackjackHand hand) {
-        // TODO not quite yet
-        System.out.println("Would split here");
+        if(hands.size() == 4) {
+            hand.setHandText("You can't split more than four times");
+            return;
+        }
+
+        if(hand.getBetTotal() > game.getBalance()) {
+            hand.setHandText("You don't have enough funds to split");
+            return;
+        }
+
+        Card splitCard = hand.splitHand();
+        // first add a new card to the hand just split
+        hand.addCard(nextCard());
+
+        // now add a new blackjack hand
+        final BlackjackHand newHand = new BlackjackHand(game, assets, true);
+        newHand.addCard(splitCard);
+        newHand.addCard(nextCard());
+        newHand.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if(newHand.canSplit()) {
+                    splitHand(newHand);
+                }
+            }
+        });
+        newHand.setBetTotal(hand.getBetTotal());
+        newHand.setColor(Color.DARK_GRAY);
+        subtractFromBalance(hand.getBetTotal());
+
+        stage.addActor(newHand);
+        hands.add(newHand);
+
+        calculateWager();
+
+        // we have a new hand, move them around
+        setHandPositions();
     }
 
     private BlackjackHand getNextHand() {
-        if(currentHandIndex >= hands.size() - 1)
+        if(currentHandIndex >= hands.size() - 1) {
+            for(BlackjackHand hand : hands) {
+                hand.setColor(Color.WHITE);
+            }
             return null;
+        }
 
-        return hands.get(++currentHandIndex);
+        BlackjackHand nextHand = hands.get(++currentHandIndex);
+        for(BlackjackHand hand : hands) {
+            hand.setColor(Color.DARK_GRAY);
+        }
+        nextHand.setColor(Color.WHITE);
+        return nextHand;
     }
 
     private Card nextCard() {
@@ -406,7 +498,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
                 initialBet += hand.getBetTotal();
                 if (hand == mainHand && hand.isBlackjack()) {
                     // pay out 3-2 for the blackjack
-                    total = hand.getBetTotal() + hand.getBetTotal() * 3 / 2;
+                    total += hand.getBetTotal() + hand.getBetTotal() * 3 / 2;
                     hand.popStack(true);
                 } else if(hand.surrendered()) {
                     // give back 1/2 but it's still a loss
@@ -414,11 +506,11 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
                     hand.popStack(false);
                 } else if(hand.bestHandTotal() > dealerHand.bestHandTotal()) {
                     // play won even money.
-                    total = hand.getBetTotal() * 2;
+                    total += hand.getBetTotal() * 2;
                     hand.popStack(true);
                 } else if(hand.bestHandTotal() != -1 && hand.bestHandTotal() == dealerHand.bestHandTotal()) {
                     // push
-                    total = hand.getBetTotal();
+                    total += hand.getBetTotal();
                 } else {
                     // hand busted or lost to the dealer
                     hand.popStack(false);
@@ -426,6 +518,8 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
                 hand.setBetTotal(0);
             }
         }
+
+        System.out.println("Initial bet: " + initialBet + " Total: " + total);
 
         addToBalance(total);
 
@@ -446,6 +540,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         int wager = 0;
         for(BlackjackHand hand : hands) {
             wager += hand.getBetTotal();
+            System.out.println("Wager: " + wager);
         }
         leftSide.setWagerText("" + wager);
     }

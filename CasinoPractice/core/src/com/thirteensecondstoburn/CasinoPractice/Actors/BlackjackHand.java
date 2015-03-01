@@ -1,5 +1,6 @@
 package com.thirteensecondstoburn.CasinoPractice.Actors;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
@@ -105,7 +106,9 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
         soft = 0;
 
         for(Card c : hand.getCards()) {
-            if(!c.isFaceUp()) continue; // don't count face down cards
+            if(!c.isFaceUp()) {
+                continue; // don't count face down cards
+            }
 
             Card.FaceValue fv = c.getFaceValue();
             if(!foundAce) {
@@ -133,8 +136,6 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
         if(hand.getCards().size() == 2 && (hand.getCards().get(0).getFaceValue().getFaceValue() + hand.getCards().get(1).getFaceValue().getFaceValue() == 21) && !isSplit) {
             setHandText("Blackjack!");
             isBlackjack = true;
-        } else if(canSplit()) {
-            setHandText(hard + " (tap cards to split)");
         } else if(soft > 21) {
             setHandText("Bust");
         } else if(hard == soft) {
@@ -153,6 +154,7 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
         hard = 0;
         soft = 0;
         surrender = false;
+        isSplit = false;
     }
 
     public void deal(int x, int y) {
@@ -161,6 +163,15 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
 
     public boolean canSplit() {
         return hand.getCards().size() == 2 && hand.getCards().get(0).getFaceValue().getFaceValue() == hand.getCards().get(1).getFaceValue().getFaceValue();
+    }
+
+    public Card splitHand() {
+        isSplit = true;
+        // can only split if there are 2 cards so remove the second one and return it so it can be moved elsewhere
+        if(canSplit())
+            return hand.getCards().remove(1);
+
+        return null;
     }
 
     public void addActionListener(ActionCompletedListener listener) {
@@ -208,5 +219,12 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
     @Override
     public void actionCompleted(Actor caller) {
         notifyListeners(caller);
+    }
+
+    @Override
+    public void setColor(Color color) {
+        super.setColor(color);
+        System.out.println("Setting hand color to :" + color);
+        hand.setColor(color);
     }
 }
