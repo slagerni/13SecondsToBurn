@@ -249,12 +249,12 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         stage.addActor(playPopup);
     }
 
-     private void dealHand() {
-        if(playerHand != null) playerHand.remove();
-        if(dealerHand != null) dealerHand.remove();
+    private void dealHand() {
+        if (playerHand != null) playerHand.remove();
+        if (dealerHand != null) dealerHand.remove();
         playStack.setTotal(0);
-        if(anteStack.getTotal() == 0) {
-            if(lastAnteBet * 2 + lastPairPlusBet > game.getBalance()) {
+        if (anteStack.getTotal() == 0) {
+            if (lastAnteBet * 2 + lastPairPlusBet > game.getBalance()) {
                 playerHandText.setText("You can't repeat your last bet");
                 dealerHandText.setText("");
                 return;
@@ -265,8 +265,18 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
             subtractFromBalance(lastAnteBet + lastPairPlusBet);
         }
 
+        if (anteStack.getTotal() < ChipStack.TABLE_MIN) {
+            playerHandText.setText("Your bet is less than the table minimum of " + ChipStack.TABLE_MIN);
+            dealerHandText.setText("");
+            return;
+        }
+
         Card.Back back;
-        if(isFirstDeck) { back = Card.Back.BACK1;} else {back = Card.Back.BACK2;}
+        if (isFirstDeck) {
+            back = Card.Back.BACK1;
+        } else {
+            back = Card.Back.BACK2;
+        }
         isFirstDeck = !isFirstDeck;
         deck = new Deck(assets, back);
         deck.shuffle();
@@ -277,7 +287,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         dealerHand.addActionListener(this);
 
 
-         // TEST
+        // TEST
 //        ArrayList<Card> playerTestCards = new ArrayList<Card>();
 //        playerTestCards.add(new Card(Card.FaceValue.TWO, Card.Suit.HEART, Card.Back.BACK1, true, assets));
 //        playerTestCards.add(new Card(Card.FaceValue.THREE, Card.Suit.SPADE, Card.Back.BACK1, true, assets));

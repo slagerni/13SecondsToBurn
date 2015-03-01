@@ -305,6 +305,12 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             subtractFromBalance(lastAnteBet * 2 + lastQueensUpBet);
         }
 
+        if(anteStack.getTotal() < ChipStack.TABLE_MIN) {
+            playerHandText.setText("Your bet is less than the table minimum of " + ChipStack.TABLE_MIN);
+            dealerHandText.setText("");
+            return;
+        }
+
         Card.Back back;
         if(isFirstDeck) { back = Card.Back.BACK1;} else {back = Card.Back.BACK2;}
         isFirstDeck = !isFirstDeck;
