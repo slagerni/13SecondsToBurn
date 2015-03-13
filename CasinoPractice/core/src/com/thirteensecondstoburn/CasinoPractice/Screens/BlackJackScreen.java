@@ -53,7 +53,11 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
     TableButton doubleButton;
     TableButton clearButton;
 
+    TableButton correctButton;
+    Strategy strategy;
+
     BlackjackHand mainHand;
+    Card.Back back;
 
     List<BlackjackHand> hands;
 
@@ -65,11 +69,16 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         title.setColor(mainColor);
         title.setPosition(315, stage.getHeight() - titleTex.getHeight());
 
+        strategy = new Strategy(game.getBlackjackDecks());
 
         dealerHandText = new Text(assets, "", 1.5f);
         dealerHandText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - Card.CARD_HEIGHT - 90);
 
-        blackjackPayText = new Text(assets, "BLACKJACK PAYS 3 TO 2 - DEALER HITS ON SOFT 17", 1);
+        if(game.getBlackjackHitSoft17()) {
+            blackjackPayText = new Text(assets, "BLACKJACK PAYS 3 TO 2 - DEALER HITS ON SOFT 17", 1);
+        } else {
+            blackjackPayText = new Text(assets, "BLACKJACK PAYS 3 TO 2 - DEALER MUST STAND ON ALL 17’S", 1);
+        }
         blackjackPayText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - 40);
         blackjackPayText.setColor(.5f, .5f, .5f, .5f);
 
@@ -223,12 +232,18 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
             return;
         }
 
-        Card.Back back;
-        back = Card.Back.BACK1;
-        deck = new Deck(assets, back);
-        deck.shuffle();
+        if(deck == null || cardIndex > deck.getTotalCards() * game.getBlackjackPenetration()) {
+            showHint("Cards Shuffled");
+            if(back == null || back == Card.Back.BACK2) {
+                back = Card.Back.BACK1;
+            } else {
+                back = Card.Back.BACK2;
+            }
+            deck = new Deck(assets, back, game.getBlackjackDecks(), 0);
+            deck.shuffle();
+            cardIndex = 0;
+        }
 
-        cardIndex = 0;
         dealerHand = new BlackjackHand(game, assets);
         dealerHand.addCard(nextCard(), false);
         dealerHand.addCard(nextCard());
@@ -324,6 +339,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
                 doubleButton.setVisible(true);
                 surrenderButton.setVisible(true);
             }
+            setButtonHints();
         }
     }
 
@@ -348,6 +364,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
                 }
             }
         }
+        setButtonHints();
 
     }
 
@@ -371,6 +388,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         } else {
             // move to the next split hand
             currentHand = nextHand;
+            setButtonHints();
         }
     }
 
@@ -385,6 +403,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         } else {
             // move to the next split hand
             currentHand = nextHand;
+            setButtonHints();
         }
     }
 
@@ -410,7 +429,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         newHand.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if(newHand.canSplit()) {
+                if (newHand.canSplit()) {
                     splitHand(newHand);
                 }
             }
@@ -426,6 +445,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
 
         // we have a new hand, move them around
         setHandPositions();
+        setButtonHints();
     }
 
     private BlackjackHand getNextHand() {
@@ -519,8 +539,6 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
             }
         }
 
-        System.out.println("Initial bet: " + initialBet + " Total: " + total);
-
         addToBalance(total);
 
         if(total - initialBet > 0)
@@ -540,11 +558,39 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         int wager = 0;
         for(BlackjackHand hand : hands) {
             wager += hand.getBetTotal();
-            System.out.println("Wager: " + wager);
         }
         leftSide.setWagerText("" + wager);
     }
 
+    private void setButtonHints() {
+        if(!game.usePreBetHints()) return; // only if it's actually turned on
+
+        hitButton.setColor(mainColor);
+        standButton.setColor(mainColor);
+        doubleButton.setColor(mainColor);
+        surrenderButton.setColor(mainColor);
+        currentHand.setColor(Color.WHITE);
+
+        if(game.usePreBetHints()) {
+            switch (strategy.getAction(currentHand, dealerHand.getHard(), doubleButton.isVisible(), surrenderButton.isVisible())) {
+                case HIT:
+                    hitButton.setColor(hintColor);
+                    break;
+                case STAND:
+                    standButton.setColor(hintColor);
+                    break;
+                case DOUBLE:
+                    doubleButton.setColor(hintColor);
+                    break;
+                case SURRENDER:
+                    surrenderButton.setColor(hintColor);
+                    break;
+                case SPLIT:
+                    currentHand.setColor(hintColor);
+                    break;
+            }
+        }
+    }
 
     @Override
     public void actionCompleted(Actor caller) {
@@ -557,10 +603,3045 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
                 playDealer();
                 return;
             }
-            if(game.usePreBetHints()) {
-                // TODO HINTS
-                //setPreBetHint();
+            setButtonHints();
+        }
+    }
+
+    public enum Action {
+
+        HIT("H"), STAND("S"), SPLIT("P"), DOUBLE("D"),
+        SURRENDER ("R"), DOUBLE_HIT("DH"), DOUBLE_STAND("DS"),
+        SURRENDER_HIT("RH"), SURRENDER_STAND("RS"), SURRENDER_SPLIT("RP");
+
+        private final String name;
+        Action(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() { return name; }
+    }
+
+    private class Strategy {
+
+        private Action[][] hard = new Action[17][10];
+        private Action[][] soft = new Action[9][10];
+        private Action[][] split = new Action[10][10];
+
+        public Strategy(int decks) {
+            int dealer = 0;
+            int player = 0;
+
+            if(!game.getBlackjackHitSoft17()) {
+                //<editor-fold desc="Stand on Soft 17">
+                if (decks == 1) {
+                    // 5
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 9
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 10
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 11
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer] = Action.DOUBLE_HIT;
+                    dealer = 0;
+                    player++;
+                    // 12
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 13
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer] = Action.SURRENDER_HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 13
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 2,2
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 3,3
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 4,4
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 5,5
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6,6
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7,7
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.SURRENDER_STAND;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8,8
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SPLIT;
+                    dealer = 0;
+                    player++;
+                    // 9,9
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 10,10
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // A,A
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SPLIT;
+                } else if (decks > 1 && decks < 4) {
+                    // 5
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 9
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 10
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 11
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer] = Action.DOUBLE_HIT;
+                    dealer = 0;
+                    player++;
+                    // 12
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 13
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer] = Action.SURRENDER_HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 13
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 2,2
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 3,3
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 4,4
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 5,5
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6,6
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7,7
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8,8
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SPLIT;
+                    dealer = 0;
+                    player++;
+                    // 9,9
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 10,10
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // A,A
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SPLIT;
+                } else if (decks >= 4) {
+                    // 5
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 9
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 10
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 11
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 12
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 13
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer] = Action.SURRENDER_HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 13
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 2,2
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 3,3
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 4,4
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 5,5
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6,6
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7,7
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8,8
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SPLIT;
+                    dealer = 0;
+                    player++;
+                    // 9,9
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 10,10
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // A,A
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SPLIT;
+                }
+                //</editor-fold>
+            } else {
+                //<editor-fold desc="Hit Soft 17">
+                if(decks == 1) {
+                    // 5
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 9
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 10
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 11
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer] = Action.DOUBLE_HIT;
+                    dealer = 0;
+                    player++;
+                    // 12
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 13
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.SURRENDER_HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer] = Action.SURRENDER_HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.SURRENDER_STAND;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 13
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 2,2
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 3,3
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 4,4
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 5,5
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6,6
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7,7
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.SURRENDER_STAND;
+                    split[player][dealer] = Action.SURRENDER_HIT;
+                    dealer = 0;
+                    player++;
+                    // 8,8
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SPLIT;
+                    dealer = 0;
+                    player++;
+                    // 9,9
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 10,10
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // A,A
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SPLIT;
+                } else if(decks > 1 && decks < 4) {
+                    // 5
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 9
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 10
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 11
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer] = Action.DOUBLE_HIT;
+                    dealer = 0;
+                    player++;
+                    // 12
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 13
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer] = Action.SURRENDER_HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer] = Action.SURRENDER_HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.SURRENDER_STAND;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 13
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 2,2
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 3,3
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 4,4
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 5,5
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6,6
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7,7
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8,8
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SURRENDER_SPLIT;
+                    dealer = 0;
+                    player++;
+                    // 9,9
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 10,10
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // A,A
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SPLIT;
+                } else if(decks >= 4) {
+                    // 5
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 9
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 10
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 11
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer++] = Action.DOUBLE_HIT;
+                    hard[player][dealer] = Action.DOUBLE_HIT;
+                    dealer = 0;
+                    player++;
+                    // 12
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 13
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer] = Action.SURRENDER_HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer++] = Action.SURRENDER_HIT;
+                    hard[player][dealer] = Action.SURRENDER_HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.SURRENDER_STAND;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer++] = Action.STAND;
+                    hard[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 13
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 14
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 15
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 16
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 17
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.DOUBLE_HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 18
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer++] = Action.HIT;
+                    soft[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 19
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.DOUBLE_STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 20
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 21
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer++] = Action.STAND;
+                    soft[player][dealer] = Action.STAND;
+
+                    dealer = 0;
+                    player = 0;
+                    // 2,2
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 3,3
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 4,4
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 5,5
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.DOUBLE_HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 6,6
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 7,7
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer++] = Action.HIT;
+                    split[player][dealer] = Action.HIT;
+                    dealer = 0;
+                    player++;
+                    // 8,8
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SURRENDER_SPLIT;
+                    dealer = 0;
+                    player++;
+                    // 9,9
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // 10,10
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer++] = Action.STAND;
+                    split[player][dealer] = Action.STAND;
+                    dealer = 0;
+                    player++;
+                    // A,A
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer++] = Action.SPLIT;
+                    split[player][dealer] = Action.SPLIT;
+                }
+                //</editor-fold>
             }
+
+            // spit out the tables to check them
+            System.out.print("Hard ");
+            for (int i = 0; i < hard[0].length; i++) {
+                System.out.print(String.format("%3d", i + 2));
+            }
+            System.out.println();
+            for (int i = 0; i < hard.length; i++) {
+                System.out.print(String.format("%5s", "" + (i + 5)));
+                for (int j = 0; j < hard[i].length; j++) {
+                    System.out.print(String.format("%3s", hard[i][j]));
+                }
+                System.out.println();
+            }
+            System.out.println();
+
+            System.out.print("Soft ");
+            for (int i = 0; i < soft[0].length; i++) {
+                System.out.print(String.format("%3d", i + 2));
+            }
+            System.out.println();
+            for (int i = 0; i < soft.length; i++) {
+                System.out.print(String.format("%5s", "" + (i + 13)));
+                for (int j = 0; j < soft[i].length; j++) {
+                    System.out.print(String.format("%3s", soft[i][j]));
+                }
+                System.out.println();
+            }
+            System.out.println();
+
+            System.out.print("Pair ");
+            for (int i = 0; i < split[0].length; i++) {
+                System.out.print(String.format("%3d", i + 2));
+            }
+            System.out.println();
+            for (int i = 0; i < split.length; i++) {
+                System.out.print(String.format("%5s", "" + (i + 2) + "," + (i + 2)));
+                for (int j = 0; j < split[i].length; j++) {
+                    System.out.print(String.format("%3s", split[i][j]));
+                }
+                System.out.println();
+            }
+
+
+        }
+
+        public Action getAction(BlackjackHand hand, int dealerValue, boolean canDouble, boolean canSurrender) {
+            int hardValue = hand.getHard();
+            int softValue = hand.getSoft();
+            boolean canSplit = hand.canSplit();
+            int splitValue = hand.getFirstCard().getFaceValue().getFaceValue();
+
+            System.out.println(String.format("hard %s, soft %s, dealer %s, split %s, splitValue %s", hardValue, softValue, dealerValue, canSplit, splitValue));
+
+            Action result;
+            if(game.isSimpleBlackjackHints()) {
+                // dumbed down non-table version
+                if(canSplit) {
+//                    System.out.println("CAN SPLIT");
+                    if(splitValue == 8 || splitValue == 11 ||
+                            ((splitValue == 2 || splitValue == 3 || splitValue == 6 || splitValue == 7 || splitValue == 9) && dealerValue < 7)) {
+//                        System.out.println("SUGGEST SPLIT");
+                        return Action.SPLIT;
+                    }
+                }
+
+                if(hardValue == 16 && dealerValue == 10 && canSurrender) {
+//                    System.out.println("SUGGEST SURRENDER");
+                    return Action.SURRENDER;
+                }
+
+                if(softValue != hardValue && hardValue <= 21) {
+                    // even though it's soft, use the hard value
+                    if(hardValue >= 13 && hardValue <= 15){
+//                        System.out.println("SUGGEST HIT SOFT 13-15");
+                        return Action.HIT;
+                    } else if(hardValue >= 16 && hardValue <= 18) {
+                        if(dealerValue >= 7) {
+//                            System.out.println("SUGGEST HIT SOFT 16-18 dealer > 7");
+                            return Action.HIT;
+                        } else {
+                            if(canDouble) {
+//                                System.out.println("SUGGEST DOUBLE SOFT 16-18");
+                                return Action.DOUBLE;
+                            }
+                            if(hardValue == 18 ) {
+//                                System.out.println("SUGGEST STAND ON SOFT 18");
+                                return Action.STAND;
+                            }
+//                            System.out.println("SUGGEST HIT SOFT 16-18");
+                            return Action.HIT;
+                        }
+                    } else if(hardValue >= 19) {
+//                        System.out.println("SUGGEST STAND SOFT 19+");
+                        return Action.STAND;
+                    }
+                }
+
+                // if we've hit and gone over w/ A=11 use the soft value
+                if(hardValue > 21) {
+                    hardValue = softValue;
+                }
+
+                if(hardValue >=4 && hardValue <= 8) {
+//                    System.out.println("SUGGEST 4-8 HIT");
+                    return Action.HIT;
+                }
+
+                if(hardValue == 9) {
+                    if(canDouble && dealerValue < 7) {
+//                        System.out.println("SUGGEST 9 DOUBLE");
+                        return Action.DOUBLE;
+                    }
+//                    System.out.println("SUGGEST 9 HIT");
+                    return Action.HIT;
+                }
+
+                if(hardValue == 10 || hardValue == 11) {
+                    if(canDouble && hardValue > dealerValue) {
+//                        System.out.println(String.format("SUGGEST 10-11 DOUBLE DEALER: %s", dealerValue));
+                        return Action.DOUBLE;
+                    }
+//                    System.out.println(String.format("SUGGEST 10-11 HIT DEALER: %s", dealerValue));
+                    return Action.HIT;
+                }
+
+                if(hardValue >= 12 && hardValue <= 16 && dealerValue >= 7) {
+//                    System.out.println(String.format("SUGGEST HIT 12-16 dealer > 7: %s", dealerValue));
+                    return Action.HIT;
+                }
+
+//                System.out.println("SUGGEST STAND (CATCH ALL)");
+                return Action.STAND;
+            } else {
+                // basic strategy
+                int dealerIndex = dealerValue - 2;
+                if (canSplit) {
+                    // look in the split table
+                    int splitIndex = splitValue - 2;
+                    result = split[splitIndex][dealerIndex];
+                } else if (hardValue != softValue && hardValue <= 21) {
+                    // this is a soft hand
+                    int softIndex = hardValue - 13; // we still look at the hard cause we care about the high number
+                    result = soft[softIndex][dealerIndex];
+                } else {
+
+                    int hardIndex = hardValue - 5;
+                    // if we've hit and gone over w/ A=11 use the soft value
+                    if(hardValue > 21) {
+                        hardIndex = softValue - 5;
+                    }
+                    result = hard[hardIndex][dealerIndex];
+                }
+
+                if (result == Action.DOUBLE_HIT) {
+                    if (canDouble) {
+                        result = Action.DOUBLE;
+                    } else {
+                        result = Action.HIT;
+                    }
+                } else if (result == Action.DOUBLE_STAND) {
+                    if (canDouble) {
+                        result = Action.DOUBLE;
+                    } else {
+                        result = Action.STAND;
+                    }
+                } else if (result == Action.SURRENDER_HIT) {
+                    if (canSurrender) {
+                        result = Action.SURRENDER;
+                    } else {
+                        result = Action.HIT;
+                    }
+                } else if (result == Action.SURRENDER_STAND) {
+                    if (canSurrender) {
+                        result = Action.SURRENDER;
+                    } else {
+                        result = Action.STAND;
+                    }
+                } else if (result == Action.SURRENDER_SPLIT) {
+                    if (canSurrender) {
+                        result = Action.SURRENDER;
+                    } else {
+                        result = Action.SPLIT;
+                    }
+                }
+            }
+            return result;
         }
     }
 }

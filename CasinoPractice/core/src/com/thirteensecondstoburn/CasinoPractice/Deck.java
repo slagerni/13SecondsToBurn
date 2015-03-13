@@ -11,6 +11,7 @@ import java.util.Random;
 public class Deck {
     private ArrayList<Card> cards = new ArrayList<Card>();
     private Random rand = new Random();
+    private int totalCards = 0;
 
     // 52 card deck shortcut
     public Deck(Assets assets, Card.Back back) {
@@ -22,6 +23,7 @@ public class Deck {
     }
 
     public Deck(Assets assets, Card.Back back, int numDecks, int numJokers) {
+        totalCards = numDecks * 52 + numDecks * numJokers;
         for(int i=0; i< numDecks; i++) {
             cards.add(new Card(Card.FaceValue.ACE, Card.Suit.CLUB, back, false, assets));
             cards.add(new Card(Card.FaceValue.KING, Card.Suit.CLUB, back, false, assets));
@@ -98,4 +100,6 @@ public class Deck {
     public ArrayList<Card> getCards() {
         return cards;
     }
+
+    public int getTotalCards() { return totalCards; }
 }

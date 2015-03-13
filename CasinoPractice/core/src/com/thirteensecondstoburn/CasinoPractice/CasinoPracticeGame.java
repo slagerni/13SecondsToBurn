@@ -27,6 +27,10 @@ public class CasinoPracticeGame extends Game {
     // TODO allow a user to actually change these on a setting screen
     private boolean showHints = false;
     private boolean preBetHints = false;
+    private boolean simpleBlackjackHints = false;
+    private double blackjackPenetration = .65;
+    private int blackjackDecks = 4;
+    private boolean blackjackHitSoft17 = false;
 
     public SplashScreen getSplashScreen() {
         if(splashScreen == null) splashScreen = new SplashScreen(this);
@@ -97,6 +101,7 @@ public class CasinoPracticeGame extends Game {
         saveData.putInteger("balance", balance);
         saveData.putBoolean("showHints", showHints);
         saveData.putBoolean("preBetHints", preBetHints);
+        // TODO save blackjack settings once there is a setting screen for it
         saveData.flush();
     }
 
@@ -123,5 +128,37 @@ public class CasinoPracticeGame extends Game {
 
     public boolean useHintText() {
         return ALLOW_HINTS && showHints;
+    }
+
+    public boolean isSimpleBlackjackHints() {
+        return simpleBlackjackHints;
+    }
+
+    public void setSimpleBlackjackHints(boolean simpleBlackjackHints) {
+        this.simpleBlackjackHints = simpleBlackjackHints;
+    }
+
+    public double getBlackjackPenetration() {
+        return blackjackPenetration;
+    }
+
+    public void setBlackjackPenetration(double blackjackPenetration) {
+        this.blackjackPenetration = blackjackPenetration;
+    }
+
+    public int getBlackjackDecks() {
+        return blackjackDecks;
+    }
+
+    public void setBlackjackDecks(int blackjackDecks) {
+        this.blackjackDecks = blackjackDecks;
+    }
+
+    public boolean getBlackjackHitSoft17() {
+        return blackjackHitSoft17;
+    }
+
+    public void setBlackjackHitSoft17(boolean hit) {
+        this.blackjackHitSoft17 = hit;
     }
 }

@@ -72,13 +72,21 @@ abstract public class TableScreen implements Screen {
     public void showHint(String text) {
         hintText.setTextCentered(text);
         hintText.setZIndex(1000);
-        hintText.addAction(sequence(Actions.moveTo(stage.getWidth(), hintText.getY()), Actions.show(), Actions.moveTo(-hintText.getWidth(), hintText.getY(), text.length() / 10), Actions.hide()));
+        int duration = 3;
+        if(hintText.getWidth() > stage.getWidth()) {
+            duration += text.length() / 15;
+        }
+        hintText.addAction(sequence(Actions.moveTo(stage.getWidth(), hintText.getY()), Actions.show(), Actions.moveTo(-hintText.getWidth(), hintText.getY(), duration), Actions.hide()));
         hintText.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 hintText.setVisible(false);
             }
         });
+
+        System.out.println("Text: " + text);
+        System.out.println("From: " + stage.getWidth() + ":" + hintText.getY());
+        System.out.println("To: " + -hintText.getWidth() + ":" + hintText.getY());
     }
 
     protected abstract void setup();

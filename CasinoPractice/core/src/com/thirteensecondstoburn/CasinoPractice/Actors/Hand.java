@@ -164,7 +164,6 @@ public class Hand extends Group {
     public void setColor(Color color) {
         super.setColor(color);
         for(Card c : cards) {
-            System.out.println("Setting card color to :" + color);
             c.setColor(color);
         }
     }

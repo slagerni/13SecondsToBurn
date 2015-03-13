@@ -216,6 +216,10 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
         betPopup.pop(won, betCircle.getX() + 37, betCircle.getY() + 38);
     }
 
+    public Card getFirstCard() {
+        return hand.getCards().get(0);
+    }
+
     @Override
     public void actionCompleted(Actor caller) {
         notifyListeners(caller);
@@ -224,7 +228,6 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
     @Override
     public void setColor(Color color) {
         super.setColor(color);
-        System.out.println("Setting hand color to :" + color);
         hand.setColor(color);
     }
 }
