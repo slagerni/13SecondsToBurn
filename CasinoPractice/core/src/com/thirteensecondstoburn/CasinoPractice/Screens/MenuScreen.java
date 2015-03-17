@@ -9,17 +9,15 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
-import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 
@@ -31,9 +29,13 @@ public class MenuScreen implements Screen {
     CasinoPracticeGame game;
     Skin skin;
 
-    Stage stage = new Stage(new FitViewport(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT));;
-    Table table;
+    Stage stage = new Stage(new FitViewport(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT));
+    Table gamesTable;
+    Table windowTable;
     ScrollPane scrollPane;
+
+    Button settingsButton;
+
     Button tcpButton;
     Button cfpButton;
     Button cStudButton;
@@ -63,11 +65,32 @@ public class MenuScreen implements Screen {
         background.setSize(stage.getWidth(), stage.getHeight());
         background.setColor(backgroundColor);
 
-        table = new Table(skin);
+        settingsButton = new Button(skin);
+        Image settingsImage = new Image(assets.getTexture(Assets.TEX_NAME.SETTINGS));
+        settingsImage.setColor(Color.YELLOW);
+        settingsButton.add(settingsImage);
+        settingsButton.pad(10);
+        settingsButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        game.setScreen(game.getSettingsScreen());
+                    }
+                })));
+            }
+        });
+
+        windowTable = new Table();
+        windowTable.add(settingsButton).right();
+        windowTable.row();
+
+        gamesTable = new Table(skin);
         //table.debug();
-        table.setBackground(new SpriteDrawable(background));
-        table.setWidth(stage.getWidth());
-        table.setHeight(stage.getHeight());
+        gamesTable.setWidth(stage.getWidth());
+        gamesTable.setHeight(stage.getHeight());
+        gamesTable.setFillParent(true);
 
         tcpTitle = new Image(assets.getTexture(Assets.TEX_NAME.THREE_CARD_POKER_TITLE));
         tcpTitle.setColor(Color.GREEN);
@@ -133,15 +156,18 @@ public class MenuScreen implements Screen {
             }
         });
 
-        table.add(tcpButton).width(300).height(300).expand().pad(10);
-        table.add(cfpButton).width(300).height(300).expand().pad(10);
-        table.add(cStudButton).width(300).height(300).expand().pad(10);
-        table.add(blackjackButton).width(300).height(300).expand().pad(10);
-        scrollPane = new ScrollPane(table, skin);
-        scrollPane.setTouchable(Touchable.enabled);
-        scrollPane.setWidth(stage.getWidth());
-        scrollPane.setHeight(stage.getHeight());
-        stage.addActor(scrollPane);
+        gamesTable.add(tcpButton).width(300).height(300).expand().pad(10);
+        gamesTable.add(cfpButton).width(300).height(300).expand().pad(10);
+        gamesTable.add(cStudButton).width(300).height(300).expand().pad(10);
+        gamesTable.add(blackjackButton).width(300).height(300).expand().pad(10);
+//        scrollPane = new ScrollPane(gamesTable, skin);
+//        scrollPane.setTouchable(Touchable.enabled);
+//        scrollPane.setWidth(stage.getWidth());
+//        scrollPane.setHeight(stage.getHeight());
+
+        windowTable.add(gamesTable).expand().fill();
+        windowTable.setFillParent(true);
+        stage.addActor(windowTable);
     }
 
     @Override

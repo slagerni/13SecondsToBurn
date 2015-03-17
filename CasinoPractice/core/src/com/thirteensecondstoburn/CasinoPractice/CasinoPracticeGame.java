@@ -7,6 +7,7 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.BlackJackScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CaribbeanStudPokerScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CrazyFourPokerScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.MenuScreen;
+import com.thirteensecondstoburn.CasinoPractice.Screens.SettingsScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SplashScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.ThreeCardPokerScreen;
 
@@ -16,6 +17,7 @@ public class CasinoPracticeGame extends Game {
     private Assets assets;
     private SplashScreen splashScreen;
     private MenuScreen menuScreen;
+    private SettingsScreen settingsScreen;
     private ThreeCardPokerScreen threeCardPokerScreen;
     private CrazyFourPokerScreen crazyFourPokerScreen;
     private CaribbeanStudPokerScreen caribbeanStudPokerScreen;
@@ -25,8 +27,8 @@ public class CasinoPracticeGame extends Game {
 
     public static final boolean ALLOW_HINTS = true;
     // TODO allow a user to actually change these on a setting screen
-    private boolean showHints = false;
-    private boolean preBetHints = false;
+    private boolean showHints = true;
+    private boolean preBetHints = true;
     private boolean simpleBlackjackHints = false;
     private double blackjackPenetration = .65;
     private int blackjackDecks = 4;
@@ -40,6 +42,11 @@ public class CasinoPracticeGame extends Game {
     public MenuScreen getMenuScreen() {
         if(menuScreen == null) menuScreen = new MenuScreen(this);
         return menuScreen;
+    }
+
+    public SettingsScreen getSettingsScreen() {
+        if(settingsScreen == null) settingsScreen = new SettingsScreen(this);
+        return settingsScreen;
     }
 
     public ThreeCardPokerScreen getThreeCardPokerScreen() {
