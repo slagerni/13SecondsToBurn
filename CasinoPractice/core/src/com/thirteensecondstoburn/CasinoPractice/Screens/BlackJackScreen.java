@@ -231,7 +231,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         }
 
         if(mainHand.getBetTotal() < ChipStack.TABLE_MIN) {
-            mainHand.setHandText("Minimum bet is " + ChipStack.TABLE_MIN);
+            showHint("Minimum bet is " + ChipStack.TABLE_MIN);
             return;
         }
 
@@ -594,7 +594,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
 
         postHintBjAction = strategy.getAction(currentHand, dealerHand.getHard(), doubleButton.isVisible(), surrenderButton.isVisible());
 
-        if(!game.usePreBetHints()) return; // only if it's actually turned on
+        if(!game.usePreActionHints()) return; // only if it's actually turned on
         switch (postHintBjAction) {
             case HIT:
                 hitButton.setColor(hintColor);

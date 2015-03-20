@@ -266,7 +266,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         }
 
         if (anteStack.getTotal() < ChipStack.TABLE_MIN) {
-            playerHandText.setText("Your bet is less than the table minimum of " + ChipStack.TABLE_MIN);
+            showHint("Minimum bet is " + ChipStack.TABLE_MIN);
             dealerHandText.setText("");
             return;
         }
@@ -392,7 +392,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
             playerHand.dealAction(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT);
         } else if(caller == playerHand) {
             toggleButtons(true);
-            if(game.usePreBetHints()) {
+            if(game.usePreActionHints()) {
                 setPreBetHint();
             }
         }

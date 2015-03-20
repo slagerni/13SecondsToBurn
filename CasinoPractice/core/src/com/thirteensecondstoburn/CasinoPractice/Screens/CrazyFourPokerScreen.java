@@ -306,7 +306,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         }
 
         if(anteStack.getTotal() < ChipStack.TABLE_MIN) {
-            playerHandText.setText("Your bet is less than the table minimum of " + ChipStack.TABLE_MIN);
+            showHint("Minimum bet is " + ChipStack.TABLE_MIN);
             dealerHandText.setText("");
             return;
         }
@@ -455,7 +455,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         } else if(caller == playerHand) {
 
             toggleButtons(true);
-            if(game.usePreBetHints()) {
+            if(game.usePreActionHints()) {
                 setPreBetHint();
             }
         }

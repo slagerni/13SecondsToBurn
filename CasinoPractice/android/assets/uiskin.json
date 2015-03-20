@@ -1,10 +1,16 @@
 {
-com.badlogic.gdx.graphics.g2d.BitmapFont: { default-font: { file: default.fnt } },
+com.badlogic.gdx.graphics.g2d.BitmapFont: {
+    default-font: { file: ArialBlack32.fnt }
+    large-font: { file: ArialBlack50.fnt }
+},
 com.badlogic.gdx.graphics.Color: {
 	green: { a: 1, b: 0, g: 1, r: 0 },
 	white: { a: 1, b: 1, g: 1, r: 1 },
 	red: { a: 1, b: 0, g: 0, r: 1 },
-	black: { a: 1, b: 0, g: 0, r: 0 }
+	black: { a: 1, b: 0, g: 0, r: 0 },
+	gray: { a: 1, b: .5, g: .5, r: .5 },
+	yellow: { a: 1, b: 0, g: 1, r: 1 },
+	menuButtonColor: {a: 1, b: 0, g: .90, r: .90 },
 },
 com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
 	dialogDim: { name: white, color: { r: 0, g: 0, b: 0, a: 0.45 } }
@@ -22,9 +28,9 @@ com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
 },
 com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle: {
 	default: {
-		font: default-font, fontColor: white, background: default-select,
+		font: default-font, fontColor: black, background: default-select,
 		scrollStyle: default,
-		listStyle: { font: default-font, selection: default-select-selection }
+		listStyle: { font: default-font, selection: default-select-selection, fontColorUnselected: black }
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.SplitPane$SplitPaneStyle: {
@@ -45,6 +51,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
 },
 com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	default: { font: default-font, fontColor: white }
+	large-font: { font: large-font, fontColor: yellow }
 },
 com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
 	default: { selection: selection, background: textfield, font: default-font, fontColor: white, cursor: cursor }

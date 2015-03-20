@@ -221,7 +221,7 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
         }
 
         if(anteStack.getTotal() < ChipStack.TABLE_MIN) {
-            playerHandText.setText("Your bet is less than the table minimum of " + ChipStack.TABLE_MIN);
+            showHint("Minimum bet is " + ChipStack.TABLE_MIN);
             dealerHandText.setText("");
             return;
         }
@@ -348,7 +348,7 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
         } else if(caller == playerHand) {
 
             toggleButtons(true);
-            if(game.usePreBetHints()) {
+            if(game.usePreActionHints()) {
                 setPreBetHint();
             }
         }

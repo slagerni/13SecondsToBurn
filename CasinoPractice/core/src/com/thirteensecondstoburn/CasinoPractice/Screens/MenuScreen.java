@@ -17,7 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 
@@ -59,6 +58,8 @@ public class MenuScreen implements Screen {
     public void show() {
         Gdx.input.setInputProcessor(stage);
 
+        Color menuButtonColor = skin.getColor("menuButtonColor");
+
         Texture back = assets.getTexture(Assets.TEX_NAME.BACKGROUND);
         back.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         background = new Sprite(back, (int)stage.getWidth(), (int)stage.getHeight());
@@ -66,8 +67,9 @@ public class MenuScreen implements Screen {
         background.setColor(backgroundColor);
 
         settingsButton = new Button(skin);
+        settingsButton.setColor(menuButtonColor);
         Image settingsImage = new Image(assets.getTexture(Assets.TEX_NAME.SETTINGS));
-        settingsImage.setColor(Color.YELLOW);
+        settingsImage.setColor(Color.GRAY);
         settingsButton.add(settingsImage);
         settingsButton.pad(10);
         settingsButton.addListener(new ActorGestureListener() {
@@ -102,6 +104,7 @@ public class MenuScreen implements Screen {
         blackjackTitle.setColor(Color.WHITE);
 
         tcpButton = new Button(skin);
+        tcpButton.setColor(menuButtonColor);
         tcpButton.add(tcpTitle).center().expand();
         tcpButton.addListener(new ActorGestureListener() {
             @Override
@@ -115,6 +118,7 @@ public class MenuScreen implements Screen {
             }
         });
         cfpButton = new Button(skin);
+        cfpButton.setColor(menuButtonColor);
         cfpButton.add(cfpTitle).center().expand();
         cfpButton.addListener(new ActorGestureListener() {
             @Override
@@ -129,6 +133,7 @@ public class MenuScreen implements Screen {
         });
 
         cStudButton = new Button(skin);
+        cStudButton.setColor(menuButtonColor);
         cStudButton.add(cStudTitle).center().expand();
         cStudButton.addListener(new ActorGestureListener() {
             @Override
@@ -143,6 +148,7 @@ public class MenuScreen implements Screen {
         });
 
         blackjackButton = new Button(skin);
+        blackjackButton.setColor(menuButtonColor);
         blackjackButton.add(blackjackTitle).center().expand();
         blackjackButton.addListener(new ActorGestureListener() {
             @Override
