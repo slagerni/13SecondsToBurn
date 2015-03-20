@@ -42,7 +42,7 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
 
         betCircle = new Image(assets.getTexture(Assets.TEX_NAME.BLANK_CIRCLE));
 
-        betStack = new ChipStack(assets, 0);
+        betStack = new ChipStack(game, 0);
 
         hand = new Hand(75);
         hand.setPosition(betStack.getWidth() + 10, 0);

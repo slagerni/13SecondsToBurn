@@ -55,7 +55,7 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
     WinLosePopup antePopup;
     WinLosePopup playPopup;
 
-    int lastAnteBet = ChipStack.TABLE_MIN;
+    int lastAnteBet = 5;
     BestHand bestHandPlayer = null;
 
     Card visibleCard;
@@ -66,6 +66,8 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
 
     @Override
     public void setup() {
+        lastAnteBet = game.getTableMinimum();
+
         Texture paytableTex = assets.getTexture(Assets.TEX_NAME.CARIBBEAN_STUD_PAYTABLE);
         paytable = new Image(paytableTex);
         paytable.setScale(.75f, .75f);
@@ -82,7 +84,7 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
         playCircle = new Image(assets.getTexture(Assets.TEX_NAME.PLAY_CIRCLE));
         playCircle.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playCircle.getWidth()) / 2, anteCircle.getY() - 200);
 
-        anteStack = new ChipStack(assets, 0);
+        anteStack = new ChipStack(game, 0);
         anteStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + anteCircle.getWidth()) / 2, stage.getHeight()/2 + 10);
         anteStack.addListener(new ActorGestureListener() {
             @Override
@@ -91,12 +93,14 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
                     clearButton.setVisible(true);
                     int betAmount = leftSide.getBetAmount();
                     if(anteStack.getTotal() + leftSide.getBetAmount() * 2 > game.getBalance() - betAmount) {
-                        playerHandText.setText("Insufficient funds to make that bet");
+                        showHint("Insufficient funds to make that bet");
+                        playerHandText.setText("");
                         dealerHandText.setText("");
                         return;
                     }
-                    if(anteStack.getTotal() + betAmount > ChipStack.TABLE_MAX) {
-                        playerHandText.setText("Table maximum of " + ChipStack.TABLE_MAX);
+                    if(anteStack.getTotal() + betAmount >  game.getTableMaximum()) {
+                        showHint("Table maximum of " +  game.getTableMaximum());
+                        playerHandText.setText("");
                         dealerHandText.setText("");
                         return;
                     }
@@ -109,7 +113,7 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
             }
         });
 
-        playStack = new ChipStack(assets, 0);
+        playStack = new ChipStack(game, 0);
         playStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playCircle.getWidth()) / 2, anteStack.getY() - 200);
         playStack.addListener(new ActorGestureListener() {
             @Override
@@ -220,8 +224,8 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
             subtractFromBalance(lastAnteBet);
         }
 
-        if(anteStack.getTotal() < ChipStack.TABLE_MIN) {
-            showHint("Minimum bet is " + ChipStack.TABLE_MIN);
+        if(anteStack.getTotal() < game.getTableMinimum()) {
+            showHint("Minimum bet is " + game.getTableMinimum());
             dealerHandText.setText("");
             return;
         }
@@ -307,7 +311,7 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
 
     private void clearHand() {
         addToBalance(anteStack.getTotal());
-        lastAnteBet = ChipStack.TABLE_MIN;
+        lastAnteBet = game.getTableMinimum();
         anteStack.setTotal(0);
         playStack.setTotal(0);
         leftSide.setWonText("");

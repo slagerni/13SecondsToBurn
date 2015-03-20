@@ -88,6 +88,23 @@ public class SettingsScreen  implements Screen {
         table.add(chkActionHints).left().pad(10);
 
         table.row();
+        Table minTable = new Table(skin);
+        minTable.add("Table Minimum").padRight(10);
+        final SelectBox<Integer> sbMin = new SelectBox<>(skin);
+        sbMin.setItems(new Integer[] {5,10,25,100,500});
+        sbMin.setSelected(game.getTableMinimum());
+        sbMin.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Integer value = sbMin.getSelection().first();
+                game.setTableMinimum(value);
+                game.saveSettings();
+            }
+        });
+        minTable.add(sbMin).left();
+        table.add(minTable).left().pad(10);
+        table.add("Table Maximum = 10 x Table Minimum");
+        table.row();
         table.add(new Label("Blackjack Settings", skin, "large-font")).pad(20).colspan(2);
         table.row();
 
@@ -219,24 +236,24 @@ public class SettingsScreen  implements Screen {
     }
 
     public enum Penetration {
-        P35 ("35%", .35),
-        P40 ("40%", .40),
-        P45 ("45%", .45),
-        P50 ("50%", .50),
-        P55 ("55%", .55),
-        P60 ("60%", .60),
-        P65 ("65%", .65),
-        P70 ("70%", .70),
-        P75 ("75%", .75);
+        P35 ("35%", .35f),
+        P40 ("40%", .40f),
+        P45 ("45%", .45f),
+        P50 ("50%", .50f),
+        P55 ("55%", .55f),
+        P60 ("60%", .60f),
+        P65 ("65%", .65f),
+        P70 ("70%", .70f),
+        P75 ("75%", .75f);
 
         private final String display;
-        private final double value;
-        Penetration(String display, double value) {
+        private final float value;
+        Penetration(String display, float value) {
             this.display = display;
             this.value = value;
         }
 
-        public double getValue() {return value;}
+        public float getValue() {return value;}
         @Override
         public String toString() { return display; }
 
@@ -255,7 +272,7 @@ public class SettingsScreen  implements Screen {
             return all;
         }
 
-        public static Penetration getByValue(double val) {
+        public static Penetration getByValue(float val) {
             for(Penetration p : Penetration.toList()) {
                 if(p.value == val) { return p; }
             }

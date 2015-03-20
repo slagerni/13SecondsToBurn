@@ -35,7 +35,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
     Deck deck;
     boolean canBet = true;
     Image title;
-    int lastBet = ChipStack.TABLE_MIN;
+    int lastBet =5;
 
     BlackjackHand dealerHand;
 
@@ -67,6 +67,8 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
 
     @Override
     protected void setup() {
+        lastBet = game.getTableMinimum();
+
         Texture titleTex = assets.getTexture(Assets.TEX_NAME.BLACKJACK_TITLE);
         title = new Image(titleTex);
         title.setColor(mainColor);
@@ -93,12 +95,14 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
                 if (canBet) {
                     int betAmount = leftSide.getBetAmount();
                     if (mainHand.getBetTotal() + leftSide.getBetAmount() > game.getBalance() - betAmount) {
-                        mainHand.setHandText("Insufficient funds to make that bet");
+                        showHint("Insufficient funds to make that bet");
+                        mainHand.setHandText("");
                         dealerHandText.setText("");
                         return;
                     }
-                    if (mainHand.getBetTotal() + betAmount > ChipStack.TABLE_MAX) {
-                        mainHand.setHandText("Table maximum of " + ChipStack.TABLE_MAX);
+                    if (mainHand.getBetTotal() + betAmount >  game.getTableMaximum()) {
+                        showHint("Table maximum of " +  game.getTableMaximum());
+                        mainHand.setHandText("");
                         dealerHandText.setText("");
                         return;
                     }
@@ -230,8 +234,8 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
             subtractFromBalance(lastBet);
         }
 
-        if(mainHand.getBetTotal() < ChipStack.TABLE_MIN) {
-            showHint("Minimum bet is " + ChipStack.TABLE_MIN);
+        if(mainHand.getBetTotal() < game.getTableMinimum()) {
+            showHint("Minimum bet is " + game.getTableMinimum());
             return;
         }
 
@@ -281,7 +285,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
             addToBalance(hand.getBetTotal());
             hand.setHandText("");
         }
-        lastBet = ChipStack.TABLE_MIN;
+        lastBet = game.getTableMinimum();
         leftSide.setWonText("");
         dealerHand.setVisible(false);
         leftSide.setWagerText("");
@@ -514,7 +518,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
     }
 
     private void calculateWinners() {
-        int total = 0;
+        float total = 0;
         int initialBet = 0;
 
         if(dealerHand.isBlackjack()) {
@@ -530,11 +534,11 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
                 initialBet += hand.getBetTotal();
                 if (hand == mainHand && hand.isBlackjack()) {
                     // pay out 3-2 for the blackjack
-                    total += hand.getBetTotal() + hand.getBetTotal() * 3 / 2;
+                    total += hand.getBetTotal() + hand.getBetTotal() * 3 / 2f;
                     hand.popStack(true);
                 } else if(hand.surrendered()) {
                     // give back 1/2 but it's still a loss
-                    total += hand.getBetTotal() / 2;
+                    total += hand.getBetTotal() / 2f;
                     hand.popStack(false);
                 } else if(hand.bestHandTotal() > dealerHand.bestHandTotal()) {
                     // play won even money.
@@ -560,7 +564,11 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         else
             leftSide.setWonColor(Color.WHITE);
 
-        leftSide.setWonText("" + (total - initialBet));
+        if(total != (int)total) {
+            leftSide.setWonText(String.format("%.2f", total - initialBet));
+        } else {
+            leftSide.setWonText(String.format("%.0f", total - initialBet));
+        }
 
         canBet = true;
         toggleButtons(false);

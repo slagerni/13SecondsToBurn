@@ -22,16 +22,17 @@ public class CasinoPracticeGame extends Game {
     private CrazyFourPokerScreen crazyFourPokerScreen;
     private CaribbeanStudPokerScreen caribbeanStudPokerScreen;
     private BlackJackScreen blackJackScreen;
-    private int balance;
+    private float balance;
     private Preferences saveData;
 
     public static final boolean ALLOW_HINTS = true;
     private boolean showHints = false;
     private boolean actionHints = false;
     private boolean simpleBlackjackHints = false;
-    private double blackjackPenetration = .65;
+    private float blackjackPenetration = .65f;
     private int blackjackDecks = 8;
     private boolean blackjackHitSoft17 = false;
+    private int tableMinimum = 5;
 
     public SplashScreen getSplashScreen() {
         if(splashScreen == null) splashScreen = new SplashScreen(this);
@@ -71,13 +72,9 @@ public class CasinoPracticeGame extends Game {
     @Override
 	public void create () {
         saveData = Gdx.app.getPreferences("com.thirteensecondstoburn.CasinoPractice.saveData");
-        if(saveData.contains("balance")) {
-            balance = saveData.getInteger("balance");
-            if(balance < 5000)
-                balance = 5000;
-        } else {
+        balance = saveData.getFloat("balance", 5000.0f);
+        if(balance < 5000)
             balance = 5000;
-        }
 
         showHints = saveData.getBoolean("showHints", false);
         actionHints = saveData.getBoolean("actionHints", false);
@@ -85,18 +82,20 @@ public class CasinoPracticeGame extends Game {
         simpleBlackjackHints = saveData.getBoolean(("simpleBjHints"), false);
         blackjackPenetration = saveData.getFloat(("bjPenetration"), .65f);
         blackjackDecks = saveData.getInteger("bjDecks", 8);
+        tableMinimum = saveData.getInteger("tableMinimum", 5);
 
         setScreen(getSplashScreen());
 	}
 
     public void saveSettings() {
-        saveData.putInteger("balance", balance);
+        saveData.putFloat("balance", balance);
         saveData.putBoolean("showHints", showHints);
         saveData.putBoolean("actionHints", actionHints);
         saveData.putBoolean("hitSoft", blackjackHitSoft17);
         saveData.putBoolean("simpleBjHints", isSimpleBlackjackHints());
-        saveData.putFloat("bjPenetration", (float)blackjackPenetration);
+        saveData.putFloat("bjPenetration", blackjackPenetration);
         saveData.putInteger("bjDecks", blackjackDecks);
+        saveData.putInteger("tableMinimum", tableMinimum);
         saveData.flush();
     }
 
@@ -116,7 +115,7 @@ public class CasinoPracticeGame extends Game {
         return assets;
     }
 
-    public void addToBalance(long amount) {
+    public void addToBalance(float amount) {
         balance += amount;
     }
 
@@ -124,7 +123,7 @@ public class CasinoPracticeGame extends Game {
         balance -= amount;
     }
 
-    public long getBalance() {
+    public float getBalance() {
         return balance;
     }
 
@@ -160,11 +159,11 @@ public class CasinoPracticeGame extends Game {
         this.simpleBlackjackHints = simpleBlackjackHints;
     }
 
-    public double getBlackjackPenetration() {
+    public float getBlackjackPenetration() {
         return blackjackPenetration;
     }
 
-    public void setBlackjackPenetration(double blackjackPenetration) {
+    public void setBlackjackPenetration(float blackjackPenetration) {
         this.blackjackPenetration = blackjackPenetration;
     }
 
@@ -183,4 +182,14 @@ public class CasinoPracticeGame extends Game {
     public void setBlackjackHitSoft17(boolean hit) {
         this.blackjackHitSoft17 = hit;
     }
+
+    public int getTableMinimum() {
+        return tableMinimum;
+    }
+
+    public void setTableMinimum(int tableMinimum) {
+        this.tableMinimum = tableMinimum;
+    }
+
+    public int getTableMaximum() { return tableMinimum * 10; }
 }

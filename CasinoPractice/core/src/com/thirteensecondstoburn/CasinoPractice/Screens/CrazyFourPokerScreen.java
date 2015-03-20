@@ -62,7 +62,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
     WinLosePopup superBonusPopup;
     WinLosePopup playPopup;
 
-    int lastAnteBet = ChipStack.TABLE_MIN;
+    int lastAnteBet = 5;
     int lastQueensUpBet = 0;
     BestHand bestHandPlayer = null;
 
@@ -72,6 +72,8 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
 
     @Override
     public void setup() {
+        lastAnteBet = game.getTableMinimum();
+
         paytable = new Image(assets.getTexture(Assets.TEX_NAME.CRAZY_FOUR_POKER_PAYTABLE));
         paytable.setScale(.75f, .75f);
         paytable.setColor(1, 1, 1, .75f);
@@ -91,7 +93,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         playCircle = new Image(assets.getTexture(Assets.TEX_NAME.PLAY_CIRCLE));
         playCircle.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playCircle.getWidth()) / 2, anteCircle.getY() - 200);
 
-        queensUpStack = new ChipStack(assets, 0);
+        queensUpStack = new ChipStack(game, 0);
         queensUpStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + queensUpCircle.getWidth()) / 2, stage.getHeight() / 2 + 10);
         queensUpStack.addListener(new ActorGestureListener() {
             @Override
@@ -100,12 +102,14 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
                     clearButton.setVisible(true);
                     int betAmount = leftSide.getBetAmount();
                     if (anteStack.getTotal() + betAmount > game.getBalance()) {
-                        playerHandText.setText("Insufficient funds to make that bet");
+                        showHint("Insufficient funds to make that bet");
+                        playerHandText.setText("");
                         dealerHandText.setText("");
                         return;
                     }
-                    if (queensUpStack.getTotal() + betAmount > ChipStack.TABLE_MAX) {
-                        playerHandText.setText("Table maximum of " + ChipStack.TABLE_MAX);
+                    if (queensUpStack.getTotal() + betAmount > game.getTableMaximum()) {
+                        showHint("Table maximum of " + game.getTableMaximum());
+                        playerHandText.setText("");
                         dealerHandText.setText("");
                         return;
                     }
@@ -121,7 +125,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             }
         });
 
-        anteStack = new ChipStack(assets, 0);
+        anteStack = new ChipStack(game, 0);
         anteStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + anteCircle.getWidth() * 2) / 2 - 20, queensUpStack.getY() - 200);
         anteStack.addListener(new ActorGestureListener() {
             @Override
@@ -130,12 +134,14 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
                     clearButton.setVisible(true);
                     int betAmount = leftSide.getBetAmount();
                     if(anteStack.getTotal() + leftSide.getBetAmount() * 2 > game.getBalance() - betAmount) {
-                        playerHandText.setText("Insufficient funds to make that bet");
+                        showHint("Insufficient funds to make that bet");
+                        playerHandText.setText("");
                         dealerHandText.setText("");
                         return;
                     }
-                    if(anteStack.getTotal() + betAmount > ChipStack.TABLE_MAX) {
-                        playerHandText.setText("Table maximum of " + ChipStack.TABLE_MAX);
+                    if(anteStack.getTotal() + betAmount > game.getTableMaximum()) {
+                        showHint("Table maximum of " +  game.getTableMaximum());
+                        playerHandText.setText("");
                         dealerHandText.setText("");
                         return;
                     }
@@ -149,11 +155,11 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             }
         });
 
-        superBonusStack = new ChipStack(assets, 0);
+        superBonusStack = new ChipStack(game, 0);
         superBonusStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + superBonusCircle.getWidth() * 2) / 2 + superBonusCircle.getWidth() + 20, queensUpStack.getY() - 200); // TO DO FIX THIS
         // can't click on the super bonus stack. It's always = ante
 
-        playStack = new ChipStack(assets, 0);
+        playStack = new ChipStack(game, 0);
         playStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playCircle.getWidth()) / 2, anteStack.getY() - 200);
         // doesn't make sense to have this clickable here
 
@@ -305,8 +311,8 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             subtractFromBalance(lastAnteBet * 2 + lastQueensUpBet);
         }
 
-        if(anteStack.getTotal() < ChipStack.TABLE_MIN) {
-            showHint("Minimum bet is " + ChipStack.TABLE_MIN);
+        if(anteStack.getTotal() < game.getTableMinimum()) {
+            showHint("Minimum bet is " + game.getTableMinimum());
             dealerHandText.setText("");
             return;
         }
@@ -402,7 +408,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
 
     private void clearHand() {
         addToBalance(anteStack.getTotal() + superBonusStack.getTotal() + queensUpStack.getTotal());
-        lastAnteBet = ChipStack.TABLE_MIN;
+        lastAnteBet = game.getTableMinimum();
         lastQueensUpBet = 0;
         anteStack.setTotal(0);
         superBonusStack.setTotal(0);

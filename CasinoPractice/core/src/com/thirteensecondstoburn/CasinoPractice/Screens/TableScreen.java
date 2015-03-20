@@ -87,12 +87,12 @@ abstract public class TableScreen implements Screen {
 
     protected abstract void setup();
 
-    protected void addToBalance(int amount) {
+    protected void addToBalance(float amount) {
         game.addToBalance(amount);
-        leftSide.setBalanceText("" + game.getBalance());
+        leftSide.updateBalance();
     }
 
-    protected void subtractFromBalance(int amount) {
+    protected void subtractFromBalance(float amount) {
         addToBalance(-amount);
     }
 

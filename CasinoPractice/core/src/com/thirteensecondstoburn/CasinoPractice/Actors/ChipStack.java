@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
+import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,19 +19,18 @@ public class ChipStack extends Actor {
     public static int CHIP_HEIGHT = 71;
     public static int CHIP_BASE_HEIGHT = 10;
     int stackTotal = 0;
-    public static final int TABLE_MAX = 1000;
-    public static final int TABLE_MIN = 10;
 
     ArrayList<Integer> chipStack = new ArrayList<Integer>();
 
     HashMap<Integer, TextureRegion> regions = new HashMap<Integer, TextureRegion>();
 
+    CasinoPracticeGame game;
     Assets assets;
 
-    public ChipStack(Assets assets, int stackTotal) {
+    public ChipStack(CasinoPracticeGame game, int stackTotal) {
         this.stackTotal = stackTotal;
         calculateChips();
-        this.assets = assets;
+        this.assets = game.getAssets();
         regions.put(1, assets.getChipTexture("1"));
         regions.put(5, assets.getChipTexture("5"));
         regions.put(25, assets.getChipTexture("25"));
@@ -55,7 +55,7 @@ public class ChipStack extends Actor {
 
     public void increaseTotal(int amount) {
         stackTotal += amount;
-        if (stackTotal > TABLE_MAX) stackTotal = TABLE_MAX;
+        if (stackTotal > game.getTableMaximum()) stackTotal = game.getTableMaximum();
         calculateChips();
     }
 

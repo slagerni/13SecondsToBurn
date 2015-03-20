@@ -39,7 +39,7 @@ public class LeftSide extends Group {
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (betButton.isInside(x, y)) {
                     int amount = betButton.increaseAmount();
-                    if(amount > ChipStack.TABLE_MAX) {
+                    if(amount >  game.getTableMaximum()) {
                         betButton.resetToMin();
                     }
                 }
@@ -64,7 +64,9 @@ public class LeftSide extends Group {
             }
         });
 
-        balance = new Text(assets, "" + game.getBalance(), 1.0f);
+        balance = new Text(assets, "", 1.0f);
+        updateBalance();
+
         wager = new Text(assets, "0", 1.5f);
         won = new Text(assets, "0", 1.5f);
 
@@ -98,8 +100,12 @@ public class LeftSide extends Group {
         wager.setText(text);
     }
 
-    public void setBalanceText(String text) {
-        balance.setText(text);
+    public void updateBalance() {
+        if(game.getBalance() == (int)game.getBalance()) {
+            balance.setText(String.format("%.0f", game.getBalance()));
+        } else {
+            balance.setText(String.format("%.2f", game.getBalance()));
+        }
     }
 
     public void setWonText(String text) {
