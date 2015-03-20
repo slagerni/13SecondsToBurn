@@ -72,7 +72,7 @@ public class CasinoPracticeGame extends Game {
     @Override
 	public void create () {
         saveData = Gdx.app.getPreferences("com.thirteensecondstoburn.CasinoPractice.saveData");
-        balance = saveData.getFloat("balance", 5000.0f);
+        balance = saveData.getFloat("balanceFloat", 5000.0f);
         if(balance < 5000)
             balance = 5000;
 
@@ -88,7 +88,7 @@ public class CasinoPracticeGame extends Game {
 	}
 
     public void saveSettings() {
-        saveData.putFloat("balance", balance);
+        saveData.putFloat("balanceFloat", balance);
         saveData.putBoolean("showHints", showHints);
         saveData.putBoolean("actionHints", actionHints);
         saveData.putBoolean("hitSoft", blackjackHitSoft17);
