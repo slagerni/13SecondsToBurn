@@ -113,26 +113,15 @@ public class MainMenuScreen implements Screen {
 
 		final Label lblGenerating = new Label("Generating...", skin);
 		lblGenerating.setVisible(false);
-		final SelectBox ddlQuickType = new SelectBox(skin);
-        ddlQuickType.setItems(new Object[] {Difficulty.Any, Difficulty.Beginner, Difficulty.Easy, Difficulty.Medium, Difficulty.Hard});
-		ddlQuickType.setSelected(SudokuGame.settings.defaultQuickPlay);
+		final SelectBox<Difficulty> ddlQuickType = new SelectBox<>(skin);
+        ddlQuickType.setItems(new Difficulty[] {Difficulty.Any, Difficulty.Beginner, Difficulty.Easy, Difficulty.Medium, Difficulty.Hard});
+		ddlQuickType.setSelected(Difficulty.getByName(SudokuGame.settings.defaultQuickPlay));
 		ddlQuickType.addListener(new ChangeListener() {
 			
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				SelectBox ddl = (SelectBox)actor;
-				if(ddl.getSelection().toString().equalsIgnoreCase("Beginner")) {
-					selectedDifficulty = (Difficulty.Beginner);
-				} else if(ddl.getSelection().toString().equalsIgnoreCase("Easy")) {
-					selectedDifficulty = (Difficulty.Easy);
-				} else if(ddl.getSelection().toString().equalsIgnoreCase("Medium")) {
-					selectedDifficulty = (Difficulty.Medium);
-				} else if(ddl.getSelection().toString().equalsIgnoreCase("Hard")) {
-					selectedDifficulty = (Difficulty.Hard);
-				} else {
-					selectedDifficulty = (Difficulty.Any);
-				}
-				SudokuGame.settings.defaultQuickPlay = ddl.getSelection().toString();
+                selectedDifficulty = ddlQuickType.getSelection().first();
+				SudokuGame.settings.defaultQuickPlay = selectedDifficulty.toString();
 				SudokuGame.settings.save();
 			}
 		});		

@@ -3,7 +3,20 @@ package com.thirteensecondstoburn.Sudoku;
 public class Generate {
 	public HumanSolver solver;
 
-	public enum Difficulty {Any, Beginner, Easy, Medium, Hard, Random};
+	public enum Difficulty {
+        Any, Beginner, Easy, Medium, Hard, Random;
+
+        public static Difficulty getByName(String name) {
+            for(Difficulty d : toList()) {
+                if(d.toString().equals(name)) return d;
+            }
+            return Any;
+        }
+
+        public static Difficulty[] toList() {
+            return new Difficulty[] {Any, Beginner, Easy, Medium, Hard};
+        }
+    };
 	public enum TechniqueUse {MayHave, MustHave, MayNotHave};
 
 	public Generate() {
