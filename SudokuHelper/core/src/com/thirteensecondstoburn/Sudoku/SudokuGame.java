@@ -3,11 +3,15 @@ package com.thirteensecondstoburn.Sudoku;
 import com.badlogic.gdx.Game;
 
 public class SudokuGame extends Game {
+    public static boolean IS_FREE_VERSION = true;
+
 	public static Settings settings;
 	private SudokuScreen sudokuScreen;
 	private SplashScreen splashScreen;
 	private MainMenuScreen mainMenuScreen;
 	private ManualEntryScreen manualEntryScreen;
+    private NagScreen nagScreen;
+    private StatisticsScreen statisticsScreen;
 	private Assets assets;
 	private Data data = new Data();
 
@@ -25,13 +29,24 @@ public class SudokuGame extends Game {
 		if(mainMenuScreen == null) mainMenuScreen = new MainMenuScreen(this);
 		return mainMenuScreen;
 	}
-	
-	public ManualEntryScreen getManualEntryScreen() {
-		if(manualEntryScreen == null) manualEntryScreen = new ManualEntryScreen(this);
-		return manualEntryScreen;
-	}
-	
-	public Data getData() {
+
+    public ManualEntryScreen getManualEntryScreen() {
+        if(manualEntryScreen == null) manualEntryScreen = new ManualEntryScreen(this);
+        return manualEntryScreen;
+    }
+
+    public NagScreen getNagScreen(boolean fromHint) {
+        if(nagScreen == null) nagScreen = new NagScreen(this);
+        nagScreen.setFromHint(fromHint);
+        return nagScreen;
+    }
+
+    public StatisticsScreen getStatisticsScreen() {
+        if(statisticsScreen == null) statisticsScreen = new StatisticsScreen(this);
+        return statisticsScreen;
+    }
+
+    public Data getData() {
 		return data;
 	}
 	
@@ -44,6 +59,7 @@ public class SudokuGame extends Game {
 
 	@Override
 	public void dispose() {
+        settings.save(); // make sure everything is saved when exiting
 		super.dispose();
 		if(sudokuScreen != null) sudokuScreen.dispose();
 		if(splashScreen != null) splashScreen.dispose();

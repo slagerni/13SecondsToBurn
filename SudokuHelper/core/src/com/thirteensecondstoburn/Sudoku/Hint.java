@@ -14,13 +14,15 @@ public class Hint extends Actor {
 	Assets.DistanceFieldShader distanceFieldShader;
 	private HumanSolver solver;
 	private Data data;
+    private SudokuGame game;
 
-	public Hint (HumanSolver solver, Data data, Assets assets) {
-		this.font = assets.getFont();
-		this.distanceFieldShader = assets.getDistanceFieldShader();
-		backgroundTextureRegion = new TextureRegion(assets.getTexture(Assets.TEX_NAME.HINT));
+	public Hint (HumanSolver solver, SudokuGame game) {
+        this.game = game;
+		this.font = game.getAssets().getFont();
+		this.distanceFieldShader = game.getAssets().getDistanceFieldShader();
+		backgroundTextureRegion = new TextureRegion(game.getAssets().getTexture(Assets.TEX_NAME.HINT));
 		this.solver = solver;
-		this.data = data;
+		this.data = game.getData();
 	}
 	
 	@Override
@@ -55,4 +57,6 @@ public class Hint extends Actor {
 	public void showHint() {
 		data.setStatusText(solver.NextMove(false));
 	}
+
+    public SudokuGame getGame() {return game;}
 }

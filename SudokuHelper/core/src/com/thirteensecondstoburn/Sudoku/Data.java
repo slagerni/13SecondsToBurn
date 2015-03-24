@@ -27,6 +27,7 @@ public class Data {
 	private int zoomedTo = -1;
 	private boolean selectedPossibilitiesOnly = false;
 	private String statusText = "";
+    private int rating = 0;
 	
 	ArrayList<DataListener> listeners = new ArrayList<DataListener>();
 
@@ -546,6 +547,7 @@ public class Data {
 			oos.close();
 
 			SudokuGame.settings.saveData(toSave);
+            SudokuGame.settings.saveRating(rating);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -581,10 +583,15 @@ public class Data {
 			history.clear();
 			redoList.clear();
 
+            rating = SudokuGame.settings.getRating();
+
 			return true;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 		return false;
 	}
+
+    public int getRating() {return rating;}
+    public void setRating(int value ) {rating = value;}
 }

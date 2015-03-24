@@ -16,7 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Array;
 import com.thirteensecondstoburn.Sudoku.Assets.TEX_NAME;
 
-public class SudokuScreen implements Screen, ColoringListener {
+public class SudokuScreen implements Screen, ColoringListener, DataListener {
 	private SudokuGame game;
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
@@ -24,16 +24,15 @@ public class SudokuScreen implements Screen, ColoringListener {
 	private Stage hudStage;
 	private Stage coloringStage;
 	private Assets assets;
-	private ZoomOut zoomOut;
 	private Sprite background;
-	private HumanSolver solver;
-	private Array<ColoringCell> coloringCells = new Array<ColoringCell>();
+	private Array<ColoringCell> coloringCells = new Array<>();
 		
 	private Data data;
 
 	public SudokuScreen(SudokuGame game) {
 		this.game = game;
 		this.data = game.getData();
+        data.addListener(this);
 	}
 
 	@Override
@@ -148,7 +147,7 @@ public class SudokuScreen implements Screen, ColoringListener {
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
 
-		solver = new HumanSolver(data);
+        HumanSolver solver = new HumanSolver(data);
 		boardStage = new Stage();
 		coloringStage = new Stage();
 		hudStage = new Stage();
@@ -165,7 +164,7 @@ public class SudokuScreen implements Screen, ColoringListener {
 		batch = new SpriteBatch();
 		
 		assets = game.getAssets();
-		zoomOut = new ZoomOut(assets);
+		ZoomOut zoomOut = new ZoomOut(assets);
 		zoomOut.setVisible(false);
 
 		// draw the cells from the top down
@@ -221,7 +220,7 @@ public class SudokuScreen implements Screen, ColoringListener {
 		redo.addListener(new UndoRedoEventListener());
 		Help help = new Help(assets);
 		help.addListener(new HelpEventListener());
-		Hint hint = new Hint(solver, data, assets);
+		Hint hint = new Hint(solver, game);
 		hint.addListener(new HintEventListener());
 		SelectedOnly selectedOnly = new SelectedOnly(data, assets);
 		selectedOnly.addListener(new SelectedOnlyEventListener());
@@ -262,7 +261,7 @@ public class SudokuScreen implements Screen, ColoringListener {
 			}
 		}
 		
-		boolean canSolve = false;
+		boolean canSolve;
 		Data dataCopy = new Data();
 		for(int i = 0; i < game.getData().getItems().length; i++) {
 			dataCopy.getItems()[i] = new DataItem(game.getData().getItems()[i]);
@@ -278,16 +277,10 @@ public class SudokuScreen implements Screen, ColoringListener {
 	}
 
 	@Override
-	public void pause() {
-		// TODO Auto-generated method stub
-
-	}
+	public void pause() {}
 
 	@Override
-	public void resume() {
-		// TODO Auto-generated method stub
-
-	}
+	public void resume() {}
 
 	@Override
 	public void dispose() {
@@ -380,4 +373,35 @@ public class SudokuScreen implements Screen, ColoringListener {
 		data.setColors(0, false);
 		ColoringCell.setPossibility(0);
 	}
+
+    @Override
+    // This should be called any time the Data List changes
+    public void OnChange() {
+        // check for a winning condition
+        if(data.unsolvedCount() == 0) {
+            int rating = SudokuGame.settings.getRating();
+            String winText = "";
+            if(rating >= 30) {
+                winText = "Hard";
+                SudokuGame.settings.hardSolved++;
+            }
+            else if (rating >= 10 && rating < 30) {
+                winText = "Medium";
+                SudokuGame.settings.mediumSolved++;
+            }
+            else if (rating > 0 && rating < 10) {
+                winText = "Easy";
+                SudokuGame.settings.easySolved++;
+            }
+            else if (rating == 0) {
+                winText = "Beginner";
+                SudokuGame.settings.beginnerSolved++;
+            }
+            winText += " sudoku solved!";
+            if(rating > SudokuGame.settings.hardestRatingSolved) {
+                SudokuGame.settings.hardestRatingSolved = rating;
+            }
+            data.setStatusText(winText);
+        }
+    }
 }

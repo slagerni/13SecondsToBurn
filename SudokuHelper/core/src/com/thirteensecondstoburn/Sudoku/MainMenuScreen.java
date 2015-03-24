@@ -40,12 +40,11 @@ public class MainMenuScreen implements Screen {
 	private Difficulty selectedDifficulty = Difficulty.Any;
     private Image title;
     private Image by;
+    private boolean isNagging;
 
     public MainMenuScreen(SudokuGame game) {
 		this.game = game;
 		assets = game.getAssets();
-		//stage = new Stage(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//        stage = new Stage(new ScreenViewport());
 //        stage = new Stage(new FitViewport(1080, 1920));
         stage = new Stage();
 
@@ -130,45 +129,67 @@ public class MainMenuScreen implements Screen {
 		btnQuickPlay.addListener(new ActorGestureListener() {
         	@Override
         	public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-        		stage.addAction( sequence(
-        				new Action() {
-        	                @Override
-        	                public boolean act(float delta )
-        	                {
-        	                	ddlQuickType.setVisible(false);
-        	                	btnQuickPlay.setVisible(false);
-        	                	lblGenerating.setVisible(true);
-        	                	table.invalidate();
-        	                    return true;
-        	                }
-        	            },
-        	            new Action() {
-        	                @Override
-        	                public boolean act(float delta )
-        	                {
-        	                	Data data = game.getData();
-        	                	int rating = generator.getPuzzle(data, selectedDifficulty);
-        	                	String diff = "Any";
-        						if(rating >= 30) diff = "Hard";
-        						else if (rating >= 10 && rating < 30) diff = "Medium";
-        						else if (rating > 0 && rating < 10) diff = "Easy";
-        						else if (rating == 0) diff = "Beginner";
-        	            		data.setStatusText("Rating: " + rating + " (" + diff + ")");
-        	                    return true;
-        	                }
-        	            },
-        				fadeOut( 0.5f ),
-        	            new Action() {
-        	                @Override
-        	                public boolean act(float delta )
-        	                {
-        	                    // the last action will move to the next screen
-        	                	game.setScreen( game.getSudokuScreen() );
-        	                    return true;
-        	                }
-        	            } ) );
+                // boo nagging code
+                if(SudokuGame.IS_FREE_VERSION && !isNagging && game.settings.gamesPlayed % 5 == 0) {
+                    isNagging = true;
+                    game.setScreen(game.getNagScreen(false));
+                    return;
+                }
 
-        	}
+                isNagging = false;
+
+                stage.addAction( sequence(
+                    new Action() {
+                        @Override
+                        public boolean act(float delta )
+                        {
+                            ddlQuickType.setVisible(false);
+                            btnQuickPlay.setVisible(false);
+                            lblGenerating.setVisible(true);
+                            table.invalidate();
+                            return true;
+                        }
+                    },
+                    new Action() {
+                        @Override
+                        public boolean act(float delta )
+                        {
+                            Data data = game.getData();
+                            int rating = generator.getPuzzle(data, selectedDifficulty);
+                            data.setRating(rating);
+                            String diff = "Any";
+                            SudokuGame.settings.gamesPlayed++;
+                            if(rating >= 30) {
+                                diff = "Hard";
+                                SudokuGame.settings.hardPlayed++;
+                            }
+                            else if (rating >= 10 && rating < 30) {
+                                diff = "Medium";
+                                SudokuGame.settings.mediumPlayed++;
+                            }
+                            else if (rating > 0 && rating < 10) {
+                                diff = "Easy";
+                                SudokuGame.settings.easyPlayed++;
+                            }
+                            else if (rating == 0) {
+                                diff = "Beginner";
+                                SudokuGame.settings.beginnerPlayed++;
+                            }
+                            data.setStatusText("Rating: " + rating + " (" + diff + ")");
+                            return true;
+                        }
+                    },
+                    fadeOut( 0.5f ),
+                    new Action() {
+                        @Override
+                        public boolean act(float delta )
+                        {
+                            // the last action will move to the next screen
+                            game.setScreen( game.getSudokuScreen() );
+                            return true;
+                        }
+                    } ) );
+          	}
 		});		
 		
 		final TextButton btnManualEntry = new TextButton("Manual Entry", skin);
@@ -243,8 +264,33 @@ public class MainMenuScreen implements Screen {
 		table.add(btnTechniqueHelp).colspan(2);
 		table.row();
 		table.add(" ").colspan(2);
-		table.row();
-		table.add(btnResume).colspan(2);
+        if(btnResume.isVisible()) {
+            table.row();
+            table.add(btnResume).colspan(2);
+        }
+        if(!SudokuGame.IS_FREE_VERSION) {
+            final TextButton btnStats = new TextButton("Statistics", skin);
+            btnStats.addListener(new ActorGestureListener() {
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    stage.addAction( sequence(
+                            fadeOut( 0.5f ),
+                            new Action() {
+                                @Override
+                                public boolean act(float delta )
+                                {
+                                    // the last action will move to the next screen
+                                    game.setScreen( game.getStatisticsScreen() );
+                                    return true;
+                                }
+                            } ) );
+                }
+            });
+            table.row();
+            table.add(" ").colspan(2);
+            table.row();
+            table.add(btnStats).colspan(2);
+        }
 
 		by = new Image(assets.getAtlasTexture("13stb"));
         title = new Image(assets.getAtlasTexture("title"));

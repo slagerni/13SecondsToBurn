@@ -63,6 +63,8 @@ public class UndoRedo extends Actor {
 	}
 	
 	public void undoRedo() {
+        if(data.unsolvedCount() == 0) return;
+
 		if(isUndo) {
 			data.undo();			
 		} else {
