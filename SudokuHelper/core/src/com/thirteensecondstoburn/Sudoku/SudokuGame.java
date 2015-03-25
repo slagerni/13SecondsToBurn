@@ -3,7 +3,7 @@ package com.thirteensecondstoburn.Sudoku;
 import com.badlogic.gdx.Game;
 
 public class SudokuGame extends Game {
-    public static boolean IS_FREE_VERSION = true;
+    public static boolean IS_FREE_VERSION = false;
 
 	public static Settings settings;
 	private SudokuScreen sudokuScreen;
@@ -14,6 +14,10 @@ public class SudokuGame extends Game {
     private StatisticsScreen statisticsScreen;
 	private Assets assets;
 	private Data data = new Data();
+
+    public SudokuGame(boolean isFreeVersion) {
+        IS_FREE_VERSION = isFreeVersion;
+    }
 
 	public SudokuScreen getSudokuScreen() {
 		if(sudokuScreen == null) sudokuScreen = new SudokuScreen(this);

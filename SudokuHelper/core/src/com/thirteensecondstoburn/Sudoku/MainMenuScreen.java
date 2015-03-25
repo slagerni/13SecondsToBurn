@@ -262,12 +262,6 @@ public class MainMenuScreen implements Screen {
 		table.add(" ").colspan(2);
 		table.row();
 		table.add(btnTechniqueHelp).colspan(2);
-		table.row();
-		table.add(" ").colspan(2);
-        if(btnResume.isVisible()) {
-            table.row();
-            table.add(btnResume).colspan(2);
-        }
         if(!SudokuGame.IS_FREE_VERSION) {
             final TextButton btnStats = new TextButton("Statistics", skin);
             btnStats.addListener(new ActorGestureListener() {
@@ -290,6 +284,12 @@ public class MainMenuScreen implements Screen {
             table.add(" ").colspan(2);
             table.row();
             table.add(btnStats).colspan(2);
+        }
+        if(btnResume.isVisible()) {
+            table.row();
+            table.add(" ").colspan(2);
+            table.row();
+            table.add(btnResume).colspan(2);
         }
 
 		by = new Image(assets.getAtlasTexture("13stb"));

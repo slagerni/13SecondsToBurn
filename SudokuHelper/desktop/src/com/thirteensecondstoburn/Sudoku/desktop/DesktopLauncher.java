@@ -19,6 +19,7 @@ public class DesktopLauncher {
 //        config.height = 1280;
 //        config.width = 800;
 
-		new LwjglApplication(new SudokuGame(), config);
+        // toggle this false = full, true = free
+		new LwjglApplication(new SudokuGame(false), config);
 	}
 }
