@@ -12,6 +12,9 @@ public class DesktopLauncher {
         // 1/2 my galaxy phone
         config.width = 1920/2;
         config.height = 1080/2;
+        // kindle fire HD / Galaxy Note
+//        config.width = 1280;
+//        config.height = 800;
 		new LwjglApplication(new CasinoPracticeGame(), config);
 	}
 }

@@ -34,7 +34,7 @@ public class SettingsScreen  implements Screen {
     CasinoPracticeGame game;
     Skin skin;
 
-    Stage stage = new Stage(new FitViewport(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT));;
+    Stage stage = new Stage(new FitViewport(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT));
     ScrollPane scrollPane;
 
     Sprite background;
