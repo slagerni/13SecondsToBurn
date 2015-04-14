@@ -33,6 +33,18 @@ namespace SudokuHelperWeb.Controllers
             return View();
         }
 
+        public ActionResult GetIt()
+        {
+            ViewBag.Title = "Get Sudoku Helper";
+            return View();
+        }
+
+        public ActionResult History()
+        {
+            ViewBag.Title = "Sudoku Helper History";
+            return View();
+        }
+
         public ActionResult Contact()
         {
             //ViewBag.Message = "Your contact page.";

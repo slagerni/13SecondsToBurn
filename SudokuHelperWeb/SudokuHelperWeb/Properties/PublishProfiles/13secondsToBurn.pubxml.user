@@ -95,7 +95,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>04/09/2014 11:51:39</publishTime>
     </File>
     <File Include="bin/SudokuHelperWeb.dll">
-      <publishTime>01/02/2015 15:56:12</publishTime>
+      <publishTime>04/13/2015 11:06:17</publishTime>
     </File>
     <File Include="bin/System.Net.Http.Formatting.dll">
       <publishTime>04/09/2014 11:51:36</publishTime>
@@ -523,8 +523,14 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="Views/Home/Contact.cshtml">
       <publishTime>04/10/2014 14:44:51</publishTime>
     </File>
+    <File Include="Views/Home/GetIt.cshtml">
+      <publishTime>04/12/2015 11:11:13</publishTime>
+    </File>
+    <File Include="Views/Home/History.cshtml">
+      <publishTime>04/13/2015 11:05:04</publishTime>
+    </File>
     <File Include="Views/Home/Index.cshtml">
-      <publishTime>04/10/2014 14:45:28</publishTime>
+      <publishTime>04/13/2015 08:24:24</publishTime>
     </File>
     <File Include="Views/Home/Rules.cshtml">
       <publishTime>01/04/2015 11:17:47</publishTime>
@@ -536,7 +542,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>04/09/2014 11:51:17</publishTime>
     </File>
     <File Include="Views/Shared/_Layout.cshtml">
-      <publishTime>01/02/2015 15:51:49</publishTime>
+      <publishTime>04/13/2015 11:05:47</publishTime>
     </File>
     <File Include="Views/Shared/_LoginPartial.cshtml">
       <publishTime>04/09/2014 11:51:17</publishTime>
@@ -548,7 +554,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>04/09/2014 11:51:17</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>01/02/2015 15:54:22</publishTime>
+      <publishTime>04/12/2015 11:17:49</publishTime>
     </File>
   </ItemGroup>
 </Project>

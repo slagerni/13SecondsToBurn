@@ -294,6 +294,8 @@
     <Content Include="Views\Home\Rules.cshtml" />
     <Content Include="Views\Home\Techniques.cshtml" />
     <Content Include="Views\Home\AppControls.cshtml" />
+    <Content Include="Views\Home\GetIt.cshtml" />
+    <Content Include="Views\Home\History.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
