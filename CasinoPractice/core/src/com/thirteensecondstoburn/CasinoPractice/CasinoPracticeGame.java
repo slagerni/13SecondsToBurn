@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.thirteensecondstoburn.CasinoPractice.Screens.BlackJackScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CaribbeanStudPokerScreen;
+import com.thirteensecondstoburn.CasinoPractice.Screens.CrapsScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CrazyFourPokerScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.MenuScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SettingsScreen;
@@ -22,6 +23,7 @@ public class CasinoPracticeGame extends Game {
     private CrazyFourPokerScreen crazyFourPokerScreen;
     private CaribbeanStudPokerScreen caribbeanStudPokerScreen;
     private BlackJackScreen blackJackScreen;
+    private CrapsScreen crapsScreen;
     private float balance;
     private Preferences saveData;
 
@@ -67,6 +69,11 @@ public class CasinoPracticeGame extends Game {
     public BlackJackScreen getBlackJackScreen() {
         if(blackJackScreen == null) blackJackScreen = new BlackJackScreen(this);
         return blackJackScreen;
+    }
+
+    public CrapsScreen getCrapsScreen() {
+        if(crapsScreen == null) crapsScreen = new CrapsScreen(this);
+        return crapsScreen;
     }
 
     @Override

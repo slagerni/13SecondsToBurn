@@ -28,6 +28,7 @@ public class ChipStack extends Actor {
     Assets assets;
 
     public ChipStack(CasinoPracticeGame game, int stackTotal) {
+        this.game = game;
         this.stackTotal = stackTotal;
         calculateChips();
         this.assets = game.getAssets();

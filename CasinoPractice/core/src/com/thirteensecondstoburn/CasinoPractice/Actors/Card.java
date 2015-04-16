@@ -26,8 +26,8 @@ public class Card extends Actor implements Comparable<Card>{
         setBack(back);
         setFaceUp(faceUp);
         this.assets = assets;
-        this.setWidth(226);
-        this.setHeight(314);
+        this.setWidth(CARD_WIDTH);
+        this.setHeight(CARD_HEIGHT);
         setBounds(0, 0, getWidth(), getHeight());
         setTouchable(Touchable.enabled);
     }
@@ -61,6 +61,8 @@ public class Card extends Actor implements Comparable<Card>{
             card.setPosition(this.getX(), this.getY());
             card.setOrigin(card.getWidth() / 2, card.getHeight() / 2); // origin sets the location to rotate around
             card.setRotation(this.getRotation());
+            card.setScaleX(this.getScaleX());
+            card.setScaleY(this.getScaleY());
             card.draw(batch, parentAlpha);
         }
     }

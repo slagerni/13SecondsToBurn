@@ -51,7 +51,6 @@ public class SettingsScreen  implements Screen {
         Gdx.input.setInputProcessor(stage);
         stage.addAction(Actions.fadeIn(0.5f));
 
-
         Texture back = assets.getTexture(Assets.TEX_NAME.BACKGROUND);
         back.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         background = new Sprite(back, (int)stage.getWidth(), (int)stage.getHeight());
