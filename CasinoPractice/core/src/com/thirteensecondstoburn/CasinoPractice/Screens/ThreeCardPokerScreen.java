@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Card;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStack;
+import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStackGroup;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Actors.WinLosePopup;
@@ -34,12 +35,9 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
     boolean isFirstDeck = true;
     boolean canBet = true;
 
-    ChipStack anteStack;
-    ChipStack pairPlusStack;
-    ChipStack playStack;
-    Image anteCircle;
-    Image pairPlusCircle;
-    Image playCircle;
+    ChipStackGroup anteStack;
+    ChipStackGroup pairPlusStack;
+    ChipStackGroup playStack;
 
     TableButton dealButton;
     TableButton playButton;
@@ -55,10 +53,6 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
     Text dealerHandText;
     Text playerHandText;
     Text qualifyText;
-
-    WinLosePopup pairPlusPopup;
-    WinLosePopup antePopup;
-    WinLosePopup playPopup;
 
     int lastAnteBet = 5;
     int lastPairPlusBet = 0;
@@ -90,20 +84,12 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         title.setColor(mainColor);
         title.setPosition(315, stage.getHeight() - 270);
 
-
-        pairPlusCircle = new Image(assets.getTexture(Assets.TEX_NAME.PAIRPLUS_CIRCLE));
-        pairPlusCircle.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + pairPlusCircle.getWidth()) / 2, stage.getHeight()/2);
-        anteCircle = new Image(assets.getTexture(Assets.TEX_NAME.ANTE_CIRCLE));
-        anteCircle.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + anteCircle.getWidth()) / 2, pairPlusCircle.getY() - 200);
-        playCircle = new Image(assets.getTexture(Assets.TEX_NAME.PLAY_CIRCLE));
-        playCircle.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playCircle.getWidth()) / 2, anteCircle.getY() - 200);
-
-        pairPlusStack = new ChipStack(game, 0);
-        pairPlusStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + pairPlusCircle.getWidth()) / 2, stage.getHeight()/2 + 10);
+        pairPlusStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.PAIRPLUS_CIRCLE);
+        pairPlusStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + pairPlusStack.getWidth()) / 2, stage.getHeight()/2 + 10);
         pairPlusStack.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (pairPlusStack.isInside(x, y) && canBet) {
+                if (pairPlusStack.hit(x, y, true) != null && canBet) {
                     clearButton.setVisible(true);
                     int betAmount = leftSide.getBetAmount();
                     if(anteStack.getTotal() + betAmount > game.getBalance()) {
@@ -128,12 +114,12 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
             }
         });
 
-        anteStack = new ChipStack(game, 0);
-        anteStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + anteCircle.getWidth()) / 2, pairPlusStack.getY() - 200);
+        anteStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.ANTE_CIRCLE);
+        anteStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + anteStack.getWidth()) / 2, pairPlusStack.getY() - 200);
         anteStack.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (anteStack.isInside(x, y) && canBet) {
+                if (anteStack.hit(x, y, true) != null && canBet) {
                     clearButton.setVisible(true);
                     int betAmount = leftSide.getBetAmount();
                     if(anteStack.getTotal() + leftSide.getBetAmount() > game.getBalance() - betAmount) {
@@ -157,12 +143,12 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
             }
         });
 
-        playStack = new ChipStack(game, 0);
-        playStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playCircle.getWidth()) / 2, anteStack.getY() - 200);
+        playStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.PLAY_CIRCLE);
+        playStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playStack.getWidth()) / 2, anteStack.getY() - 200);
         playStack.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (playStack.isInside(x, y) && !canBet) {
+                if (playStack.hit(x, y, true) != null && !canBet) {
                     playHand(playButton);
                 }
             }
@@ -227,16 +213,9 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         qualifyText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - 40);
         qualifyText.setColor(.5f, .5f, .5f, .5f);
 
-        pairPlusPopup = new WinLosePopup(assets);
-        antePopup = new WinLosePopup(assets);
-        playPopup = new WinLosePopup(assets);
-
         stage.addActor(paytable);
         stage.addActor(title);
 
-        stage.addActor(anteCircle);
-        stage.addActor(pairPlusCircle);
-        stage.addActor(playCircle);
         stage.addActor(anteStack);
         stage.addActor(pairPlusStack);
         stage.addActor(playStack);
@@ -249,10 +228,6 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         stage.addActor(dealerHandText);
         stage.addActor(playerHandText);
         stage.addActor(qualifyText);
-
-        stage.addActor(pairPlusPopup);
-        stage.addActor(antePopup);
-        stage.addActor(playPopup);
     }
 
     private void dealHand() {
@@ -343,8 +318,8 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         canBet = true;
         toggleButtons(false);
         showDealerHand();
-        anteStack.clearTotal();
-        pairPlusStack.clearTotal();
+        anteStack.clear();
+        pairPlusStack.clear();
         if(game.useHintText()) {
             TableButton correctButton = getCorrectButtonForHint();
             if(correctButton != foldButton) {
@@ -468,19 +443,19 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
             if(dealerQualifies) {
                 //If the player has the higher poker hand then the Ante and Play will both pay even money.
                 total = anteStack.getTotal() * 2 + playStack.getTotal() * 2;
-                antePopup.pop(true, anteCircle.getX() + 37, anteCircle.getY() + 38);
-                playPopup.pop(true, playCircle.getX() + 37, playCircle.getY() + 38);
+                anteStack.popStack(true);
+                playStack.popStack(true);
             } else {
                 // If the dealer does not qualify then the player will win even money on the Ante bet and the Play bet will push.
                 total = anteStack.getTotal() * 2 + playStack.getTotal();
-                antePopup.pop(true, anteCircle.getX() + 37, anteCircle.getY() + 38);
+                anteStack.popStack(true);
             }
         } else if(playerWon < 0) {
             // the player lost
             total = 0; // we've already pulled this from the balance. no need to re-deduct
-            antePopup.pop(false, anteCircle.getX() + 37, anteCircle.getY() + 38);
+            anteStack.popStack(false);
             if(playStack.getTotal() > 0) {
-                playPopup.pop(false, playCircle.getX() + 37, playCircle.getY() + 38);
+                playStack.popStack(false);
             }
         } else {
             // tie.
@@ -504,7 +479,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         // Pair Plus
         if(!playerFolded && pairPlusStack.getTotal() > 0 && bestHandPlayer.getHandType().ordinal() >= HandType.PAIR.ordinal()) {
             total += pairPlusStack.getTotal(); // return the initial bet
-            pairPlusPopup.pop(true, pairPlusCircle.getX() + 37, pairPlusCircle.getY() + 38);
+            pairPlusStack.popStack(true);
             switch(bestHandPlayer.getHandType()) {
                 case STRAIGHT_FLUSH:
                     total += pairPlusStack.getTotal() * 40;
@@ -523,7 +498,7 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
                     break;
             }
         } else if(pairPlusStack.getTotal() > 0) {
-            pairPlusPopup.pop(false, pairPlusCircle.getX() + 37, pairPlusCircle.getY() + 38);
+            pairPlusStack.popStack(false);
         }
         addToBalance(total);
 
@@ -540,9 +515,9 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 
         setHandText(bestHandDealer.getHandType(), bestHandDealer.getFaceValues().get(0), bestHandPlayer.getHandType(), bestHandPlayer.getFaceValues().get(0), dealerQualifies, playerFolded);
 
-        anteStack.clearTotal();
-        pairPlusStack.clearTotal();
-        playStack.clearTotal();
+        anteStack.clear();
+        pairPlusStack.clear();
+        playStack.clear();
     }
 
     private void setHandText(HandType dealerType, Card.FaceValue dealerHigh, HandType playerType, Card.FaceValue playerHigh, boolean dealerQualified, boolean playerFolded) {

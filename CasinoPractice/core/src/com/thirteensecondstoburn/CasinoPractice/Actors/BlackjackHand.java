@@ -18,10 +18,8 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
     Assets assets;
     Hand hand;
     Text handText;
-    Image betCircle;
-    ChipStack betStack;
+    ChipStackGroup betStack;
     List<ActionCompletedListener> listeners = new ArrayList<ActionCompletedListener>();
-    WinLosePopup betPopup;
 
 
     private int hard = 0;
@@ -40,9 +38,7 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
         this.assets = assets;
         this.isSplit = isSplit;
 
-        betCircle = new Image(assets.getTexture(Assets.TEX_NAME.BLANK_CIRCLE));
-
-        betStack = new ChipStack(game, 0);
+        betStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.BLANK_CIRCLE);
 
         hand = new Hand(75);
         hand.setPosition(betStack.getWidth() + 10, 0);
@@ -54,13 +50,9 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
 
         setSize(betStack.getWidth() + hand.getWidth() + 25, Card.CARD_HEIGHT + handText.getHeight() + 15);
 
-        betPopup = new WinLosePopup(assets);
-
-        addActor(betCircle);
         addActor(betStack);
         addActor(hand);
         addActor(handText);
-        addActor(betPopup);
     }
 
     public void addCard(Card card) {
@@ -186,7 +178,6 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
 
     public void hideBets() {
         removeActor(betStack);
-        removeActor(betCircle);
         hand.setPosition(0,0);
         // if we're hiding the bets, put the text at the bottom and slide the hand up a bit (dealer hand)
         handText.setPosition(0, 0);
@@ -213,7 +204,7 @@ public class BlackjackHand extends Group implements ActionCompletedListener {
     }
 
     public void popStack(boolean won) {
-        betPopup.pop(won, betCircle.getX() + 37, betCircle.getY() + 38);
+        betStack.popStack(won);
     }
 
     public Card getFirstCard() {

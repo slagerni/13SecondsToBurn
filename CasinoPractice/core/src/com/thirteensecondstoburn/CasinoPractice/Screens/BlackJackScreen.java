@@ -287,7 +287,9 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         }
         lastBet = game.getTableMinimum();
         leftSide.setWonText("");
-        dealerHand.setVisible(false);
+        if(dealerHand != null) {
+            dealerHand.setVisible(false);
+        }
         leftSide.setWagerText("");
         canBet = true;
         toggleButtons(false);
@@ -445,7 +447,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         newHand.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (newHand.canSplit()) {
+                if (newHand.canSplit() && !dealButton.isVisible()) {
                     splitHand(newHand);
                 }
             }

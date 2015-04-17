@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Card;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStack;
+import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStackGroup;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Actors.WinLosePopup;
@@ -31,14 +32,10 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
     boolean isFirstDeck = true;
     boolean canBet = true;
 
-    ChipStack anteStack;
-    ChipStack superBonusStack;
-    ChipStack queensUpStack;
-    ChipStack playStack;
-    Image anteCircle;
-    Image superBonusCircle;
-    Image queensUpCircle;
-    Image playCircle;
+    ChipStackGroup anteStack;
+    ChipStackGroup superBonusStack;
+    ChipStackGroup queensUpStack;
+    ChipStackGroup playStack;
 
     TableButton dealButton;
     TableButton oneTimesButton;
@@ -56,11 +53,6 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
     Text dealerHandText;
     Text playerHandText;
     Text qualifyText;
-
-    WinLosePopup queensUpPopup;
-    WinLosePopup antePopup;
-    WinLosePopup superBonusPopup;
-    WinLosePopup playPopup;
 
     int lastAnteBet = 5;
     int lastQueensUpBet = 0;
@@ -83,22 +75,12 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         title.setColor(mainColor);
         title.setPosition(315, stage.getHeight() - 200);
 
-
-        queensUpCircle = new Image(assets.getTexture(Assets.TEX_NAME.QUEENS_UP_CIRCLE));
-        queensUpCircle.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + queensUpCircle.getWidth()) / 2, stage.getHeight()/2);
-        anteCircle = new Image(assets.getTexture(Assets.TEX_NAME.ANTE_CIRCLE));
-        anteCircle.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + anteCircle.getWidth() * 2) / 2 - 20, queensUpCircle.getY() - 200);
-        superBonusCircle = new Image(assets.getTexture(Assets.TEX_NAME.SUPER_BONUS_CIRCLE));
-        superBonusCircle.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + superBonusCircle.getWidth() * 2) / 2 + superBonusCircle.getWidth() + 20, queensUpCircle.getY() - 200);
-        playCircle = new Image(assets.getTexture(Assets.TEX_NAME.PLAY_CIRCLE));
-        playCircle.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playCircle.getWidth()) / 2, anteCircle.getY() - 200);
-
-        queensUpStack = new ChipStack(game, 0);
-        queensUpStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + queensUpCircle.getWidth()) / 2, stage.getHeight() / 2 + 10);
+        queensUpStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.QUEENS_UP_CIRCLE);
+        queensUpStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + queensUpStack.getWidth()) / 2, stage.getHeight() / 2 + 10);
         queensUpStack.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (queensUpStack.isInside(x, y) && canBet) {
+                if (queensUpStack.hit(x, y, true) != null && canBet) {
                     clearButton.setVisible(true);
                     int betAmount = leftSide.getBetAmount();
                     if (anteStack.getTotal() + betAmount > game.getBalance()) {
@@ -125,12 +107,12 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             }
         });
 
-        anteStack = new ChipStack(game, 0);
-        anteStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + anteCircle.getWidth() * 2) / 2 - 20, queensUpStack.getY() - 200);
+        anteStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.ANTE_CIRCLE);
+        anteStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + anteStack.getWidth() * 2) / 2 - 20, queensUpStack.getY() - 200);
         anteStack.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (anteStack.isInside(x, y) && canBet) {
+                if (anteStack.hit(x, y, true) != null && canBet) {
                     clearButton.setVisible(true);
                     int betAmount = leftSide.getBetAmount();
                     if(anteStack.getTotal() + leftSide.getBetAmount() * 2 > game.getBalance() - betAmount) {
@@ -155,12 +137,12 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             }
         });
 
-        superBonusStack = new ChipStack(game, 0);
-        superBonusStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + superBonusCircle.getWidth() * 2) / 2 + superBonusCircle.getWidth() + 20, queensUpStack.getY() - 200); // TO DO FIX THIS
+        superBonusStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.SUPER_BONUS_CIRCLE);
+        superBonusStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + superBonusStack.getWidth() * 2) / 2 + superBonusStack.getWidth() + 20, queensUpStack.getY() - 200);
         // can't click on the super bonus stack. It's always = ante
 
-        playStack = new ChipStack(game, 0);
-        playStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playCircle.getWidth()) / 2, anteStack.getY() - 200);
+        playStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.PLAY_CIRCLE);
+        playStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playStack.getWidth()) / 2, anteStack.getY() - 200);
         // doesn't make sense to have this clickable here
 
         dealButton = new TableButton(assets, "Deal", mainColor);
@@ -168,7 +150,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         dealButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (dealButton.isInside(x, y)) {
+                if (dealButton.hit(x, y, true) != null) {
                     dealHand();
                 }
             }
@@ -181,7 +163,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         oneTimesButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (oneTimesButton.isInside(x, y) && !canBet) {
+                if (oneTimesButton.hit(x, y, true) != null && !canBet) {
                     playHand(1, oneTimesButton);
                     oneTimesButton.setVisible(false);
                 }
@@ -195,7 +177,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         twoTimesButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (twoTimesButton.isInside(x, y) && !canBet) {
+                if (twoTimesButton.hit(x, y, true) != null && !canBet) {
                     if(anteStack.getTotal() * 2 > game.getBalance()) {
                         playerHandText.setText("Insufficient funds to make that bet");
                         return;
@@ -213,7 +195,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         threeTimesButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (threeTimesButton.isInside(x, y) && !canBet) {
+                if (threeTimesButton.hit(x, y, true) != null && !canBet) {
                     if(anteStack.getTotal() * 2 > game.getBalance()) {
                         playerHandText.setText("Insufficient funds to make that bet");
                         return;
@@ -230,7 +212,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         clearButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (clearButton.isInside(x, y)) {
+                if (clearButton.hit(x, y, true) != null) {
                     clearHand();
                 }
             }
@@ -243,7 +225,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         foldButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (foldButton.isInside(x, y)) {
+                if (foldButton.hit(x, y, true) != null) {
                     foldHand();
                 }
             }
@@ -260,18 +242,9 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         qualifyText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - 40);
         qualifyText.setColor(.5f, .5f, .5f, .5f);
 
-        queensUpPopup = new WinLosePopup(assets);
-        antePopup = new WinLosePopup(assets);
-        superBonusPopup = new WinLosePopup(assets);
-        playPopup = new WinLosePopup(assets);
-
         stage.addActor(paytable);
         stage.addActor(title);
 
-        stage.addActor(anteCircle);
-        stage.addActor(superBonusCircle);
-        stage.addActor(queensUpCircle);
-        stage.addActor(playCircle);
         stage.addActor(anteStack);
         stage.addActor(superBonusStack);
         stage.addActor(queensUpStack);
@@ -287,11 +260,6 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         stage.addActor(dealerHandText);
         stage.addActor(playerHandText);
         stage.addActor(qualifyText);
-
-        stage.addActor(queensUpPopup);
-        stage.addActor(antePopup);
-        stage.addActor(superBonusPopup);
-        stage.addActor(playPopup);
     }
 
     private void dealHand() {
@@ -392,8 +360,8 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         canBet = true;
         toggleButtons(false);
         showDealerHand();
-        anteStack.clearTotal();
-        queensUpStack.clearTotal();
+        anteStack.clear();
+        queensUpStack.clear();
         if(game.useHintText()) {
             TableButton correctButton = getCorrectButtonForHint();
             if(correctButton != foldButton) {
@@ -498,19 +466,19 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             if(dealerQualifies) {
                 //If the player has the higher poker hand then the Ante and Play will both pay even money.
                 total = anteStack.getTotal() * 2 + playStack.getTotal() * 2;
-                antePopup.pop(true, anteCircle.getX() + 37, anteCircle.getY() + 38);
-                playPopup.pop(true, playCircle.getX() + 37, playCircle.getY() + 38);
+                anteStack.popStack(true);
+                playStack.popStack(true);
             } else {
                 // If the dealer does not qualify then the Ante bet will push and the Play bet will win.
                 total = anteStack.getTotal() + playStack.getTotal() * 2;
-                playPopup.pop(true, playCircle.getX() + 37, playCircle.getY() + 38);
+                playStack.popStack(true);
             }
         } else if(playerWon < 0) {
             // the player lost
             total = 0; // we've already pulled this from the balance. no need to re-deduct
-            antePopup.pop(false, anteCircle.getX() + 37, anteCircle.getY() + 38);
+            anteStack.popStack(false);
             if(playStack.getTotal() > 0) {
-                playPopup.pop(false, playCircle.getX() + 37, playCircle.getY() + 38);
+                playStack.popStack(false);
             }
         } else {
             // tie.
@@ -521,7 +489,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         if(!playerFolded) {
             if(playerFour.getHandType().ordinal() >= HandType.STRAIGHT.ordinal()) {
                 // doesn't matter if the player won or the dealer qualified
-                superBonusPopup.pop(true, superBonusCircle.getX() + 37, superBonusCircle.getY() + 38);
+                superBonusStack.popStack(true);
                 total += superBonusStack.getTotal(); // get your initial bet back too
                 switch (playerFour.getHandType()) {
                     case FOUR_OF_A_KIND:
@@ -546,10 +514,10 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             } else if(playerWon >= 0) {
                 total += superBonusStack.getTotal();
             } else {
-                superBonusPopup.pop(false, superBonusCircle.getX() + 37, superBonusCircle.getY() + 38);
+                superBonusStack.popStack(false);
             }
         } else {
-            superBonusPopup.pop(false, superBonusCircle.getX() + 37, superBonusCircle.getY() + 38);
+            superBonusStack.popStack(false);
         }
 
         // Queens Up
@@ -558,7 +526,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
                     || (playerFour.getHandType().ordinal() == HandType.PAIR.ordinal() && playerFour.getStraightValues().get(0) >= 12) )
                 ) {
             total += queensUpStack.getTotal(); // return the initial bet
-            queensUpPopup.pop(true, queensUpCircle.getX() + 37, queensUpCircle.getY() + 38);
+            queensUpStack.popStack(true);
             switch(playerFour.getHandType()) {
                 case FOUR_OF_A_KIND:
                     total += queensUpStack.getTotal() * 50;
@@ -582,7 +550,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
                     break;
             }
         } else if(queensUpStack.getTotal() > 0) {
-            queensUpPopup.pop(false, queensUpCircle.getX() + 37, queensUpCircle.getY() + 38);
+            queensUpStack.popStack(false);
         }
         addToBalance(total);
 
@@ -599,10 +567,10 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
 
         setHandText(playerFour, dealerFour, dealerQualifies, playerFolded);
 
-        anteStack.clearTotal();
-        queensUpStack.clearTotal();
-        playStack.clearTotal();
-        superBonusStack.clearTotal();
+        anteStack.clear();
+        queensUpStack.clear();
+        playStack.clear();
+        superBonusStack.clear();
     }
 
     private void setHandText(BestFourHand playerFour, BestFourHand dealerFour, boolean dealerQualified, boolean playerFolded) {
