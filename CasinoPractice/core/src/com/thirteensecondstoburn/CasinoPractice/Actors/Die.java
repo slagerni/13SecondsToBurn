@@ -50,4 +50,6 @@ public class Die extends Actor {
     public void rollDie() {
         rolledNumber = rand.nextInt(6) + 1;
     }
+
+    public int getRolledNumber() { return rolledNumber; }
 }

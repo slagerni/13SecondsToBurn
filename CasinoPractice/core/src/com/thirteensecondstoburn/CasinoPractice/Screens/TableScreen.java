@@ -70,6 +70,7 @@ abstract public class TableScreen implements Screen {
     }
 
     public void showHint(String text) {
+        hintText.getActions().clear();
         hintText.setTextCentered(text);
         hintText.setZIndex(1000);
         int duration = 3;

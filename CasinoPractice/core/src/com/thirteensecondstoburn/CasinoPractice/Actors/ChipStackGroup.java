@@ -19,6 +19,12 @@ public class ChipStackGroup extends Group {
         this(game, assets, null);
     }
 
+    public ChipStackGroup(final CasinoPracticeGame game, Assets assets, float x, float y, float scale) {
+        this(game, assets, null);
+        setPosition(x, y);
+        setScale(scale);
+    }
+
     public ChipStackGroup(final CasinoPracticeGame game, Assets assets, Assets.TEX_NAME circleTexture) {
         this.game = game;
         this.assets = assets;
@@ -34,7 +40,9 @@ public class ChipStackGroup extends Group {
 
         popup = new WinLosePopup(assets);
 
-        addActor(circle);
+        if(circle != null) {
+            addActor(circle);
+        }
         addActor(chipStack);
         addActor(popup);
     }

@@ -198,5 +198,5 @@ public class CasinoPracticeGame extends Game {
         this.tableMinimum = tableMinimum;
     }
 
-    public int getTableMaximum() { return tableMinimum * 10; }
+    public int getTableMaximum() { return tableMinimum * 100; }
 }
