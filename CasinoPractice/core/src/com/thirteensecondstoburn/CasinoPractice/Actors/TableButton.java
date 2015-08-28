@@ -13,13 +13,13 @@ import com.thirteensecondstoburn.CasinoPractice.Assets;
  * Created by Nick on 1/17/2015.
  */
 public class TableButton extends Actor {
-    private Assets assets;
-    private String text;
-    private Color color;
-    private boolean isUp = true;
-    private Image backgroundDown;
-    private Image backgroundUp;
-    private float textScale = 2.0f;
+    protected Assets assets;
+    protected String text;
+    protected Color color;
+    protected boolean isUp = true;
+    protected Image backgroundDown;
+    protected Image backgroundUp;
+    protected float textScale = 2.0f;
 
     public static int BUTTON_WIDTH = 256;
     public static int BUTTON_HEIGHT = 256;
@@ -63,10 +63,10 @@ public class TableButton extends Actor {
         textScale = val;
     }
 
-    private void drawFont(Batch Batch, BitmapFont font, String text) {
+    protected void drawFont(Batch batch, BitmapFont font, String text) {
         font.setScale(textScale);
 
-        Batch.setShader(assets.getDistanceFieldShader());
+        batch.setShader(assets.getDistanceFieldShader());
         font.setColor(Color.BLACK);
 
         BitmapFont.TextBounds bounds = font.getBounds(text);
@@ -74,9 +74,9 @@ public class TableButton extends Actor {
         int y = (int) ((getHeight() - bounds.height) / 2);
 
         assets.getDistanceFieldShader().setSmoothing( 1f / 8f / textScale);
-        font.draw(Batch, text, getX() + x, getY() - y + getHeight() + getHeight()*.05f);
-        Batch.flush();
-        Batch.setShader(null);
+        font.draw(batch, text, getX() + x, getY() - y + getHeight() + getHeight()*.05f);
+        batch.flush();
+        batch.setShader(null);
     }
 
     public void setColor(Color color) {
@@ -89,5 +89,9 @@ public class TableButton extends Actor {
             return true;
         }
         return false;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }

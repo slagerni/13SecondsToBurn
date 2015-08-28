@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStackGroup;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Die;
+import com.thirteensecondstoburn.CasinoPractice.Actors.MultiLineTableButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
@@ -24,10 +25,13 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
     }
 
     int thePoint = -1;
+    int lastComeBet = game.getTableMinimum();
 
     Image tableImage;
 
     TableButton rollButton;
+    TableButton backOddsButton;
+    MultiLineTableButton comeButton;
 
     Die die1;
     Die die2;
@@ -90,9 +94,6 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
     ChipStackGroup dontCome10Stack;
     ChipStackGroup dontCome10OddsStack;
 
-
-
-
     @Override
     public void actionCompleted(Actor caller) {
 
@@ -108,16 +109,17 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         tableImage.setPosition(280, 40);
 
         stage.addListener(new ActorGestureListener() {
-//            float startx=0, starty=0;
+            //            float startx=0, starty=0;
             @Override
             public void touchDown(InputEvent event, float x, float y, int pointer, int button) {
 //                startx = x;
 //                starty = y;
             }
+
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 //System.out.println("Rectangle passLine1 = new Rectangle(" + (int)startx + ", " + (int)starty + ", " + (int)(x - startx) + ", " + (int)(y - starty) + ");");
-                System.out.println((int)x + ", " + (int)y);
+                System.out.println((int) x + ", " + (int) y);
 
                 Rectangle passLine1 = new Rectangle(732, 150, 892, 74);
                 Rectangle passLine2 = new Rectangle(1556, 150, 68, 778);
@@ -158,8 +160,8 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
 
                 if (passLine1.contains(x, y) || passLine2.contains(x, y)) {
                     System.out.println("PASS LINE");
-                    if(thePoint == -1) { // no point? work the pass line stack
-                        if(dontPassLineStack.getTotal() > 0) {
+                    if (thePoint == -1) { // no point? work the pass line stack
+                        if (dontPassLineStack.getTotal() > 0) {
                             showHint("You can't bet on both the pass and don't pass lines. Please clear to switch.");
                             return;
                         }
@@ -171,9 +173,9 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     } else { // point established? all you can do it mess w/ the odds
                         int newTotal = passLineOddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 3;
-                        if(thePoint == 5 || thePoint == 9) odds = 4;
-                        if(thePoint == 6 || thePoint == 8) odds = 5;
-                        if(newTotal > passLineStack.getTotal() * odds) {
+                        if (thePoint == 5 || thePoint == 9) odds = 4;
+                        if (thePoint == 6 || thePoint == 8) odds = 5;
+                        if (newTotal > passLineStack.getTotal() * odds) {
                             showHint("You can only take " + odds + "x your pass line bet when the point is " + thePoint + ". Setting to max odds");
                             newTotal = passLineStack.getTotal() * odds;
                         }
@@ -183,8 +185,8 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (dontPassLine1.contains(x, y) || dontPassLine2.contains(x, y)) {
                     System.out.println("DONT PASS LINE");
-                    if(thePoint == -1) { // no point? work the dontPass line stack
-                        if(passLineStack.getTotal() > 0) {
+                    if (thePoint == -1) { // no point? work the dontPass line stack
+                        if (passLineStack.getTotal() > 0) {
                             showHint("You can't bet on both the pass and don't pass lines. Please clear to switch.");
                             return;
                         }
@@ -195,7 +197,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         dontPassLineStack.setTotal(newTotal);
                     } else { // point established? all you can do it mess w/ the odds
                         int newTotal = dontPassLineOddsStack.getTotal() + leftSide.getBetAmount();
-                        if(newTotal > dontPassLineStack.getTotal() * 6) {
+                        if (newTotal > dontPassLineStack.getTotal() * 6) {
                             showHint("You can only lay 6x your don't pass line bet. Setting to max odds");
                             newTotal = dontPassLineStack.getTotal() * 6;
                         }
@@ -212,21 +214,23 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     fieldStack.setTotal(newTotal);
                 } else if (come.contains(x, y)) {
                     System.out.println("COME");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = comeStack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = comeStack.getTotal();
                         game.subtractFromBalance(newTotal - oldTotal);
-                        comeStack.setTotal(newTotal);                        
+                        comeStack.setTotal(newTotal);
+                        lastComeBet = newTotal;
                     } // no come bets if there isn't a point established
                 } else if (dontCome.contains(x, y)) {
                     System.out.println("DONT COME");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = dontComeStack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = dontComeStack.getTotal();
                         game.subtractFromBalance(newTotal - oldTotal);
                         dontComeStack.setTotal(newTotal);
+                        lastComeBet = newTotal;
                     } // no dontCome bets if there isn't a point established
                 } else if (lay4.contains(x, y)) {
                     System.out.println("LAY 4");
@@ -272,7 +276,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     lay10Stack.setTotal(newTotal);
                 } else if (buy4.contains(x, y)) {
                     System.out.println("BUY 4");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = buy4Stack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = buy4Stack.getTotal();
@@ -280,7 +284,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         buy4Stack.setTotal(newTotal);
                     }
                 } else if (place5.contains(x, y)) {
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         System.out.println("PLACE 5");
                         int newTotal = place5Stack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
@@ -290,7 +294,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (place6.contains(x, y)) {
                     System.out.println("PLACE 6");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = place6Stack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = place6Stack.getTotal();
@@ -299,7 +303,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (place8.contains(x, y)) {
                     System.out.println("PLACE 8");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = place8Stack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = place8Stack.getTotal();
@@ -308,7 +312,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (place9.contains(x, y)) {
                     System.out.println("PLACE 9");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = place9Stack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = place9Stack.getTotal();
@@ -317,7 +321,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (buy10.contains(x, y)) {
                     System.out.println("BUY 10");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = buy10Stack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = buy10Stack.getTotal();
@@ -326,7 +330,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (hard6.contains(x, y)) {
                     System.out.println("HARD 6");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = hard6Stack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = hard6Stack.getTotal();
@@ -335,7 +339,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (hard8.contains(x, y)) {
                     System.out.println("HARD 8");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = hard8Stack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = hard8Stack.getTotal();
@@ -344,7 +348,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (hard4.contains(x, y)) {
                     System.out.println("HARD 4");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = hard4Stack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = hard4Stack.getTotal();
@@ -353,7 +357,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (hard10.contains(x, y)) {
                     System.out.println("HARD 10");
-                    if(thePoint != -1) {
+                    if (thePoint != -1) {
                         int newTotal = hard10Stack.getTotal() + leftSide.getBetAmount();
                         newTotal = checkTableMax(newTotal);
                         int oldTotal = hard10Stack.getTotal();
@@ -404,10 +408,10 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     elevenStack.setTotal(newTotal);
                 } else if (four.contains(x, y)) {
                     System.out.println("FOUR");
-                    if(come4Stack.getTotal() > 0) {
+                    if (come4Stack.getTotal() > 0) {
                         int newTotal = come4OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 3;
-                        if(newTotal > come4Stack.getTotal() * odds) {
+                        if (newTotal > come4Stack.getTotal() * odds) {
                             showHint("You can only take " + odds + "x your pass line bet when the point is " + thePoint + ". Setting to max odds");
                             newTotal = come4Stack.getTotal() * odds;
                         }
@@ -415,9 +419,9 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         game.subtractFromBalance(newTotal - oldTotal);
                         come4OddsStack.setTotal(newTotal);
                     }
-                    if(dontCome4Stack.getTotal() > 0) {
+                    if (dontCome4Stack.getTotal() > 0) {
                         int newTotal = dontCome4OddsStack.getTotal() + leftSide.getBetAmount();
-                        if(newTotal > dontCome4Stack.getTotal() * 6) {
+                        if (newTotal > dontCome4Stack.getTotal() * 6) {
                             showHint("You can only lay 6x your don't pass line bet. Setting to max odds");
                             newTotal = dontCome4Stack.getTotal() * 6;
                         }
@@ -427,10 +431,10 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (five.contains(x, y)) {
                     System.out.println("FIVE");
-                    if(come5Stack.getTotal() > 0) {
+                    if (come5Stack.getTotal() > 0) {
                         int newTotal = come5OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 4;
-                        if(newTotal > come5Stack.getTotal() * odds) {
+                        if (newTotal > come5Stack.getTotal() * odds) {
                             showHint("You can only take " + odds + "x your pass line bet when the point is " + thePoint + ". Setting to max odds");
                             newTotal = come5Stack.getTotal() * odds;
                         }
@@ -438,9 +442,9 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         game.subtractFromBalance(newTotal - oldTotal);
                         come5OddsStack.setTotal(newTotal);
                     }
-                    if(dontCome5Stack.getTotal() > 0) {
+                    if (dontCome5Stack.getTotal() > 0) {
                         int newTotal = dontCome5OddsStack.getTotal() + leftSide.getBetAmount();
-                        if(newTotal > dontCome5Stack.getTotal() * 6) {
+                        if (newTotal > dontCome5Stack.getTotal() * 6) {
                             showHint("You can only lay 6x your don't pass line bet. Setting to max odds");
                             newTotal = dontCome5Stack.getTotal() * 6;
                         }
@@ -450,10 +454,10 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (six.contains(x, y)) {
                     System.out.println("SIX");
-                    if(come6Stack.getTotal() > 0) {
+                    if (come6Stack.getTotal() > 0) {
                         int newTotal = come6OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 5;
-                        if(newTotal > come6Stack.getTotal() * odds) {
+                        if (newTotal > come6Stack.getTotal() * odds) {
                             showHint("You can only take " + odds + "x your pass line bet when the point is " + thePoint + ". Setting to max odds");
                             newTotal = come6Stack.getTotal() * odds;
                         }
@@ -461,9 +465,9 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         game.subtractFromBalance(newTotal - oldTotal);
                         come6OddsStack.setTotal(newTotal);
                     }
-                    if(dontCome6Stack.getTotal() > 0) {
+                    if (dontCome6Stack.getTotal() > 0) {
                         int newTotal = dontCome6OddsStack.getTotal() + leftSide.getBetAmount();
-                        if(newTotal > dontCome6Stack.getTotal() * 6) {
+                        if (newTotal > dontCome6Stack.getTotal() * 6) {
                             showHint("You can only lay 6x your don't pass line bet. Setting to max odds");
                             newTotal = dontCome6Stack.getTotal() * 6;
                         }
@@ -473,10 +477,10 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (eight.contains(x, y)) {
                     System.out.println("EIGHT");
-                    if(come8Stack.getTotal() > 0) {
+                    if (come8Stack.getTotal() > 0) {
                         int newTotal = come8OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 5;
-                        if(newTotal > come8Stack.getTotal() * odds) {
+                        if (newTotal > come8Stack.getTotal() * odds) {
                             showHint("You can only take " + odds + "x your pass line bet when the point is " + thePoint + ". Setting to max odds");
                             newTotal = come8Stack.getTotal() * odds;
                         }
@@ -484,9 +488,9 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         game.subtractFromBalance(newTotal - oldTotal);
                         come8OddsStack.setTotal(newTotal);
                     }
-                    if(dontCome8Stack.getTotal() > 0) {
+                    if (dontCome8Stack.getTotal() > 0) {
                         int newTotal = dontCome8OddsStack.getTotal() + leftSide.getBetAmount();
-                        if(newTotal > dontCome8Stack.getTotal() * 6) {
+                        if (newTotal > dontCome8Stack.getTotal() * 6) {
                             showHint("You can only lay 6x your don't pass line bet. Setting to max odds");
                             newTotal = dontCome8Stack.getTotal() * 6;
                         }
@@ -496,10 +500,10 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (nine.contains(x, y)) {
                     System.out.println("NINE");
-                    if(come9Stack.getTotal() > 0) {
+                    if (come9Stack.getTotal() > 0) {
                         int newTotal = come9OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 4;
-                        if(newTotal > come9Stack.getTotal() * odds) {
+                        if (newTotal > come9Stack.getTotal() * odds) {
                             showHint("You can only take " + odds + "x your pass line bet when the point is " + thePoint + ". Setting to max odds");
                             newTotal = come9Stack.getTotal() * odds;
                         }
@@ -507,9 +511,9 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         game.subtractFromBalance(newTotal - oldTotal);
                         come9OddsStack.setTotal(newTotal);
                     }
-                    if(dontCome9Stack.getTotal() > 0) {
+                    if (dontCome9Stack.getTotal() > 0) {
                         int newTotal = dontCome9OddsStack.getTotal() + leftSide.getBetAmount();
-                        if(newTotal > dontCome9Stack.getTotal() * 6) {
+                        if (newTotal > dontCome9Stack.getTotal() * 6) {
                             showHint("You can only lay 6x your don't pass line bet. Setting to max odds");
                             newTotal = dontCome9Stack.getTotal() * 6;
                         }
@@ -519,10 +523,10 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     }
                 } else if (ten.contains(x, y)) {
                     System.out.println("TEN");
-                    if(come10Stack.getTotal() > 0) {
+                    if (come10Stack.getTotal() > 0) {
                         int newTotal = come10OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 3;
-                        if(newTotal > come10Stack.getTotal() * odds) {
+                        if (newTotal > come10Stack.getTotal() * odds) {
                             showHint("You can only take " + odds + "x your pass line bet when the point is " + thePoint + ". Setting to max odds");
                             newTotal = come10Stack.getTotal() * odds;
                         }
@@ -530,9 +534,9 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         game.subtractFromBalance(newTotal - oldTotal);
                         come10OddsStack.setTotal(newTotal);
                     }
-                    if(dontCome10Stack.getTotal() > 0) {
+                    if (dontCome10Stack.getTotal() > 0) {
                         int newTotal = dontCome10OddsStack.getTotal() + leftSide.getBetAmount();
-                        if(newTotal > dontCome10Stack.getTotal() * 6) {
+                        if (newTotal > dontCome10Stack.getTotal() * 6) {
                             showHint("You can only lay 6x your don't pass line bet. Setting to max odds");
                             newTotal = dontCome10Stack.getTotal() * 6;
                         }
@@ -559,6 +563,62 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     die2.setVisible(true);
 
                     calculateRollResult();
+                    showActionButtons();
+                }
+            }
+        });
+
+        backOddsButton = new TableButton(assets, "Odds", mainColor);
+        backOddsButton.setPosition(stage.getWidth() - backOddsButton.getWidth(), backOddsButton.getWidth() + 10);
+        backOddsButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if (backOddsButton.isInside(x, y)) {
+                    if (thePoint > -1) {
+                        int odds = 3;
+                        if (thePoint == 5 || thePoint == 9) odds = 4;
+                        if (thePoint == 6 || thePoint == 8) odds = 5;
+                        backOdds(passLineStack, passLineOddsStack, odds);
+
+                        backOdds(dontPassLineStack, dontPassLineOddsStack, 6);
+                    }
+
+                    backOdds(come4Stack, come4OddsStack, 3);
+                    backOdds(dontCome4Stack, dontCome4OddsStack, 6);
+                    backOdds(come5Stack, come5OddsStack, 4);
+                    backOdds(dontCome5Stack, dontCome5OddsStack, 6);
+                    backOdds(come6Stack, come6OddsStack, 5);
+                    backOdds(dontCome6Stack, dontCome6OddsStack, 6);
+                    backOdds(come8Stack, come8OddsStack, 5);
+                    backOdds(dontCome8Stack, dontCome8OddsStack, 6);
+                    backOdds(come9Stack, come9OddsStack, 4);
+                    backOdds(dontCome9Stack, dontCome9OddsStack, 6);
+                    backOdds(come10Stack, come10OddsStack, 3);
+                    backOdds(dontCome10Stack, dontCome10OddsStack, 6);
+
+                    showActionButtons();
+                }
+            }
+        });
+
+        comeButton = new MultiLineTableButton(assets, "Come", mainColor);
+        comeButton.setPosition(stage.getWidth() - comeButton.getWidth(), comeButton.getWidth() * 2 + 20);
+        comeButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if (comeButton.isInside(x, y)) {
+                    if (thePoint > -1) {
+                        if (passLineStack.getTotal() > 0 && comeStack.getTotal() == 0) {
+                            game.subtractFromBalance(lastComeBet);
+                            comeStack.setTotal(lastComeBet);
+                        }
+                        if (dontPassLineStack.getTotal() > 0 && dontComeStack.getTotal() == 0) {
+                            game.subtractFromBalance(lastComeBet);
+                            dontComeStack.setTotal(lastComeBet);
+                        }
+                    }
+
+                    showActionButtons();
                 }
             }
         });
@@ -640,6 +700,8 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
 
         stage.addActor(tableImage);
         stage.addActor(rollButton);
+        stage.addActor(backOddsButton);
+        stage.addActor(comeButton);
         stage.addActor(die1);
         stage.addActor(die2);
         stage.addActor(onChip);
@@ -699,6 +761,39 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         stage.addActor(place9Stack);
         stage.addActor(buy10Stack);
 
+        showActionButtons();
+    }
+
+    private void backOdds(ChipStackGroup checkStack, ChipStackGroup oddsStack, int odds) {
+        if (checkStack.getTotal() > 0 && oddsStack.getTotal() == 0) {
+            int oddsTotal = checkStack.getTotal() * odds;
+            game.subtractFromBalance(oddsTotal);
+            oddsStack.setTotal(oddsTotal);
+        }
+    }
+
+    private void showActionButtons() {
+        comeButton.setVisible(thePoint > -1 && comeStack.getTotal() == 0 && dontComeStack.getTotal() == 0);
+        comeButton.setColor((game.usePreActionHints() && thePoint > -1 && comeStack.getTotal() == 0 && dontComeStack.getTotal() == 0) ? hintColor : mainColor);
+        comeButton.setText(dontPassLineStack.getTotal() > 0 ? "Don't|Come" : "Come");
+
+        boolean canBack = (passLineStack.getTotal() > 0 && passLineOddsStack.getTotal() == 0)
+                ||(dontPassLineStack.getTotal() > 0 && dontPassLineOddsStack.getTotal() == 0)
+                ||(come4Stack.getTotal() > 0 && come4OddsStack.getTotal() == 0)
+                || (dontCome4Stack.getTotal() > 0 && dontCome4OddsStack.getTotal() == 0)
+                || (come5Stack.getTotal() > 0 && come5OddsStack.getTotal() == 0)
+                || (dontCome5Stack.getTotal() > 0 && dontCome5OddsStack.getTotal() == 0)
+                || (come6Stack.getTotal() > 0 && come6OddsStack.getTotal() == 0)
+                || (dontCome6Stack.getTotal() > 0 && dontCome6OddsStack.getTotal() == 0)
+                || (come8Stack.getTotal() > 0 && come8OddsStack.getTotal() == 0)
+                || (dontCome8Stack.getTotal() > 0 && dontCome8OddsStack.getTotal() == 0)
+                || (come9Stack.getTotal() > 0 && come9OddsStack.getTotal() == 0)
+                || (dontCome9Stack.getTotal() > 0 && dontCome9OddsStack.getTotal() == 0)
+                || (come10Stack.getTotal() > 0 && come10OddsStack.getTotal() == 0)
+                || (dontCome10Stack.getTotal() > 0 && dontCome10OddsStack.getTotal() == 0);
+
+        backOddsButton.setVisible(canBack);
+        backOddsButton.setColor(game.usePreActionHints() && canBack ? hintColor : mainColor);
     }
 
     private void calculateWager() {
