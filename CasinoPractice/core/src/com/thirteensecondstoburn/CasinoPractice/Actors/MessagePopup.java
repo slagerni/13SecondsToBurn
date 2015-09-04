@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 
+import java.util.HashMap;
 import java.util.Random;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
@@ -15,12 +16,32 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.addAction;
 /**
  * Created by Nick on 1/22/2015.
  */
-public class WinLosePopup extends Actor {
+public class MessagePopup extends Actor {
     Assets assets;
-    boolean isWinner = true;
-    Image winnerImage;
-    Image loserImage;
+    Message message;
+    Image image;
     Random random = new Random();
+    HashMap<Message, Image> images = new HashMap<>();
+
+    public enum Message {
+        WIN(Assets.TEX_NAME.WIN_POPUP, Color.YELLOW),
+        LOSE(Assets.TEX_NAME.LOSE_POPUP, Color.RED),
+        THREEX(Assets.TEX_NAME.THREEX_POPUP, Color.CYAN),
+        FOURX(Assets.TEX_NAME.FOURX_POPUP, Color.CYAN),
+        FIVEX(Assets.TEX_NAME.FIVEX_POPUP, Color.CYAN),
+        SIXX(Assets.TEX_NAME.SIXX_POPUP, Color.CYAN);
+
+        private final Assets.TEX_NAME texName;
+        private final Color color;
+
+        Message(Assets.TEX_NAME texName, Color color) {
+            this.texName = texName;
+            this.color = color;
+        }
+
+        public Assets.TEX_NAME getTexName() {return texName;}
+        public Color getColor() {return color;}
+    }
 
     class HideRunnable implements Runnable {
         @Override
@@ -29,36 +50,26 @@ public class WinLosePopup extends Actor {
         }
     }
 
-    public WinLosePopup(Assets assets) {
+    public MessagePopup(Assets assets) {
         this.assets = assets;
 
         setVisible(false);
 
-        winnerImage = new Image(assets.getTexture(Assets.TEX_NAME.WIN_POPUP));
-        winnerImage.setOrigin(winnerImage.getWidth()/2, winnerImage.getHeight()/2);
-        winnerImage.setColor(Color.YELLOW);
-
-        loserImage = new Image(assets.getTexture(Assets.TEX_NAME.LOSE_POPUP));
-        loserImage.setOrigin(loserImage.getWidth()/2, loserImage.getHeight()/2);
-        loserImage.setColor(Color.RED);
+        for(Message message : Message.values()) {
+            Image image = new Image(assets.getTexture(message.getTexName()));
+            image.setOrigin(image.getWidth()/2, image.getHeight()/2);
+            image.setColor(message.getColor());
+            images.put(message, image);
+        }
     }
 
-    public void pop(boolean isWinner, float startX, float startY) {
+    public void pop(Message message, float startX, float startY) {
         setColor(Color.WHITE); // so I reset the alpha of the actor
-        winnerImage.setColor(Color.YELLOW);
-        winnerImage.setPosition(0, 0);
-        loserImage.setColor(Color.RED);
-        loserImage.setPosition(0, 0);
+        this.message = message;
+        Image image = images.get(message);
+        image.setPosition(0, 0);
 
-        this.isWinner = isWinner;
         setVisible(true);
-        Image image;
-        if(isWinner) {
-            image = winnerImage;
-        }
-        else {
-            image = loserImage;
-        }
 
         setScale(1);
         setPosition(startX, startY);
@@ -73,13 +84,7 @@ public class WinLosePopup extends Actor {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        Image toDraw;
-        if(isWinner) {
-            toDraw = winnerImage;
-        }
-        else {
-            toDraw = loserImage;
-        }
+        Image toDraw = images.get(message);
 
         toDraw.setPosition(this.getX(), this.getY());
         toDraw.setRotation(this.getRotation());

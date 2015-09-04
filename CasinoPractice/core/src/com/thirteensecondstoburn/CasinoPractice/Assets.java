@@ -19,7 +19,8 @@ public class Assets {
         BACKGROUND, FONT, BUTTON_BLANK, BUTTON_BLANK_DOWN, LEFT_SIDE, ANTE_CIRCLE, PAIRPLUS_CIRCLE, PLAY_CIRCLE, WIN_POPUP, LOSE_POPUP,
         THREE_CARD_POKER_PAYTABLE, THREE_CARD_POKER_TITLE, QUEENS_UP_CIRCLE, SUPER_BONUS_CIRCLE, CRAZY_FOUR_POKER_PAYTABLE, CRAZY_FOUR_POKER_TITLE,
         MENU_BUTTON, MENU_BUTTON_DOWN, SPLASH_TITLE, BURN_LOGO, BLACK_50_ALPHA, CARIBBEAN_STUD_POKER_TITLE, CARIBBEAN_STUD_PAYTABLE, BLACKJACK_TITLE,
-        BLANK_CIRCLE, SETTINGS, CRAPS_TABLE, CRAPS_TITLE, DIEFACE1, DIEFACE2, DIEFACE3, DIEFACE4, DIEFACE5, DIEFACE6, CHIP_ON, CHIP_OFF
+        BLANK_CIRCLE, SETTINGS, CRAPS_TABLE, CRAPS_TITLE, DIEFACE1, DIEFACE2, DIEFACE3, DIEFACE4, DIEFACE5, DIEFACE6, CHIP_ON, CHIP_OFF, DICE_FRAMES,
+        THREEX_POPUP, FOURX_POPUP, FIVEX_POPUP, SIXX_POPUP
     }
     TextureAtlas cardAtlas;
     TextureAtlas chipAtlas;
@@ -205,6 +206,26 @@ public class Assets {
         texture = new Texture(Gdx.files.internal("OffChip.png"));
         texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         textures.put(TEX_NAME.CHIP_OFF, texture);
+
+        texture = new Texture(Gdx.files.internal("DiceFrames.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.DICE_FRAMES, texture);
+
+        texture = new Texture(Gdx.files.internal("3xPopup.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.THREEX_POPUP, texture);
+
+        texture = new Texture(Gdx.files.internal("4xPopup.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.FOURX_POPUP, texture);
+
+        texture = new Texture(Gdx.files.internal("5xPopup.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.FIVEX_POPUP, texture);
+
+        texture = new Texture(Gdx.files.internal("6xPopup.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.SIXX_POPUP, texture);
 
     }
 

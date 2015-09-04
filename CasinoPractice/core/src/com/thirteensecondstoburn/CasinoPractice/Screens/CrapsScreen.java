@@ -2,14 +2,18 @@ package com.thirteensecondstoburn.CasinoPractice.Screens;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
+import com.thirteensecondstoburn.CasinoPractice.Actors.AnimatedDice;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStackGroup;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Die;
+import com.thirteensecondstoburn.CasinoPractice.Actors.MessagePopup;
 import com.thirteensecondstoburn.CasinoPractice.Actors.MultiLineTableButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
@@ -38,6 +42,9 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
 
     Image onChip;
     Image offChip;
+
+    AnimatedDice rollingDice;
+    Animation rollingDiceAnimation;
     
     // woo! 50000000 chipstacks in craps!
     ChipStackGroup passLineStack;
@@ -96,7 +103,17 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
 
     @Override
     public void actionCompleted(Actor caller) {
+        if(caller == rollingDice) {
+            rollingDice.setVisible(false);
+            die1.rollDie();
+            die1.setVisible(true);
+            die2.rollDie();
+            die2.setVisible(true);
+            rollButton.setVisible(true);
 
+            calculateRollResult();
+            showActionButtons();
+        }
     }
 
     @Override
@@ -557,16 +574,31 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (rollButton.isInside(x, y)) {
-                    die1.rollDie();
-                    die1.setVisible(true);
-                    die2.rollDie();
-                    die2.setVisible(true);
-
-                    calculateRollResult();
-                    showActionButtons();
+                    die1.setVisible(false);
+                    die2.setVisible(false);
+                    rollButton.setVisible(false);
+                    comeButton.setVisible(false);
+                    backOddsButton.setVisible(false);
+                    rollingDice.roll(leftSide.getWidth(),stage.getHeight() - rollingDice.getHeight(), stage.getWidth(), stage.getHeight() - rollingDice.getHeight());
                 }
             }
         });
+
+
+        TextureRegion[][] tmp = TextureRegion.split(assets.getTexture(Assets.TEX_NAME.DICE_FRAMES), 320, 160);
+        TextureRegion[] diceFrames = new TextureRegion[14];
+        int index = 0;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.println(i + "-" + j + " -- " + (index));
+                if(index > 13) break; // only have 14 frames, not 15
+                diceFrames[index++] = tmp[i][j];
+            }
+        }
+        rollingDiceAnimation = new Animation(0.05f, diceFrames);
+        rollingDice = new AnimatedDice(rollingDiceAnimation);
+        rollingDice.setVisible(false);
+        rollingDice.addActionListener(this);
 
         backOddsButton = new TableButton(assets, "Odds", mainColor);
         backOddsButton.setPosition(stage.getWidth() - backOddsButton.getWidth(), backOddsButton.getWidth() + 10);
@@ -706,6 +738,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         stage.addActor(die2);
         stage.addActor(onChip);
         stage.addActor(offChip);
+        stage.addActor(rollingDice);
 
         stage.addActor(passLineStack);
         stage.addActor(passLineOddsStack);
@@ -769,6 +802,20 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
             int oddsTotal = checkStack.getTotal() * odds;
             game.subtractFromBalance(oddsTotal);
             oddsStack.setTotal(oddsTotal);
+            switch (odds) {
+                case 3:
+                    oddsStack.popStack(MessagePopup.Message.THREEX);
+                    break;
+                case 4:
+                    oddsStack.popStack(MessagePopup.Message.FOURX);
+                    break;
+                case 5:
+                    oddsStack.popStack(MessagePopup.Message.FIVEX);
+                    break;
+                case 6:
+                    oddsStack.popStack(MessagePopup.Message.SIXX);
+                    break;
+            }
         }
     }
 

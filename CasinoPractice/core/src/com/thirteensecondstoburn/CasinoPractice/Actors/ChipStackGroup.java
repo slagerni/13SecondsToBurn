@@ -13,7 +13,7 @@ public class ChipStackGroup extends Group {
     Assets assets;
     Image circle;
     ChipStack chipStack;
-    WinLosePopup popup;
+    MessagePopup popup;
 
     public ChipStackGroup(final CasinoPracticeGame game, Assets assets) {
         this(game, assets, null);
@@ -38,7 +38,7 @@ public class ChipStackGroup extends Group {
 
         setSize(chipStack.getWidth(), chipStack.getHeight());
 
-        popup = new WinLosePopup(assets);
+        popup = new MessagePopup(assets);
 
         if(circle != null) {
             addActor(circle);
@@ -62,7 +62,11 @@ public class ChipStackGroup extends Group {
     public void increaseTotal(int amount) {chipStack.increaseTotal(amount);}
 
     public void popStack(boolean won) {
-        popup.pop(won, chipStack.getX() + 37, chipStack.getY() + 38);
+        popup.pop(won ? MessagePopup.Message.WIN : MessagePopup.Message.LOSE, chipStack.getX() + 37, chipStack.getY() + 38);
+    }
+
+    public void popStack(MessagePopup.Message message) {
+        popup.pop(message, chipStack.getX() + 37, chipStack.getY() + 38);
     }
 
     public void clear() {
