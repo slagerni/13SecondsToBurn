@@ -126,18 +126,8 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         tableImage.setPosition(280, 40);
 
         stage.addListener(new ActorGestureListener() {
-            //            float startx=0, starty=0;
-            @Override
-            public void touchDown(InputEvent event, float x, float y, int pointer, int button) {
-//                startx = x;
-//                starty = y;
-            }
-
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                //System.out.println("Rectangle passLine1 = new Rectangle(" + (int)startx + ", " + (int)starty + ", " + (int)(x - startx) + ", " + (int)(y - starty) + ");");
-                System.out.println((int) x + ", " + (int) y);
-
                 Rectangle passLine1 = new Rectangle(732, 150, 892, 74);
                 Rectangle passLine2 = new Rectangle(1556, 150, 68, 778);
                 Rectangle dontPassLine1 = new Rectangle(732, 230, 818, 68);
@@ -176,255 +166,121 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 Rectangle ten = new Rectangle(1130, 724, 160, 140);
 
                 if (passLine1.contains(x, y) || passLine2.contains(x, y)) {
-                    System.out.println("PASS LINE");
                     if (thePoint == -1) { // no point? work the pass line stack
                         if (dontPassLineStack.getTotal() > 0) {
-                            showHint("You can't bet on both the pass and don't pass lines. Please clear to switch.");
+                            showHint("You can't bet on both the pass and don't pass lines.");
                             return;
                         }
-                        int newTotal = passLineStack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = passLineStack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        passLineStack.setTotal(newTotal);
+                        placeBet(passLineStack, leftSide.getBetAmount());
                     } else { // point established? all you can do it mess w/ the odds
-                        int newTotal = passLineOddsStack.getTotal() + leftSide.getBetAmount();
-                        int odds = 3;
-                        if (thePoint == 5 || thePoint == 9) odds = 4;
-                        if (thePoint == 6 || thePoint == 8) odds = 5;
-                        if (newTotal > passLineStack.getTotal() * odds) {
-                            showHint("You can only take " + odds + "x your pass line bet when the point is " + thePoint + ". Setting to max odds");
-                            newTotal = passLineStack.getTotal() * odds;
+                        if(passLineStack.getTotal() > 0) {
+                            int newTotal = passLineOddsStack.getTotal() + leftSide.getBetAmount();
+                            int odds = 3;
+                            if (thePoint == 5 || thePoint == 9) odds = 4;
+                            if (thePoint == 6 || thePoint == 8) odds = 5;
+                            if (newTotal > passLineStack.getTotal() * odds) {
+                                showHint("You can only take " + odds + "x your pass line bet when the point is " + thePoint + ". Setting to max odds");
+                                newTotal = passLineStack.getTotal() * odds;
+                            }
+                            int oldTotal = passLineOddsStack.getTotal();
+                            game.subtractFromBalance(newTotal - oldTotal);
+                            passLineOddsStack.setTotal(newTotal);
                         }
-                        int oldTotal = passLineOddsStack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        passLineOddsStack.setTotal(newTotal);
                     }
                 } else if (dontPassLine1.contains(x, y) || dontPassLine2.contains(x, y)) {
-                    System.out.println("DONT PASS LINE");
                     if (thePoint == -1) { // no point? work the dontPass line stack
                         if (passLineStack.getTotal() > 0) {
-                            showHint("You can't bet on both the pass and don't pass lines. Please clear to switch.");
+                            showHint("You can't bet on both the pass and don't pass lines.");
                             return;
                         }
-                        int newTotal = dontPassLineStack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = dontPassLineStack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        dontPassLineStack.setTotal(newTotal);
+                        placeBet(dontPassLineStack, leftSide.getBetAmount());
                     } else { // point established? all you can do it mess w/ the odds
-                        int newTotal = dontPassLineOddsStack.getTotal() + leftSide.getBetAmount();
-                        if (newTotal > dontPassLineStack.getTotal() * 6) {
-                            showHint("You can only lay 6x your don't pass line bet. Setting to max odds");
-                            newTotal = dontPassLineStack.getTotal() * 6;
+                        if(dontPassLineStack.getTotal() > 0) {
+                            int newTotal = dontPassLineOddsStack.getTotal() + leftSide.getBetAmount();
+                            if (newTotal > dontPassLineStack.getTotal() * 6) {
+                                showHint("You can only lay 6x your don't pass line bet. Setting to max odds");
+                                newTotal = dontPassLineStack.getTotal() * 6;
+                            }
+                            int oldTotal = dontPassLineOddsStack.getTotal();
+                            game.subtractFromBalance(newTotal - oldTotal);
+                            dontPassLineOddsStack.setTotal(newTotal);
                         }
-                        int oldTotal = dontPassLineOddsStack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        dontPassLineOddsStack.setTotal(newTotal);
                     }
                 } else if (field.contains(x, y)) {
-                    System.out.println("FIELD");
-                    int newTotal = fieldStack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = fieldStack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    fieldStack.setTotal(newTotal);
+                    placeBet(fieldStack, leftSide.getBetAmount());
                 } else if (come.contains(x, y)) {
-                    System.out.println("COME");
                     if (thePoint != -1) {
-                        int newTotal = comeStack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = comeStack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        comeStack.setTotal(newTotal);
-                        lastComeBet = newTotal;
+                        lastComeBet = placeBet(comeStack, leftSide.getBetAmount());
                     } // no come bets if there isn't a point established
                 } else if (dontCome.contains(x, y)) {
-                    System.out.println("DONT COME");
                     if (thePoint != -1) {
-                        int newTotal = dontComeStack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = dontComeStack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        dontComeStack.setTotal(newTotal);
-                        lastComeBet = newTotal;
+                        lastComeBet = placeBet(dontComeStack, leftSide.getBetAmount());
                     } // no dontCome bets if there isn't a point established
                 } else if (lay4.contains(x, y)) {
-                    System.out.println("LAY 4");
-                    int newTotal = lay4Stack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = lay4Stack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    lay4Stack.setTotal(newTotal);
+                    placeBet(lay4Stack, leftSide.getBetAmount());
                 } else if (lay5.contains(x, y)) {
-                    System.out.println("LAY 5");
-                    int newTotal = lay5Stack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = lay5Stack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    lay5Stack.setTotal(newTotal);
+                    placeBet(lay5Stack, leftSide.getBetAmount());
                 } else if (lay6.contains(x, y)) {
-                    System.out.println("LAY 6");
-                    int newTotal = lay6Stack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = lay6Stack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    lay6Stack.setTotal(newTotal);
+                    placeBet(lay6Stack, leftSide.getBetAmount());
                 } else if (lay8.contains(x, y)) {
-                    System.out.println("LAY 8");
-                    int newTotal = lay8Stack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = lay8Stack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    lay8Stack.setTotal(newTotal);
+                    placeBet(lay8Stack, leftSide.getBetAmount());
                 } else if (lay9.contains(x, y)) {
-                    System.out.println("LAY 9");
-                    int newTotal = lay9Stack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = lay9Stack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    lay9Stack.setTotal(newTotal);
+                    placeBet(lay9Stack, leftSide.getBetAmount());
                 } else if (lay10.contains(x, y)) {
-                    System.out.println("Lay 10");
-                    int newTotal = lay10Stack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = lay10Stack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    lay10Stack.setTotal(newTotal);
+                    placeBet(lay10Stack, leftSide.getBetAmount());
                 } else if (buy4.contains(x, y)) {
-                    System.out.println("BUY 4");
                     if (thePoint != -1) {
-                        int newTotal = buy4Stack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = buy4Stack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        buy4Stack.setTotal(newTotal);
+                        placeBet(buy4Stack, leftSide.getBetAmount());
                     }
                 } else if (place5.contains(x, y)) {
                     if (thePoint != -1) {
-                        System.out.println("PLACE 5");
-                        int newTotal = place5Stack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = place5Stack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        place5Stack.setTotal(newTotal);
+                        placeBet(place5Stack, leftSide.getBetAmount());
                     }
                 } else if (place6.contains(x, y)) {
-                    System.out.println("PLACE 6");
                     if (thePoint != -1) {
-                        int newTotal = place6Stack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = place6Stack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        place6Stack.setTotal(newTotal);
+                        placeBet(place6Stack, leftSide.getBetAmount());
                     }
                 } else if (place8.contains(x, y)) {
-                    System.out.println("PLACE 8");
                     if (thePoint != -1) {
-                        int newTotal = place8Stack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = place8Stack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        place8Stack.setTotal(newTotal);
+                        placeBet(place8Stack, leftSide.getBetAmount());
                     }
                 } else if (place9.contains(x, y)) {
-                    System.out.println("PLACE 9");
                     if (thePoint != -1) {
-                        int newTotal = place9Stack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = place9Stack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        place9Stack.setTotal(newTotal);
+                        placeBet(place9Stack, leftSide.getBetAmount());
                     }
                 } else if (buy10.contains(x, y)) {
-                    System.out.println("BUY 10");
                     if (thePoint != -1) {
-                        int newTotal = buy10Stack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = buy10Stack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        buy10Stack.setTotal(newTotal);
+                        placeBet(buy10Stack, leftSide.getBetAmount());
                     }
                 } else if (hard6.contains(x, y)) {
-                    System.out.println("HARD 6");
                     if (thePoint != -1) {
-                        int newTotal = hard6Stack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = hard6Stack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        hard6Stack.setTotal(newTotal);
+                        placeBet(hard6Stack, leftSide.getBetAmount());
                     }
                 } else if (hard8.contains(x, y)) {
-                    System.out.println("HARD 8");
                     if (thePoint != -1) {
-                        int newTotal = hard8Stack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = hard8Stack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        hard8Stack.setTotal(newTotal);
+                        placeBet(hard8Stack, leftSide.getBetAmount());
                     }
                 } else if (hard4.contains(x, y)) {
-                    System.out.println("HARD 4");
                     if (thePoint != -1) {
-                        int newTotal = hard4Stack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = hard4Stack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        hard4Stack.setTotal(newTotal);
+                        placeBet(hard4Stack, leftSide.getBetAmount());
                     }
                 } else if (hard10.contains(x, y)) {
-                    System.out.println("HARD 10");
                     if (thePoint != -1) {
-                        int newTotal = hard10Stack.getTotal() + leftSide.getBetAmount();
-                        newTotal = checkTableMax(newTotal);
-                        int oldTotal = hard10Stack.getTotal();
-                        game.subtractFromBalance(newTotal - oldTotal);
-                        hard10Stack.setTotal(newTotal);
+                        placeBet(hard10Stack, leftSide.getBetAmount());
                     }
                 } else if (any7.contains(x, y)) {
-                    System.out.println("ANY 7");
-                    int newTotal = any7Stack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = any7Stack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    any7Stack.setTotal(newTotal);
+                    placeBet(any7Stack, leftSide.getBetAmount());
                 } else if (anyCraps.contains(x, y)) {
-                    System.out.println("ANY CRAPS");
-                    int newTotal = anyCrapsStack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = anyCrapsStack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    anyCrapsStack.setTotal(newTotal);
+                    placeBet(anyCrapsStack, leftSide.getBetAmount());
                 } else if (snakeEyes.contains(x, y)) {
-                    System.out.println("SNAKE EYES");
-                    int newTotal = snakeEyesStack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = snakeEyesStack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    snakeEyesStack.setTotal(newTotal);
+                    placeBet(snakeEyesStack, leftSide.getBetAmount());
                 } else if (boxCars.contains(x, y)) {
-                    System.out.println("BOX CARS");
-                    int newTotal = boxCarsStack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = boxCarsStack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    boxCarsStack.setTotal(newTotal);
+                    placeBet(boxCarsStack, leftSide.getBetAmount());
                 } else if (three.contains(x, y)) {
-                    System.out.println("THREE");
-                    int newTotal = threeStack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = threeStack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    threeStack.setTotal(newTotal);
+                    placeBet(threeStack, leftSide.getBetAmount());
                 } else if (eleven.contains(x, y)) {
-                    System.out.println("ELEVEN");
-                    int newTotal = elevenStack.getTotal() + leftSide.getBetAmount();
-                    newTotal = checkTableMax(newTotal);
-                    int oldTotal = elevenStack.getTotal();
-                    game.subtractFromBalance(newTotal - oldTotal);
-                    elevenStack.setTotal(newTotal);
+                    placeBet(elevenStack, leftSide.getBetAmount());
                 } else if (four.contains(x, y)) {
-                    System.out.println("FOUR");
                     if (come4Stack.getTotal() > 0) {
                         int newTotal = come4OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 3;
@@ -447,7 +303,6 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         dontCome4OddsStack.setTotal(newTotal);
                     }
                 } else if (five.contains(x, y)) {
-                    System.out.println("FIVE");
                     if (come5Stack.getTotal() > 0) {
                         int newTotal = come5OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 4;
@@ -470,7 +325,6 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         dontCome5OddsStack.setTotal(newTotal);
                     }
                 } else if (six.contains(x, y)) {
-                    System.out.println("SIX");
                     if (come6Stack.getTotal() > 0) {
                         int newTotal = come6OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 5;
@@ -493,7 +347,6 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         dontCome6OddsStack.setTotal(newTotal);
                     }
                 } else if (eight.contains(x, y)) {
-                    System.out.println("EIGHT");
                     if (come8Stack.getTotal() > 0) {
                         int newTotal = come8OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 5;
@@ -516,7 +369,6 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         dontCome8OddsStack.setTotal(newTotal);
                     }
                 } else if (nine.contains(x, y)) {
-                    System.out.println("NINE");
                     if (come9Stack.getTotal() > 0) {
                         int newTotal = come9OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 4;
@@ -539,7 +391,6 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         dontCome9OddsStack.setTotal(newTotal);
                     }
                 } else if (ten.contains(x, y)) {
-                    System.out.println("TEN");
                     if (come10Stack.getTotal() > 0) {
                         int newTotal = come10OddsStack.getTotal() + leftSide.getBetAmount();
                         int odds = 3;
@@ -590,7 +441,6 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         int index = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 3; j++) {
-                System.out.println(i + "-" + j + " -- " + (index));
                 if(index > 13) break; // only have 14 frames, not 15
                 diceFrames[index++] = tmp[i][j];
             }
@@ -914,9 +764,6 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
     private void calculateRollResult() {
         int total = die1.getRolledNumber() + die2.getRolledNumber();
         boolean hardWay = die1.getRolledNumber() == die2.getRolledNumber();
-
-        System.out.println("Rolled: " + total + " hardway: " + hardWay);
-
         int won = 0;
 
         // come on role
@@ -1793,5 +1640,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
             offChip.setVisible(true);
             onChip.setVisible(false);
         }
+    }
+
+    private int placeBet(ChipStackGroup stack, int amount) {
+        int newTotal = stack.getTotal() + amount;
+        newTotal = checkTableMax(newTotal);
+        int oldTotal = stack.getTotal();
+        game.subtractFromBalance(newTotal - oldTotal);
+        stack.setTotal(newTotal);
+        return newTotal;
     }
 }
