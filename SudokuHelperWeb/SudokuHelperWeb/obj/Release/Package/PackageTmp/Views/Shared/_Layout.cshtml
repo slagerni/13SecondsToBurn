@@ -4,6 +4,7 @@
         <meta charset="utf-8" />
         <title>@ViewBag.Title</title>
         <meta name="viewport" content="width=device-width" />
+        @RenderSection("AdditionalMeta", false)
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
         @Styles.Render("~/Content/mobileCss", "~/Content/css")
         @Scripts.Render("~/bundles/modernizr")
@@ -17,7 +18,7 @@
                 else
                 {
                     <img class="centered" src="~/Content/images/title.png" />
-                    <h1>@ViewBag.Title</h1>
+                    <h1>@ViewBag.HeaderTitle</h1>
                     @*@Html.Partial("_LoginPartial")*@
                 }
             </div>

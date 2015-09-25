@@ -753,13 +753,6 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         leftSide.updateBalance();
     }
 
-    private int checkTableMax(int newTotal) {
-        if(newTotal > game.getTableMaximum()) {
-            showHint("You're trying to bet more than the table maximum. Setting to the table max.");
-            newTotal = game.getTableMaximum();
-        }
-        return newTotal;
-    }
 
     private void calculateRollResult() {
         int total = die1.getRolledNumber() + die2.getRolledNumber();
@@ -1640,14 +1633,5 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
             offChip.setVisible(true);
             onChip.setVisible(false);
         }
-    }
-
-    private int placeBet(ChipStackGroup stack, int amount) {
-        int newTotal = stack.getTotal() + amount;
-        newTotal = checkTableMax(newTotal);
-        int oldTotal = stack.getTotal();
-        game.subtractFromBalance(newTotal - oldTotal);
-        stack.setTotal(newTotal);
-        return newTotal;
     }
 }

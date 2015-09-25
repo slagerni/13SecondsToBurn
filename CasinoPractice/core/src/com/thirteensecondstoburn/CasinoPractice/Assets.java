@@ -20,7 +20,8 @@ public class Assets {
         THREE_CARD_POKER_PAYTABLE, THREE_CARD_POKER_TITLE, QUEENS_UP_CIRCLE, SUPER_BONUS_CIRCLE, CRAZY_FOUR_POKER_PAYTABLE, CRAZY_FOUR_POKER_TITLE,
         MENU_BUTTON, MENU_BUTTON_DOWN, SPLASH_TITLE, BURN_LOGO, BLACK_50_ALPHA, CARIBBEAN_STUD_POKER_TITLE, CARIBBEAN_STUD_PAYTABLE, BLACKJACK_TITLE,
         BLANK_CIRCLE, SETTINGS, CRAPS_TABLE, CRAPS_TITLE, DIEFACE1, DIEFACE2, DIEFACE3, DIEFACE4, DIEFACE5, DIEFACE6, CHIP_ON, CHIP_OFF, DICE_FRAMES,
-        THREEX_POPUP, FOURX_POPUP, FIVEX_POPUP, SIXX_POPUP
+        THREEX_POPUP, FOURX_POPUP, FIVEX_POPUP, SIXX_POPUP, ROULETTE_TABLE_AMERICAN, ROULETTE_TABLE_EUROPEAN, ROULETTE_WHEEL_AMERICAN,
+        ROULETTE_WHEEL_EUROPEAN, ROULETTE_WHEEL_BALL, ROULETTE_TITLE
     }
     TextureAtlas cardAtlas;
     TextureAtlas chipAtlas;
@@ -226,6 +227,30 @@ public class Assets {
         texture = new Texture(Gdx.files.internal("6xPopup.png"));
         texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         textures.put(TEX_NAME.SIXX_POPUP, texture);
+
+        texture = new Texture(Gdx.files.internal("RouletteTableAmerican.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.ROULETTE_TABLE_AMERICAN, texture);
+
+        texture = new Texture(Gdx.files.internal("RouletteTableEuropean.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.ROULETTE_TABLE_EUROPEAN, texture);
+
+        texture = new Texture(Gdx.files.internal("RouletteWheelEuropean.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.ROULETTE_WHEEL_EUROPEAN, texture);
+
+        texture = new Texture(Gdx.files.internal("RouletteWheelAmerican.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.ROULETTE_WHEEL_AMERICAN, texture);
+
+        texture = new Texture(Gdx.files.internal("RouletteWheelBall.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.ROULETTE_WHEEL_BALL, texture);
+
+        texture = new Texture(Gdx.files.internal("RouletteTitle.png"));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        textures.put(TEX_NAME.ROULETTE_TITLE, texture);
 
     }
 

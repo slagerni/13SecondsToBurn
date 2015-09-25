@@ -8,6 +8,7 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.CaribbeanStudPokerScreen
 import com.thirteensecondstoburn.CasinoPractice.Screens.CrapsScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CrazyFourPokerScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.MenuScreen;
+import com.thirteensecondstoburn.CasinoPractice.Screens.RouletteScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SettingsScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SplashScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.ThreeCardPokerScreen;
@@ -24,6 +25,7 @@ public class CasinoPracticeGame extends Game {
     private CaribbeanStudPokerScreen caribbeanStudPokerScreen;
     private BlackJackScreen blackJackScreen;
     private CrapsScreen crapsScreen;
+    private RouletteScreen rouletteScreen;
     private float balance;
     private Preferences saveData;
 
@@ -74,6 +76,11 @@ public class CasinoPracticeGame extends Game {
     public CrapsScreen getCrapsScreen() {
         if(crapsScreen == null) crapsScreen = new CrapsScreen(this);
         return crapsScreen;
+    }
+
+    public RouletteScreen getRouletteScreen() {
+        if(rouletteScreen == null) rouletteScreen = new RouletteScreen(this);
+        return rouletteScreen;
     }
 
     @Override

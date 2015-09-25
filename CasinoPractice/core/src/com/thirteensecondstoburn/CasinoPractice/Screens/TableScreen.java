@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStackGroup;
 import com.thirteensecondstoburn.CasinoPractice.Actors.LeftSide;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
@@ -97,6 +98,22 @@ abstract public class TableScreen implements Screen {
         addToBalance(-amount);
     }
 
+    protected int checkTableMax(int newTotal) {
+        if(newTotal > game.getTableMaximum()) {
+            showHint("You're trying to bet more than the table maximum. Setting to the table max.");
+            newTotal = game.getTableMaximum();
+        }
+        return newTotal;
+    }
+
+    protected int placeBet(ChipStackGroup stack, int amount) {
+        int newTotal = stack.getTotal() + amount;
+        newTotal = checkTableMax(newTotal);
+        int oldTotal = stack.getTotal();
+        game.subtractFromBalance(newTotal - oldTotal);
+        stack.setTotal(newTotal);
+        return newTotal;
+    }
 
     @Override
     public void render(float delta) {

@@ -40,12 +40,14 @@ public class MenuScreen implements Screen {
     Button cStudButton;
     Button blackjackButton;
     Button crapsButton;
+    Button rouletteButton;
 
     Image tcpTitle;
     Image cfpTitle;
     Image cStudTitle;
     Image blackjackTitle;
     Image crapsTitle;
+    Image rouletteTitle;
 
     Sprite background;
     public Color backgroundColor = new Color().valueOf("265614FF");
@@ -106,6 +108,8 @@ public class MenuScreen implements Screen {
         blackjackTitle.setColor(Color.WHITE);
         crapsTitle = new Image(assets.getTexture(Assets.TEX_NAME.CRAPS_TITLE));
         crapsTitle.setColor(Color.WHITE);
+        rouletteTitle = new Image(assets.getTexture(Assets.TEX_NAME.ROULETTE_TITLE));
+        rouletteTitle.setColor(Color.WHITE);
 
         tcpButton = new Button(skin);
         tcpButton.setColor(menuButtonColor);
@@ -181,11 +185,28 @@ public class MenuScreen implements Screen {
             }
         });
 
+        rouletteButton = new Button(skin);
+        rouletteButton.setColor(menuButtonColor);
+        rouletteButton.add(rouletteTitle).center().expand();
+        rouletteButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        game.setScreen(game.getRouletteScreen());
+                    }
+                })));
+            }
+        });
+
         gamesTable.add(tcpButton).width(300).height(300).expand().pad(10);
         gamesTable.add(cfpButton).width(300).height(300).expand().pad(10);
         gamesTable.add(cStudButton).width(300).height(300).expand().pad(10);
         gamesTable.add(blackjackButton).width(300).height(300).expand().pad(10);
         gamesTable.add(crapsButton).width(300).height(300).expand().pad(10);
+        gamesTable.row();
+        gamesTable.add(rouletteButton).width(300).height(300).expand().pad(10);
 //        scrollPane = new ScrollPane(gamesTable, skin);
 //        scrollPane.setTouchable(Touchable.enabled);
 //        scrollPane.setWidth(stage.getWidth());

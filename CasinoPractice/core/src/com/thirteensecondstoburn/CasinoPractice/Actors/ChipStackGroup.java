@@ -15,13 +15,14 @@ public class ChipStackGroup extends Group {
     ChipStack chipStack;
     MessagePopup popup;
 
-    public ChipStackGroup(final CasinoPracticeGame game, Assets assets) {
-        this(game, assets, null);
-    }
-
     public ChipStackGroup(final CasinoPracticeGame game, Assets assets, float x, float y, float scale) {
         this(game, assets, null);
         setPosition(x, y);
+        setScale(scale);
+    }
+
+    public ChipStackGroup(final CasinoPracticeGame game, Assets assets, float scale) {
+        this(game, assets, null);
         setScale(scale);
     }
 
@@ -30,7 +31,6 @@ public class ChipStackGroup extends Group {
         this.assets = assets;
 
         if(circleTexture != null) {
-            //Assets.TEX_NAME.BLANK_CIRCLE
             circle = new Image(assets.getTexture(circleTexture));
         }
 
@@ -46,10 +46,6 @@ public class ChipStackGroup extends Group {
         addActor(chipStack);
         addActor(popup);
     }
-
-//    public ChipStack getChipStack() {
-//        return chipStack;
-//    }
 
     public void setTotal(int amount) {
         chipStack.setTotal(amount);
