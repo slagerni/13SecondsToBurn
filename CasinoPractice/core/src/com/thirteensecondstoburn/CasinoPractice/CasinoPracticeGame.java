@@ -38,6 +38,8 @@ public class CasinoPracticeGame extends Game {
     private boolean blackjackHitSoft17 = false;
     private int tableMinimum = 5;
 
+    private String rouletteType = "European";
+
     public SplashScreen getSplashScreen() {
         if(splashScreen == null) splashScreen = new SplashScreen(this);
         return splashScreen;
@@ -97,6 +99,7 @@ public class CasinoPracticeGame extends Game {
         blackjackPenetration = saveData.getFloat(("bjPenetration"), .65f);
         blackjackDecks = saveData.getInteger("bjDecks", 8);
         tableMinimum = saveData.getInteger("tableMinimum", 5);
+        rouletteType = saveData.getString("rouletteType");
 
         setScreen(getSplashScreen());
 	}
@@ -110,6 +113,7 @@ public class CasinoPracticeGame extends Game {
         saveData.putFloat("bjPenetration", blackjackPenetration);
         saveData.putInteger("bjDecks", blackjackDecks);
         saveData.putInteger("tableMinimum", tableMinimum);
+        saveData.putString("rouletteType", rouletteType);
         saveData.flush();
     }
 
@@ -121,6 +125,9 @@ public class CasinoPracticeGame extends Game {
         if(threeCardPokerScreen != null) try {threeCardPokerScreen.dispose();} catch (Exception ex) {}
         if(crazyFourPokerScreen != null) try {crazyFourPokerScreen.dispose();} catch (Exception ex) {}
         if(caribbeanStudPokerScreen != null) try {caribbeanStudPokerScreen.dispose();} catch (Exception ex) {}
+        if(blackJackScreen != null) try {blackJackScreen.dispose();} catch (Exception ex) {}
+        if(crapsScreen != null) try {crapsScreen.dispose();} catch (Exception ex) {}
+        if(rouletteScreen != null) try {rouletteScreen.dispose();} catch (Exception ex) {}
         saveSettings();
     }
 
@@ -206,4 +213,14 @@ public class CasinoPracticeGame extends Game {
     }
 
     public int getTableMaximum() { return tableMinimum * 100; }
+
+    public String getRouletteType() {
+        return rouletteType;
+    }
+
+    public void setRouletteType(String rouletteType) {
+        this.rouletteType = rouletteType;
+    }
+
+
 }

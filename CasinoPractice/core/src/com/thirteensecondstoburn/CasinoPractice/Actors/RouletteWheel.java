@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
+import com.thirteensecondstoburn.CasinoPractice.Screens.RouletteScreen;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +30,11 @@ public class RouletteWheel extends Actor {
     int direction = 1;
 
     public RouletteWheel(Assets assets) {
-        wheel = new Image(assets.getTexture(Assets.TEX_NAME.ROULETTE_WHEEL_EUROPEAN));
+        if (RouletteScreen.isEuropean) {
+            wheel = new Image(assets.getTexture(Assets.TEX_NAME.ROULETTE_WHEEL_EUROPEAN));
+        } else {
+            wheel = new Image(assets.getTexture(Assets.TEX_NAME.ROULETTE_WHEEL_AMERICAN));
+        }
         wheel.setOrigin(225, 225);
         wheel.setPosition(this.getX(), this.getY());
 
@@ -39,10 +44,6 @@ public class RouletteWheel extends Actor {
         ball = new Image(assets.getTexture(Assets.TEX_NAME.ROULETTE_WHEEL_BALL));
         ball.setPosition(this.getX(), this.getY());
         ball.setOrigin(225, 225);
-
-//        for(int i=0; i<38; i++) {
-//            System.out.println(i * 360.0/37.0);
-//        }
     }
 
     @Override
@@ -72,15 +73,16 @@ public class RouletteWheel extends Actor {
         @Override
         public void run() {
             // make sure the wheel/ball end up on exact angles, set their positions and then set the ball number
-            // TODO update for the american wheel
             HashMap<Double, Integer> map = europeanAngles;
+            if(!RouletteScreen.isEuropean) {
+                map = americanAngles;
+            }
 
-
-            double ballRotation =  getClosestAngle(map, ball.getRotation());
-            ball.setRotation((float)ballRotation);
+            double ballRotation = getClosestAngle(map, ball.getRotation());
+            ball.setRotation((float) ballRotation);
             double wheelRotation = getClosestAngle(map, wheel.getRotation());
             wheel.setRotation((float) wheelRotation);
-            if(ballRotation > wheelRotation) ballRotation -= 360;
+            if (ballRotation > wheelRotation) ballRotation -= 360;
             double offsetAngle = getClosestAngle(map, Math.abs(ballRotation - wheelRotation));
             number = map.get(offsetAngle);
 
@@ -89,7 +91,10 @@ public class RouletteWheel extends Actor {
     }
 
     public void spin() {
-        int numbers = 37; // TODO change for american to 38
+        int numbers = 37;
+        if(!RouletteScreen.isEuropean) {
+            number = 38;
+        }
 
         ball.addAction(Actions.rotateBy(-1 * direction * (rand.nextInt(numbers) * 360 / numbers + 1080), 5f, Interpolation.sineOut));
         wheel.addAction(sequence(
@@ -104,16 +109,16 @@ public class RouletteWheel extends Actor {
     }
 
     private void notifyListeners() {
-        for(ActionCompletedListener l : listeners) {
+        for (ActionCompletedListener l : listeners) {
             l.actionCompleted(this);
         }
     }
 
     private double getClosestAngle(HashMap<Double, Integer> map, double refAngle) {
         Set<Double> keys = map.keySet();
-        if(Math.abs(refAngle) > 360) {
-            double timesGreater = (int)Math.abs(refAngle) / 360.0;
-            if(refAngle >= 0) {
+        if (Math.abs(refAngle) > 360) {
+            double timesGreater = (int) Math.abs(refAngle) / 360.0;
+            if (refAngle >= 0) {
                 refAngle -= 360.0 * (int) timesGreater;
             } else {
                 refAngle += 360.0 * (int) timesGreater + 360;
@@ -123,7 +128,7 @@ public class RouletteWheel extends Actor {
         double closestAngle = 0;
         for (double angle : keys) {
             double distance = Math.abs(refAngle - angle);
-            if(distance < closest) {
+            if (distance < closest) {
                 closest = distance;
                 closestAngle = angle;
             }
@@ -132,6 +137,7 @@ public class RouletteWheel extends Actor {
     }
 
     private static final HashMap<Double, Integer> europeanAngles = new HashMap<>();
+
     static {
         europeanAngles.put(0.0, 0);
         europeanAngles.put(9.72972972972973, 32);
@@ -170,5 +176,48 @@ public class RouletteWheel extends Actor {
         europeanAngles.put(330.81081081081084, 35);
         europeanAngles.put(340.5405405405405, 3);
         europeanAngles.put(350.27027027027026, 26);
-    };
+    }
+
+    private static final HashMap<Double, Integer> americanAngles = new HashMap<>();
+
+    static {
+        americanAngles.put(0.0, 37);
+        americanAngles.put(9.473684210526315, 27);
+        americanAngles.put(18.94736842105263, 10);
+        americanAngles.put(28.42105263157895, 25);
+        americanAngles.put(37.89473684210526, 29);
+        americanAngles.put(47.36842105263158, 12);
+        americanAngles.put(56.8421052631579, 8);
+        americanAngles.put(66.3157894736842, 19);
+        americanAngles.put(75.78947368421052, 31);
+        americanAngles.put(85.26315789473684, 18);
+        americanAngles.put(94.73684210526316, 6);
+        americanAngles.put(104.21052631578948, 21);
+        americanAngles.put(113.6842105263158, 33);
+        americanAngles.put(123.15789473684211, 16);
+        americanAngles.put(132.6315789473684, 4);
+        americanAngles.put(142.10526315789474, 23);
+        americanAngles.put(151.57894736842104, 35);
+        americanAngles.put(161.05263157894737, 14);
+        americanAngles.put(170.52631578947367, 2);
+        americanAngles.put(180.0, 0);
+        americanAngles.put(189.47368421052633, 28);
+        americanAngles.put(198.94736842105263, 9);
+        americanAngles.put(208.42105263157896, 26);
+        americanAngles.put(217.89473684210526, 30);
+        americanAngles.put(227.3684210526316, 11);
+        americanAngles.put(236.8421052631579, 7);
+        americanAngles.put(246.31578947368422, 20);
+        americanAngles.put(255.78947368421052, 32);
+        americanAngles.put(265.2631578947368, 17);
+        americanAngles.put(274.7368421052632, 5);
+        americanAngles.put(284.2105263157895, 22);
+        americanAngles.put(293.6842105263158, 34);
+        americanAngles.put(303.1578947368421, 15);
+        americanAngles.put(312.63157894736844, 3);
+        americanAngles.put(322.10526315789474, 24);
+        americanAngles.put(331.57894736842104, 36);
+        americanAngles.put(341.05263157894734, 13);
+        americanAngles.put(350.5263157894737, 1);
+    }
 }

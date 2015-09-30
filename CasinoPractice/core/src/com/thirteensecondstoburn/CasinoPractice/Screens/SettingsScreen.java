@@ -90,7 +90,7 @@ public class SettingsScreen  implements Screen {
         Table minTable = new Table(skin);
         minTable.add("Table Minimum").padRight(10);
         final SelectBox<Integer> sbMin = new SelectBox<>(skin);
-        sbMin.setItems(new Integer[] {5,10,25,100,500});
+        sbMin.setItems(new Integer[]{5, 10, 25, 100, 500});
         sbMin.setSelected(game.getTableMinimum());
         sbMin.addListener(new ChangeListener() {
             @Override
@@ -164,6 +164,26 @@ public class SettingsScreen  implements Screen {
         });
         decksTable.add(sbDecks).left();
         table.add(decksTable).left().pad(10);
+
+        table.row();
+        table.add(new Label("Roulette Settings", skin, "large-font")).pad(20).colspan(2);
+        table.row();
+        Table rouletteTable = new Table(skin);
+        rouletteTable.add("Number of Decks").padRight(10);
+        final SelectBox<String> rType = new SelectBox<>(skin);
+        rType.setItems(new String[]{"European", "American"});
+        rType.setSelected(game.getRouletteType());
+        rType.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                String value = rType.getSelection().first();
+                game.setRouletteType(value);
+                game.saveSettings();
+            }
+        });
+        rouletteTable.add(rType).left();
+        table.add(rouletteTable).left().pad(10);
+
 
         Table outerTable = new Table(skin);
         outerTable.setBackground(new SpriteDrawable(background));

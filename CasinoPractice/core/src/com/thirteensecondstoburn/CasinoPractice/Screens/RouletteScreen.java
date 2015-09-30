@@ -33,6 +33,7 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
     List<BettingSpot> bettingSpots;
     RouletteWheel wheel;
     RouletteNumberBoard numberBoard;
+    public static boolean isEuropean = true;
 
     @Override
     public void actionCompleted(Actor caller) {
@@ -42,7 +43,14 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
 
     @Override
     protected void setup() {
-        Texture tableTex = assets.getTexture(Assets.TEX_NAME.ROULETTE_TABLE_EUROPEAN);
+        isEuropean =  game.getRouletteType().equalsIgnoreCase("European");
+
+        Texture tableTex;
+        if(isEuropean) {
+            tableTex = assets.getTexture(Assets.TEX_NAME.ROULETTE_TABLE_EUROPEAN);
+        } else {
+            tableTex = assets.getTexture(Assets.TEX_NAME.ROULETTE_TABLE_AMERICAN);
+        }
         tableImage = new Image(tableTex);
         tableImage.setPosition(280, 40);
 
@@ -74,8 +82,13 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
             bettingSpots.add(new BettingSpot(new GridPoint2(428 + i * 95, 460), 35, new int[]{i*3 + 2})); // middle line
             bettingSpots.add(new BettingSpot(new GridPoint2(428 + i * 95, 342), 35, new int[]{i*3 + 1})); // bottom line
         }
-        bettingSpots.add(new BettingSpot(new GridPoint2(336, 460), 35, new int[]{0})); // single 0
-        // TODO American 0 stuff 00 = 38
+        if(isEuropean) {
+            bettingSpots.add(new BettingSpot(new GridPoint2(336, 460), 35, new int[]{0})); // single 0
+        } else {
+            // American 00 = 37
+            bettingSpots.add(new BettingSpot(new GridPoint2(336, 524), 35, new int[]{37})); // single 0
+            bettingSpots.add(new BettingSpot(new GridPoint2(336, 404), 35, new int[]{0})); // single 00
+        }
 
         bettingSpots.add(new BettingSpot(new GridPoint2(1574, 588), 2, new int[]{3,6,9,12,15,18,21,24,27,30,33,36})); // top dozen
         bettingSpots.add(new BettingSpot(new GridPoint2(1574, 460), 2, new int[]{2,5,8,11,14,17,20,23,26,29,32,35})); // middle dozen
@@ -104,7 +117,7 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
             bettingSpots.add(new BettingSpot(new GridPoint2(475 + i * 95, 292), 5, new int[]{i * 3 +1, i * 3 + 2, i * 3 + 3, (i+1) * 3 +1, (i+1) * 3 + 2, (i+1) * 3 + 3}));
         }
 
-        bettingSpots.add(new BettingSpot(new GridPoint2(380, 292), 6, new int[]{38,0,1,2,3})); // basket 00 = 38
+        bettingSpots.add(new BettingSpot(new GridPoint2(380, 292), 6, new int[]{37,0,1,2,3})); // basket 00 = 37
 
         bettingSpots.add(new BettingSpot(new GridPoint2(568, 228), 2, new int[]{1,2,3,4,5,6,7,8,9,10,11,12})); // 1 - 12
         bettingSpots.add(new BettingSpot(new GridPoint2(952, 228), 2, new int[]{13,14,15,16,17,18,19,20,21,22,23,24})); // 13 - 24
@@ -148,7 +161,6 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
     }
 
     private void calculateWinnings(int number) {
-        System.out.println("Number was: " + number);
         int won = 0;
         int currentWager = 0;
         for (BettingSpot spot : bettingSpots) {
