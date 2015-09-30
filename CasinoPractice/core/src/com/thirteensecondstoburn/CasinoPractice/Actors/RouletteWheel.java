@@ -82,7 +82,6 @@ public class RouletteWheel extends Actor {
             wheel.setRotation((float) wheelRotation);
             if(ballRotation > wheelRotation) ballRotation -= 360;
             double offsetAngle = getClosestAngle(map, Math.abs(ballRotation - wheelRotation));
-            System.out.println("Ball Rotation: " + ballRotation + " Wheel Rotation: " + wheelRotation + " Offset Angle: " + offsetAngle);
             number = map.get(offsetAngle);
 
             notifyListeners();
@@ -112,7 +111,6 @@ public class RouletteWheel extends Actor {
 
     private double getClosestAngle(HashMap<Double, Integer> map, double refAngle) {
         Set<Double> keys = map.keySet();
-        System.out.println("RefAngle: " + refAngle);
         if(Math.abs(refAngle) > 360) {
             double timesGreater = (int)Math.abs(refAngle) / 360.0;
             if(refAngle >= 0) {
@@ -121,7 +119,6 @@ public class RouletteWheel extends Actor {
                 refAngle += 360.0 * (int) timesGreater + 360;
             }
         }
-        System.out.println("After RefAngle: " + refAngle);
         double closest = 1000000.0;
         double closestAngle = 0;
         for (double angle : keys) {

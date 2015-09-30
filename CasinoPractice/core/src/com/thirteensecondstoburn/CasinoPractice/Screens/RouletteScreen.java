@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStackGroup;
+import com.thirteensecondstoburn.CasinoPractice.Actors.RouletteNumberBoard;
 import com.thirteensecondstoburn.CasinoPractice.Actors.RouletteWheel;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
@@ -31,9 +32,11 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
     TableButton spinButton;
     List<BettingSpot> bettingSpots;
     RouletteWheel wheel;
+    RouletteNumberBoard numberBoard;
 
     @Override
     public void actionCompleted(Actor caller) {
+        numberBoard.push(wheel.getNumber());
         calculateWinnings(wheel.getNumber());
     }
 
@@ -45,8 +48,10 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
 
         wheel = new RouletteWheel(assets);
         wheel.addActionListener(this);
-//        wheel.setPosition(stage.getWidth() / 2f - wheel.getWidth() / 2f, stage.getHeight() - wheel.getHeight());
         wheel.setPosition(stage.getWidth() - 450, stage.getHeight() - 450);
+
+        numberBoard = new RouletteNumberBoard(assets);
+        numberBoard.setPosition(400, stage.getHeight() - 275);
 
         spinButton = new TableButton(assets, "Spin", mainColor);
         spinButton.setPosition(stage.getWidth() - spinButton.getWidth(), 0);
@@ -123,7 +128,7 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
                         minDistance = distance;
                     }
                 }
-                if(minDistance > 30.0f) return; // has to be somewhat close to the point we're looking for
+                if(minDistance > 40.0f) return; // has to be somewhat close to the point we're looking for
 
                 int bet = placeBet(closest.stack, leftSide.getBetAmount());
                 leftSide.setWagerText("" + (currentWager + bet));
@@ -134,6 +139,7 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
         // add the actors to the stage
         stage.addActor(tableImage);
         stage.addActor(wheel);
+        stage.addActor(numberBoard);
         stage.addActor(spinButton);
 
         for (BettingSpot spot : bettingSpots) {
