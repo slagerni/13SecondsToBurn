@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStackGroup;
+import com.thirteensecondstoburn.CasinoPractice.Actors.MultiLineTableButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.RouletteNumberBoard;
 import com.thirteensecondstoburn.CasinoPractice.Actors.RouletteWheel;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
@@ -17,6 +18,7 @@ import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -30,10 +32,12 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
 
     Image tableImage;
     TableButton spinButton;
+    MultiLineTableButton undoBetButton;
     List<BettingSpot> bettingSpots;
     RouletteWheel wheel;
     RouletteNumberBoard numberBoard;
     public static boolean isEuropean = true;
+    LinkedList<BetHistory> betHistory = new LinkedList<>();
 
     @Override
     public void actionCompleted(Actor caller) {
@@ -68,6 +72,33 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (spinButton.isInside(x, y)) {
                     wheel.spin();
+                    betHistory.clear();
+                    undoBetButton.setVisible(false);
+                }
+            }
+        });
+
+        undoBetButton = new MultiLineTableButton(assets, "Undo|Bet", mainColor);
+        undoBetButton.setPosition(stage.getWidth() - undoBetButton.getWidth(), undoBetButton.getHeight() + 10);
+        undoBetButton.setVisible(false);
+        undoBetButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if (undoBetButton.isInside(x, y)) {
+                    if(betHistory.size() == 0) return;
+
+                    BetHistory last = betHistory.pop();
+                    int currentWager = 0;
+                    for (BettingSpot spot : bettingSpots) {
+                        currentWager += spot.stack.getTotal();
+                    }
+                    currentWager -= last.amount;
+
+                    placeBet(last.stack, -last.amount);
+                    leftSide.setWagerText("" + (currentWager + currentWager));
+                    if(betHistory.size() == 0) {
+                        undoBetButton.setVisible(false);
+                    }
                 }
             }
         });
@@ -86,8 +117,8 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
             bettingSpots.add(new BettingSpot(new GridPoint2(336, 460), 35, new int[]{0})); // single 0
         } else {
             // American 00 = 37
-            bettingSpots.add(new BettingSpot(new GridPoint2(336, 524), 35, new int[]{37})); // single 0
-            bettingSpots.add(new BettingSpot(new GridPoint2(336, 404), 35, new int[]{0})); // single 00
+            bettingSpots.add(new BettingSpot(new GridPoint2(336, 524), 35, new int[]{37})); // single 00
+            bettingSpots.add(new BettingSpot(new GridPoint2(336, 404), 35, new int[]{0})); // single 0
         }
 
         bettingSpots.add(new BettingSpot(new GridPoint2(1574, 588), 2, new int[]{3,6,9,12,15,18,21,24,27,30,33,36})); // top dozen
@@ -143,9 +174,12 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
                 }
                 if(minDistance > 40.0f) return; // has to be somewhat close to the point we're looking for
 
-                int bet = placeBet(closest.stack, leftSide.getBetAmount());
+                int before = closest.stack.getTotal();
+                int after = placeBet(closest.stack, leftSide.getBetAmount());
+                int bet = after - before;
+                betHistory.push(new BetHistory(closest.stack, bet));
+                undoBetButton.setVisible(true);
                 leftSide.setWagerText("" + (currentWager + bet));
-                leftSide.updateBalance();
             }
         });
 
@@ -154,6 +188,7 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
         stage.addActor(wheel);
         stage.addActor(numberBoard);
         stage.addActor(spinButton);
+        stage.addActor(undoBetButton);
 
         for (BettingSpot spot : bettingSpots) {
             stage.addActor(spot.stack);
@@ -162,22 +197,20 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
 
     private void calculateWinnings(int number) {
         int won = 0;
-        int currentWager = 0;
         for (BettingSpot spot : bettingSpots) {
             if(spot.stack.getTotal() > 0) {
                 if(spot.winningNumbers.contains(number)) {
-                    won += spot.stack.getTotal() * spot.payout;
+                    won += spot.stack.getTotal() * spot.payout + spot.stack.getTotal();
+                    addToBalance(won);
                     spot.stack.popStack(true);
-                    currentWager += spot.stack.getTotal();
                 } else {
                     won -= spot.stack.getTotal();
                     spot.stack.popStack(false);
-                    spot.stack.setTotal(0);
                 }
+                spot.stack.setTotal(0);
             }
         }
-        leftSide.setWagerText("" + (currentWager));
-        leftSide.updateBalance();
+        leftSide.setWagerText("" + 0);
         if(won > 0)
             leftSide.setWonColor(Color.GREEN);
         else if(won < 0)
@@ -206,6 +239,16 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
 
         public float distance(float originX, float originY) {
             return Vector2.dst(originX, originY, center.x, center.y);
+        }
+    }
+
+    private class BetHistory {
+        public ChipStackGroup stack;
+        public int amount;
+
+        BetHistory(ChipStackGroup stack, int amount) {
+            this.stack = stack;
+            this.amount = amount;
         }
     }
 }

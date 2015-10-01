@@ -110,7 +110,7 @@ abstract public class TableScreen implements Screen {
         int newTotal = stack.getTotal() + amount;
         newTotal = checkTableMax(newTotal);
         int oldTotal = stack.getTotal();
-        game.subtractFromBalance(newTotal - oldTotal);
+        subtractFromBalance(newTotal - oldTotal);
         stack.setTotal(newTotal);
         return newTotal;
     }
