@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_id">559346492763</string>
+    <string name="package_name">com.thirteensecondstoburn.CasinoPractice.android</string>
+    <string name="achievement_three_card_poker_played">CgkI28qY3aMQEAIQAQ</string>
+    <string name="achievement_four_card_poker_played">CgkI28qY3aMQEAIQAg</string>
+    <string name="achievement_caribbean_stud_poker_played">CgkI28qY3aMQEAIQAw</string>
+    <string name="achievement_blackjack_played">CgkI28qY3aMQEAIQBA</string>
+    <string name="achievement_craps_played">CgkI28qY3aMQEAIQBQ</string>
+    <string name="achievement_roulette_played">CgkI28qY3aMQEAIQBg</string>
+</resources>

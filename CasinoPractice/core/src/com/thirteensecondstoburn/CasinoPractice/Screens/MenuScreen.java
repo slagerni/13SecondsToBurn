@@ -60,6 +60,17 @@ public class MenuScreen implements Screen {
 
     @Override
     public void show() {
+        if(!CasinoPracticeGame.googleServices.isConnected()) {
+            while(CasinoPracticeGame.googleServices.isConnecting()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            CasinoPracticeGame.googleServices.signIn();
+        }
+
         Gdx.input.setInputProcessor(stage);
 
         Color menuButtonColor = skin.getColor("menuButtonColor");

@@ -1,3 +1,5 @@
+apply plugin: 'com.google.gms.google-services'
+
 android {
     buildToolsVersion "21.1.2"
     compileSdkVersion 21
@@ -13,6 +15,10 @@ android {
 
         instrumentTest.setRoot('tests')
     }
+}
+
+dependencies {
+    compile 'com.google.android.gms:play-services-plus:8.1.0'
 }
 
 // needed to add JNI shared libraries to APK when compiling on CLI

@@ -11,12 +11,15 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
@@ -169,7 +172,7 @@ public class SettingsScreen  implements Screen {
         table.add(new Label("Roulette Settings", skin, "large-font")).pad(20).colspan(2);
         table.row();
         Table rouletteTable = new Table(skin);
-        rouletteTable.add("Number of Decks").padRight(10);
+        rouletteTable.add("Style").padRight(10);
         final SelectBox<String> rType = new SelectBox<>(skin);
         rType.setItems(new String[]{"European", "American"});
         rType.setSelected(game.getRouletteType());
@@ -184,6 +187,19 @@ public class SettingsScreen  implements Screen {
         rouletteTable.add(rType).left();
         table.add(rouletteTable).left().pad(10);
 
+        table.row();
+        table.add(new Label("User Settings", skin, "large-font")).pad(20).colspan(2);
+        table.row();
+        Table userTable = new Table(skin);
+        Button changeUserButton = new TextButton("Change User", skin);
+        changeUserButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                CasinoPracticeGame.googleServices.changeUser();
+            }
+        });
+        userTable.add(changeUserButton).center();
+        table.add(userTable).colspan(2).center();
 
         Table outerTable = new Table(skin);
         outerTable.setBackground(new SpriteDrawable(background));
@@ -199,7 +215,7 @@ public class SettingsScreen  implements Screen {
                     @Override
                     public void run() {
                         MenuScreen screen = game.getMenuScreen();
-                        if(screen.getStage() != null) {
+                        if (screen.getStage() != null) {
                             screen.getStage().addAction(Actions.fadeIn(0.5f));
                         }
                         stage.clear();
@@ -210,7 +226,13 @@ public class SettingsScreen  implements Screen {
         });
         outerTable.add(menuButton).left().pad(20);
         outerTable.row();
-        outerTable.add(table);
+        outerTable.pack();
+
+        scrollPane = new ScrollPane(table);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setSize(outerTable.getWidth(), 10000);
+        scrollPane.setFlickScroll(true);
+        outerTable.add(scrollPane).fill().expand();
 
         stage.addActor(outerTable);
     }

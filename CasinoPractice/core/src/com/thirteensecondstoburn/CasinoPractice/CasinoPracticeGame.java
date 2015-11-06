@@ -3,6 +3,7 @@ package com.thirteensecondstoburn.CasinoPractice;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.thirteensecondstoburn.CasinoPractice.GooglePlay.IGoogleServices;
 import com.thirteensecondstoburn.CasinoPractice.Screens.BlackJackScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CaribbeanStudPokerScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CrapsScreen;
@@ -14,6 +15,7 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.SplashScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.ThreeCardPokerScreen;
 
 public class CasinoPracticeGame extends Game {
+    public static IGoogleServices googleServices;
     public static int SCREEN_WIDTH = 1920;
     public static int SCREEN_HEIGHT = 1080;
     private Assets assets;
@@ -39,6 +41,11 @@ public class CasinoPracticeGame extends Game {
     private int tableMinimum = 5;
 
     private String rouletteType = "European";
+
+    public CasinoPracticeGame(IGoogleServices googleServices) {
+        super();
+        CasinoPracticeGame.googleServices = googleServices;
+    }
 
     public SplashScreen getSplashScreen() {
         if(splashScreen == null) splashScreen = new SplashScreen(this);

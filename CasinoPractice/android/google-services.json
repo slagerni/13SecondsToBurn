@@ -1,0 +1,51 @@
+{
+  "project_info": {
+    "project_id": "casino-practice",
+    "project_number": "559346492763",
+    "name": "Casino Practice"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559346492763:android:778bbca57e9052a8",
+        "client_id": "android:com.thirteensecondstoburn.CasinoPractice.android",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.thirteensecondstoburn.CasinoPractice.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "559346492763-phlfer5q5dbm8cvl2t4fghdce74p6t6e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thirteensecondstoburn.CasinoPractice.android",
+            "certificate_hash": "687625E788BFF0EE0E2698511204D5781ACC9B1E"
+          }
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}
