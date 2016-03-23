@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
-        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.android.tools.build:gradle:1.5.0'
         classpath 'com.google.gms:google-services:1.4.0-beta3'
     }
 }
@@ -14,7 +14,7 @@ allprojects {
     apply plugin: "eclipse"
     apply plugin: "idea"
 
-    version = '1.0'
+    version = '1.0.2'
     ext {
         appName = 'CasinoPractice'
         gdxVersion = '1.5.1'

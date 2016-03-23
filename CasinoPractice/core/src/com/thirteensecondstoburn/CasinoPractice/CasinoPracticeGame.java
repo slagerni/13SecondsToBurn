@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.thirteensecondstoburn.CasinoPractice.GooglePlay.IGoogleServices;
+import com.thirteensecondstoburn.CasinoPractice.GooglePlay.IInternalApplicationBilling;
 import com.thirteensecondstoburn.CasinoPractice.Screens.BlackJackScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CaribbeanStudPokerScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CrapsScreen;
@@ -16,6 +17,7 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.ThreeCardPokerScreen;
 
 public class CasinoPracticeGame extends Game {
     public static IGoogleServices googleServices;
+    public static IInternalApplicationBilling billing;
     public static int SCREEN_WIDTH = 1920;
     public static int SCREEN_HEIGHT = 1080;
     private Assets assets;
@@ -42,9 +44,10 @@ public class CasinoPracticeGame extends Game {
 
     private String rouletteType = "European";
 
-    public CasinoPracticeGame(IGoogleServices googleServices) {
+    public CasinoPracticeGame(IGoogleServices googleServices, IInternalApplicationBilling billing) {
         super();
         CasinoPracticeGame.googleServices = googleServices;
+        CasinoPracticeGame.billing = billing;
     }
 
     public SplashScreen getSplashScreen() {
@@ -94,6 +97,9 @@ public class CasinoPracticeGame extends Game {
 
     @Override
 	public void create () {
+        // set up the in app billing
+        billing.create();
+
         saveData = Gdx.app.getPreferences("com.thirteensecondstoburn.CasinoPractice.saveData");
         balance = saveData.getFloat("balanceFloat", 5000.0f);
         if(balance < 5000)
@@ -136,6 +142,7 @@ public class CasinoPracticeGame extends Game {
         if(crapsScreen != null) try {crapsScreen.dispose();} catch (Exception ex) {}
         if(rouletteScreen != null) try {rouletteScreen.dispose();} catch (Exception ex) {}
         saveSettings();
+        billing.dispose();
     }
 
     public Assets getAssets() {

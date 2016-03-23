@@ -20,7 +20,7 @@ public class AndroidLauncher extends AndroidApplication {
         googleServices = new GoogleServices(this);
 
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-		initialize(new CasinoPracticeGame(googleServices), config);
+		initialize(new CasinoPracticeGame(googleServices, new InternalApplicationBilling(this)), config);
     }
 
     @Override

@@ -15,6 +15,6 @@ public class DesktopLauncher {
         // kindle fire HD / Galaxy Note
 //        config.width = 1280;
 //        config.height = 800;
-		new LwjglApplication(new CasinoPracticeGame(new GoogleServices()), config);
+		new LwjglApplication(new CasinoPracticeGame(new GoogleServices(), new InternalApplicationBilling()), config);
 	}
 }
