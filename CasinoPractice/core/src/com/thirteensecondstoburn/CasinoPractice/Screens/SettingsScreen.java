@@ -41,7 +41,6 @@ public class SettingsScreen  implements Screen {
     ScrollPane scrollPane;
 
     Sprite background;
-    public Color backgroundColor = new Color().valueOf("265614FF");
 
     public SettingsScreen(CasinoPracticeGame game) {
         this.game = game;
@@ -58,7 +57,7 @@ public class SettingsScreen  implements Screen {
         back.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         background = new Sprite(back, (int)stage.getWidth(), (int)stage.getHeight());
         background.setSize(stage.getWidth(), stage.getHeight());
-        background.setColor(backgroundColor);
+        background.setColor(assets.getBackgroundColor());
 
         Table table = new Table(skin);
         //table.debug();

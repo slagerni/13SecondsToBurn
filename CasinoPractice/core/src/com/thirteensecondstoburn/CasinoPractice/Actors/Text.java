@@ -62,6 +62,8 @@ public class Text extends Actor {
         this.text = text;
     }
 
+    public void setScale(float scale) {this.scale = scale; }
+
     public void setTextCentered(String text) {
         setText(text);
         BitmapFont.TextBounds bounds = font.getBounds(text);

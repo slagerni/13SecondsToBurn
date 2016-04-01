@@ -1,6 +1,7 @@
 package com.thirteensecondstoburn.CasinoPractice;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -279,4 +280,8 @@ public class Assets {
     }
 
     public Skin getSkin() { return uiSkin; }
+
+    private Color backgroundColor = new Color().valueOf("265614FF");
+    public Color getBackgroundColor(){ return backgroundColor; }
+
 }

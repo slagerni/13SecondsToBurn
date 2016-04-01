@@ -27,7 +27,6 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
  * Created by Nick on 2/11/2015.
  */
 abstract public class TableScreen implements Screen {
-    public Color backgroundColor = new Color().valueOf("265614FF");
     public Color mainColor = Color.YELLOW;
     public Color hintColor = Color.GREEN;
 
@@ -53,7 +52,7 @@ abstract public class TableScreen implements Screen {
         back.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         background = new Sprite(back, (int)stage.getWidth(), (int)stage.getHeight());
         background.setSize(stage.getWidth(), stage.getHeight());
-        background.setColor(backgroundColor);
+        background.setColor(assets.getBackgroundColor());
 
         leftSide = new LeftSide(game, assets);
         leftSide.setSize(256, stage.getHeight());

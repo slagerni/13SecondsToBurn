@@ -67,12 +67,6 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 
         lastAnteBet = game.getTableMinimum();
 
-        Texture back = assets.getTexture(Assets.TEX_NAME.BACKGROUND);
-        back.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-        background = new Sprite(back, (int)stage.getWidth(), (int)stage.getHeight());
-        background.setSize(stage.getWidth(), stage.getHeight());
-        background.setColor(backgroundColor);
-
         paytable = new Image(assets.getTexture(Assets.TEX_NAME.THREE_CARD_POKER_PAYTABLE));
         paytable.setScale(.75f, .75f);
         paytable.setColor(1, 1, 1, .75f);

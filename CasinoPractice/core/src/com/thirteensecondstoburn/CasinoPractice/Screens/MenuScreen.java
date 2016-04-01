@@ -34,6 +34,7 @@ public class MenuScreen implements Screen {
     ScrollPane scrollPane;
 
     Button settingsButton;
+    Button storeButton;
 
     Button tcpButton;
     Button cfpButton;
@@ -50,7 +51,6 @@ public class MenuScreen implements Screen {
     Image rouletteTitle;
 
     Sprite background;
-    public Color backgroundColor = new Color().valueOf("265614FF");
 
     public MenuScreen(CasinoPracticeGame game) {
         this.game = game;
@@ -79,7 +79,7 @@ public class MenuScreen implements Screen {
         back.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         background = new Sprite(back, (int)stage.getWidth(), (int)stage.getHeight());
         background.setSize(stage.getWidth(), stage.getHeight());
-        background.setColor(backgroundColor);
+        background.setColor(assets.getBackgroundColor());
 
         settingsButton = new Button(skin);
         settingsButton.setColor(menuButtonColor);
@@ -99,7 +99,26 @@ public class MenuScreen implements Screen {
             }
         });
 
+        storeButton = new Button(skin);
+        storeButton.setColor(menuButtonColor);
+        Image storeImage = new Image(assets.getTexture(Assets.TEX_NAME.SETTINGS)); // TODO change this to a store button when it's made
+        storeImage.setColor(Color.GRAY);
+        storeButton.add(storeImage);
+        storeButton.pad(10);
+        storeButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        game.setScreen(game.getStoreScreen());
+                    }
+                })));
+            }
+        });
+
         windowTable = new Table();
+        windowTable.add(storeButton).left();
         windowTable.add(settingsButton).right();
         windowTable.row();
 

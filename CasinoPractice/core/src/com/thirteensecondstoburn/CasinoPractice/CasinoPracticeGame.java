@@ -13,6 +13,7 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.MenuScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.RouletteScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SettingsScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SplashScreen;
+import com.thirteensecondstoburn.CasinoPractice.Screens.StoreScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.ThreeCardPokerScreen;
 
 public class CasinoPracticeGame extends Game {
@@ -24,13 +25,14 @@ public class CasinoPracticeGame extends Game {
     private SplashScreen splashScreen;
     private MenuScreen menuScreen;
     private SettingsScreen settingsScreen;
+    private StoreScreen storeScreen;
     private ThreeCardPokerScreen threeCardPokerScreen;
     private CrazyFourPokerScreen crazyFourPokerScreen;
     private CaribbeanStudPokerScreen caribbeanStudPokerScreen;
     private BlackJackScreen blackJackScreen;
     private CrapsScreen crapsScreen;
     private RouletteScreen rouletteScreen;
-    private float balance;
+    private double balance;
     private Preferences saveData;
 
     public static final boolean ALLOW_HINTS = true;
@@ -63,6 +65,11 @@ public class CasinoPracticeGame extends Game {
     public SettingsScreen getSettingsScreen() {
         if(settingsScreen == null) settingsScreen = new SettingsScreen(this);
         return settingsScreen;
+    }
+
+    public StoreScreen getStoreScreen() {
+        if(storeScreen == null) storeScreen = new StoreScreen(this);
+        return storeScreen;
     }
 
     public ThreeCardPokerScreen getThreeCardPokerScreen() {
@@ -101,7 +108,7 @@ public class CasinoPracticeGame extends Game {
         billing.create();
 
         saveData = Gdx.app.getPreferences("com.thirteensecondstoburn.CasinoPractice.saveData");
-        balance = saveData.getFloat("balanceFloat", 5000.0f);
+        balance = Double.parseDouble(saveData.getString("balance", "5000.00"));
         if(balance < 5000)
             balance = 5000;
 
@@ -118,7 +125,7 @@ public class CasinoPracticeGame extends Game {
 	}
 
     public void saveSettings() {
-        saveData.putFloat("balanceFloat", balance);
+        saveData.putString("balance", new Double(balance).toString());
         saveData.putBoolean("showHints", showHints);
         saveData.putBoolean("actionHints", actionHints);
         saveData.putBoolean("hitSoft", blackjackHitSoft17);
@@ -141,6 +148,9 @@ public class CasinoPracticeGame extends Game {
         if(blackJackScreen != null) try {blackJackScreen.dispose();} catch (Exception ex) {}
         if(crapsScreen != null) try {crapsScreen.dispose();} catch (Exception ex) {}
         if(rouletteScreen != null) try {rouletteScreen.dispose();} catch (Exception ex) {}
+        if(menuScreen != null) try {menuScreen.dispose();} catch (Exception ex) {}
+        if(settingsScreen != null) try {settingsScreen.dispose();} catch (Exception ex) {}
+        if(storeScreen != null) try {storeScreen.dispose();} catch (Exception ex) {}
         saveSettings();
         billing.dispose();
     }
@@ -158,7 +168,7 @@ public class CasinoPracticeGame extends Game {
         balance -= amount;
     }
 
-    public float getBalance() {
+    public double getBalance() {
         return balance;
     }
 

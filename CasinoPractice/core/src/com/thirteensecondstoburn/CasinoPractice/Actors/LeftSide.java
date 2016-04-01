@@ -106,6 +106,11 @@ public class LeftSide extends Group {
         } else {
             balance.setText(String.format("%.2f", game.getBalance()));
         }
+        if(game.getBalance() < 500000000) {
+            balance.setScale(1.0f);
+        } else {
+            balance.setScale(.75f);
+        }
     }
 
     public void setWonText(String text) {
