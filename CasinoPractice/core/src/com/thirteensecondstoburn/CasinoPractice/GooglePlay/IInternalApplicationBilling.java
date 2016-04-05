@@ -28,6 +28,7 @@ public interface IInternalApplicationBilling {
     void create();
     void dispose();
     boolean isSetup();
+    void beginPurchase(String sku, IPurchaseListener purchaseListener);
 
     /** Don't call this directly from a UI thread as everything will hang while it's getting the list */
     List<ProductDetails> listProductDetails() throws BillingException;

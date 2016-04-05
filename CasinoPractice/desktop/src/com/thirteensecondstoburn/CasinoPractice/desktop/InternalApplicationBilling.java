@@ -2,7 +2,9 @@ package com.thirteensecondstoburn.CasinoPractice.desktop;
 
 import com.thirteensecondstoburn.CasinoPractice.GooglePlay.BillingException;
 import com.thirteensecondstoburn.CasinoPractice.GooglePlay.IInternalApplicationBilling;
+import com.thirteensecondstoburn.CasinoPractice.GooglePlay.IPurchaseListener;
 import com.thirteensecondstoburn.CasinoPractice.GooglePlay.ProductDetails;
+import com.thirteensecondstoburn.CasinoPractice.GooglePlay.PurchaseDetails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,30 @@ public class InternalApplicationBilling implements IInternalApplicationBilling {
     @Override
     public boolean isSetup() {
         return true; // FAKING THAT THE BILLING IS SET UP
+    }
+
+    @Override
+    public void beginPurchase(String sku, IPurchaseListener purchaseListener) {
+//        PurchaseDetails errorDetails = new PurchaseDetails(
+//                sku,
+//                false,
+//                "THIS IS A FAKE ERROR MESSAGE. Just to test when something goes wrong. Ok, I need to add a bunch of garbage here to test to see if things wrap correctly. This is more stuff because this error message may be long and hairy.",
+//                false);
+//        purchaseListener.onConsumed(errorDetails);
+//        if(1 == 1) return;
+
+        if(sku.equals(BillingProduct.SKU_CHIPS_5000.toString())
+                || sku.equals(BillingProduct.SKU_CHIPS_25000.toString())
+                || sku.equals(BillingProduct.SKU_CHIPS_100000.toString())
+                || sku.equals(BillingProduct.SKU_CHIPS_500000.toString())
+                || sku.equals(BillingProduct.SKU_CHIPS_5000000.toString())
+                ) {
+            PurchaseDetails consumedDetails = new PurchaseDetails(sku, true, "FAKE PURCHASE CONSUMED SUCCESS RESULT", true);
+            purchaseListener.onConsumed(consumedDetails);
+        } else {
+            PurchaseDetails details = new PurchaseDetails(sku, true, "FAKE PURCHASE SUCCESS RESULT", false);
+            purchaseListener.onPurchased(details);
+        }
     }
 
     @Override

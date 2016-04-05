@@ -62,8 +62,11 @@ public class MessagePopup extends Actor {
             images.put(message, image);
         }
     }
-
     public void pop(Message message, float startX, float startY) {
+        pop(message, startX, startY, 1);
+    }
+
+    public void pop(Message message, float startX, float startY, float scale) {
         setColor(Color.WHITE); // so I reset the alpha of the actor
         this.message = message;
         Image image = images.get(message);
@@ -71,14 +74,14 @@ public class MessagePopup extends Actor {
 
         setVisible(true);
 
-        setScale(1);
+        setScale(scale);
         setPosition(startX, startY);
 
         int xOffset = random.nextInt(200) - 100;
         int yOffset = random.nextInt(100) + 50;
 
         addAction(sequence(
-                parallel(moveTo(startX + xOffset, startY + yOffset, 2f), scaleTo(2f, 2f, 2f), fadeOut(2f)),
+                parallel(moveTo(startX + xOffset, startY + yOffset, 2f), scaleTo(scale * 2f, scale * 2f, scale * 2f), fadeOut(2f)),
                 run(new HideRunnable())));
     }
 

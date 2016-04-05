@@ -101,7 +101,7 @@ public class MenuScreen implements Screen {
 
         storeButton = new Button(skin);
         storeButton.setColor(menuButtonColor);
-        Image storeImage = new Image(assets.getTexture(Assets.TEX_NAME.SETTINGS)); // TODO change this to a store button when it's made
+        Image storeImage = new Image(assets.getTexture(Assets.TEX_NAME.STORE_BUTTON));
         storeImage.setColor(Color.GRAY);
         storeButton.add(storeImage);
         storeButton.pad(10);
@@ -118,14 +118,16 @@ public class MenuScreen implements Screen {
         });
 
         windowTable = new Table();
-        windowTable.add(storeButton).left();
-        windowTable.add(settingsButton).right();
+        windowTable.setWidth(stage.getWidth());
+        windowTable.setHeight(120);
+        windowTable.add(storeButton).left().pad(10);
+        windowTable.add(settingsButton).right().pad(10);
         windowTable.row();
 
         gamesTable = new Table(skin);
         //table.debug();
         gamesTable.setWidth(stage.getWidth());
-        gamesTable.setHeight(stage.getHeight());
+        gamesTable.setHeight(stage.getHeight() - 120);
         gamesTable.setFillParent(true);
 
         tcpTitle = new Image(assets.getTexture(Assets.TEX_NAME.THREE_CARD_POKER_TITLE));
@@ -230,21 +232,25 @@ public class MenuScreen implements Screen {
             }
         });
 
-        gamesTable.add(tcpButton).width(300).height(300).expand().pad(10);
-        gamesTable.add(cfpButton).width(300).height(300).expand().pad(10);
-        gamesTable.add(cStudButton).width(300).height(300).expand().pad(10);
-        gamesTable.add(blackjackButton).width(300).height(300).expand().pad(10);
-        gamesTable.add(crapsButton).width(300).height(300).expand().pad(10);
+        gamesTable.defaults().minSize(300,300).prefSize(320,320).maxSize(320,320).pad(15);
+        gamesTable.add(tcpButton);
+        gamesTable.add(cfpButton);
+        gamesTable.add(cStudButton);
+        gamesTable.add(blackjackButton);
         gamesTable.row();
-        gamesTable.add(rouletteButton).width(300).height(300).expand().pad(10);
+        gamesTable.add(crapsButton);
+        gamesTable.add(rouletteButton);
 //        scrollPane = new ScrollPane(gamesTable, skin);
 //        scrollPane.setTouchable(Touchable.enabled);
 //        scrollPane.setWidth(stage.getWidth());
 //        scrollPane.setHeight(stage.getHeight());
 
-        windowTable.add(gamesTable).expand().fill();
+        windowTable.add(gamesTable).colspan(2).fill().expand();
         windowTable.setFillParent(true);
         stage.addActor(windowTable);
+
+//        windowTable.debug();
+//        gamesTable.debug();
     }
 
     @Override
