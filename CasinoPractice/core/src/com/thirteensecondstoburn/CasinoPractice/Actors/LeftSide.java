@@ -25,6 +25,7 @@ public class LeftSide extends Group {
     Text won;
     BetButton betButton;
     MenuButton menuButton;
+    HelpButton helpButton;
 
     public LeftSide(final CasinoPracticeGame game, Assets assets) {
         this.game = game;
@@ -39,7 +40,7 @@ public class LeftSide extends Group {
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (betButton.isInside(x, y)) {
                     int amount = betButton.increaseAmount();
-                    if(amount >  game.getTableMaximum()) {
+                    if (amount > game.getTableMaximum()) {
                         betButton.resetToMin();
                     }
                 }
@@ -64,6 +65,9 @@ public class LeftSide extends Group {
             }
         });
 
+        helpButton = new HelpButton(assets);
+
+
         balance = new Text(assets, "", 1.0f);
         updateBalance();
 
@@ -76,6 +80,7 @@ public class LeftSide extends Group {
         addActor(wager);
         addActor(won);
         addActor(menuButton);
+        addActor(helpButton);
 
     }
 
@@ -89,6 +94,8 @@ public class LeftSide extends Group {
             backgroundImage.setColor(this.getColor());
             menuButton.setPosition(30, stage.getHeight() - 500);
             menuButton.setColor(this.getColor());
+            helpButton.setPosition(68, stage.getHeight() - 650);
+            helpButton.setColor(this.getColor());
         }
     }
 

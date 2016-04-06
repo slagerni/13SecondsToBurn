@@ -3,6 +3,9 @@ package com.thirteensecondstoburn.CasinoPractice;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.utils.Base64Coder;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter;
 import com.thirteensecondstoburn.CasinoPractice.GooglePlay.IGoogleServices;
 import com.thirteensecondstoburn.CasinoPractice.GooglePlay.IInternalApplicationBilling;
 import com.thirteensecondstoburn.CasinoPractice.Screens.BlackJackScreen;
@@ -15,6 +18,8 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.SettingsScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SplashScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.StoreScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.ThreeCardPokerScreen;
+
+import java.time.ZonedDateTime;
 
 public class CasinoPracticeGame extends Game {
     public static IGoogleServices googleServices;
@@ -33,8 +38,11 @@ public class CasinoPracticeGame extends Game {
     private CrapsScreen crapsScreen;
     private RouletteScreen rouletteScreen;
     private double balance;
+
+    private ZonedDateTime lastDailyChips = null;
     private Preferences saveData;
 
+    private static final String SAVE_KEY = Base64Coder.encodeString("encodedSettings");
     public static final boolean ALLOW_HINTS = true;
     private boolean showHints = false;
     private boolean actionHints = false;
@@ -43,6 +51,8 @@ public class CasinoPracticeGame extends Game {
     private int blackjackDecks = 8;
     private boolean blackjackHitSoft17 = false;
     private int tableMinimum = 5;
+
+    private boolean isNewInstall = false;
 
     private String rouletteType = "European";
 
@@ -120,12 +130,45 @@ public class CasinoPracticeGame extends Game {
         blackjackDecks = saveData.getInteger("bjDecks", 8);
         tableMinimum = saveData.getInteger("tableMinimum", 5);
         rouletteType = saveData.getString("rouletteType");
+        isNewInstall = saveData.getBoolean("newInstall");
+
+        loadEncodedSettings();
 
         setScreen(getSplashScreen());
 	}
 
+    private void loadEncodedSettings() {
+        Json json = new Json();
+
+        String encodedKey = saveData.getString(SAVE_KEY);
+        if(encodedKey != null) {
+            try {
+                EncodedSettings encodedSettings = json.fromJson(EncodedSettings.class, Base64Coder.decodeString(encodedKey));
+                balance = encodedSettings.balance;
+                lastDailyChips = ZonedDateTime.parse(encodedSettings.lastDailyChips);
+            } catch (Exception ex) {
+                // corrupt file, assume someone tampered with it
+                System.out.println("Error reading JSON settings: " + ex.getMessage());
+
+                balance = 1000;
+                lastDailyChips = ZonedDateTime.now();
+            }
+        } else {
+            if(isNewInstall) {
+                balance = 4000; // the daily pop will push this up to 5000
+            } else {
+                balance = 0; // assume someone is messing w/ the config file
+            }
+            lastDailyChips = ZonedDateTime.now().minusDays(1); // allow the daily pop to happen
+        }
+    }
+
+    private static class EncodedSettings {
+        public double balance;
+        public String lastDailyChips;
+    }
+
     public void saveSettings() {
-        saveData.putString("balance", new Double(balance).toString());
         saveData.putBoolean("showHints", showHints);
         saveData.putBoolean("actionHints", actionHints);
         saveData.putBoolean("hitSoft", blackjackHitSoft17);
@@ -134,6 +177,18 @@ public class CasinoPracticeGame extends Game {
         saveData.putInteger("bjDecks", blackjackDecks);
         saveData.putInteger("tableMinimum", tableMinimum);
         saveData.putString("rouletteType", rouletteType);
+        saveData.putBoolean("newInstall", false);
+
+        EncodedSettings encodedSettings = new EncodedSettings();
+        encodedSettings.balance = balance;
+        encodedSettings.lastDailyChips = lastDailyChips.toString();
+
+        Json json = new Json();
+        json.setOutputType(JsonWriter.OutputType.json);
+
+        String encodedJson = Base64Coder.encodeString(json.toJson(encodedSettings));
+        saveData.putString(SAVE_KEY, encodedJson);
+
         saveData.flush();
     }
 
@@ -246,5 +301,20 @@ public class CasinoPracticeGame extends Game {
         this.rouletteType = rouletteType;
     }
 
+    public ZonedDateTime getLastDailyChips() {
+        return lastDailyChips;
+    }
 
+    public void setLastDailyChips(ZonedDateTime lastDailyChips) {
+        this.lastDailyChips = lastDailyChips;
+        saveSettings();
+    }
+
+    public boolean isNewInstall() {
+        return isNewInstall;
+    }
+
+    public void setIsNewInstall(boolean isNewInstall) {
+        this.isNewInstall = isNewInstall;
+    }
 }

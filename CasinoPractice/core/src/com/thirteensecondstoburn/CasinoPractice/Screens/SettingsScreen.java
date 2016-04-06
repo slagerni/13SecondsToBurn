@@ -24,6 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.thirteensecondstoburn.CasinoPractice.Actors.HelpButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.MenuButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
@@ -61,34 +62,37 @@ public class SettingsScreen  implements Screen {
 
         Table table = new Table(skin);
         //table.debug();
-        table.add(new Label("General Settings", skin, "large-font")).pad(20).colspan(2);
+        table.add(new Label("General Settings", skin, "large-font")).pad(20).colspan(2).left();
         table.row();
 
-        final CheckBox chkShowHints = new CheckBox("Show Hints After a Play", skin);
-        chkShowHints.setChecked(game.isShowHints());
-        chkShowHints.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                game.setShowHints(chkShowHints.isChecked());
-                game.saveSettings();
-            }
-        });
-        chkShowHints.getCells().get(0).padRight(10);
-        table.add(chkShowHints).left().pad(10);
+        if(game.ALLOW_HINTS) {
+            final CheckBox chkShowHints = new CheckBox("Show Hints After a Play", skin);
+            chkShowHints.setChecked(game.isShowHints());
+            chkShowHints.addListener(new ActorGestureListener() {
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    game.setShowHints(chkShowHints.isChecked());
+                    game.saveSettings();
+                }
+            });
+            chkShowHints.getCells().get(0).padRight(10);
+            table.add(chkShowHints).left().pad(10);
 
-        final CheckBox chkActionHints = new CheckBox("Show Visual Hints Ahead of Time", skin);
-        chkActionHints.setChecked(game.isActionHints());
-        chkActionHints.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                game.setActionHints(chkActionHints.isChecked());
-                game.saveSettings();
-            }
-        });
-        chkActionHints.getCells().get(0).padRight(10);
-        table.add(chkActionHints).left().pad(10);
+            final CheckBox chkActionHints = new CheckBox("Show Visual Hints Ahead of Time", skin);
+            chkActionHints.setChecked(game.isActionHints());
+            chkActionHints.addListener(new ActorGestureListener() {
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    game.setActionHints(chkActionHints.isChecked());
+                    game.saveSettings();
+                }
+            });
+            chkActionHints.getCells().get(0).padRight(10);
+            table.add(chkActionHints).left().pad(10);
 
-        table.row();
+            table.row();
+        }
+
         Table minTable = new Table(skin);
         minTable.add("Table Minimum").padRight(10);
         final SelectBox<Integer> sbMin = new SelectBox<>(skin);
@@ -106,7 +110,7 @@ public class SettingsScreen  implements Screen {
         table.add(minTable).left().pad(10);
         table.add("Table Maximum = 10 x Table Minimum");
         table.row();
-        table.add(new Label("Blackjack Settings", skin, "large-font")).pad(20).colspan(2);
+        table.add(new Label("Blackjack Settings", skin, "large-font")).pad(20).colspan(2).left();
         table.row();
 
         final CheckBox chkHitSoft17 = new CheckBox("Dealer Hits a Soft 17", skin);
@@ -121,18 +125,19 @@ public class SettingsScreen  implements Screen {
         chkHitSoft17.getCells().get(0).padRight(10);
         table.add(chkHitSoft17).left().pad(10);
 
-        final CheckBox chkSimpleBjStrat = new CheckBox("Use Simple Strategy Instead of Basic for Hints", skin);
-        chkSimpleBjStrat.setChecked(game.isSimpleBlackjackHints());
-        chkSimpleBjStrat.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                game.setSimpleBlackjackHints(chkSimpleBjStrat.isChecked());
-                game.saveSettings();
-            }
-        });
-        chkSimpleBjStrat.getCells().get(0).padRight(10);
-        table.add(chkSimpleBjStrat).left().pad(10);
-
+        if(game.ALLOW_HINTS) {
+            final CheckBox chkSimpleBjStrat = new CheckBox("Use Simple Strategy Instead of Basic for Hints", skin);
+            chkSimpleBjStrat.setChecked(game.isSimpleBlackjackHints());
+            chkSimpleBjStrat.addListener(new ActorGestureListener() {
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    game.setSimpleBlackjackHints(chkSimpleBjStrat.isChecked());
+                    game.saveSettings();
+                }
+            });
+            chkSimpleBjStrat.getCells().get(0).padRight(10);
+            table.add(chkSimpleBjStrat).left().pad(10);
+        }
         table.row();
 
         Table penTable = new Table(skin);
@@ -168,7 +173,7 @@ public class SettingsScreen  implements Screen {
         table.add(decksTable).left().pad(10);
 
         table.row();
-        table.add(new Label("Roulette Settings", skin, "large-font")).pad(20).colspan(2);
+        table.add(new Label("Roulette Settings", skin, "large-font")).pad(20).colspan(2).left();
         table.row();
         Table rouletteTable = new Table(skin);
         rouletteTable.add("Style").padRight(10);
@@ -187,7 +192,7 @@ public class SettingsScreen  implements Screen {
         table.add(rouletteTable).left().pad(10);
 
         table.row();
-        table.add(new Label("User Settings", skin, "large-font")).pad(20).colspan(2);
+        table.add(new Label("User Settings", skin, "large-font")).pad(20).colspan(2).left();
         table.row();
         Table userTable = new Table(skin);
         Button changeUserButton = new TextButton("Change User", skin);
@@ -197,8 +202,8 @@ public class SettingsScreen  implements Screen {
                 CasinoPracticeGame.googleServices.changeUser();
             }
         });
-        userTable.add(changeUserButton).center();
-        table.add(userTable).colspan(2).center();
+        userTable.add(changeUserButton).left();
+        table.add(userTable).colspan(2).left();
 
         Table outerTable = new Table(skin);
         outerTable.setBackground(new SpriteDrawable(background));
@@ -224,6 +229,7 @@ public class SettingsScreen  implements Screen {
             }
         });
         outerTable.add(menuButton).left().pad(20);
+        outerTable.add(new HelpButton(assets)).right().pad(20);
         outerTable.row();
         outerTable.pack();
 
@@ -231,7 +237,7 @@ public class SettingsScreen  implements Screen {
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setSize(outerTable.getWidth(), 10000);
         scrollPane.setFlickScroll(true);
-        outerTable.add(scrollPane).fill().expand();
+        outerTable.add(scrollPane).colspan(2).fill().expand();
 
         stage.addActor(outerTable);
     }

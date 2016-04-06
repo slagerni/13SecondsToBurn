@@ -12,13 +12,19 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.thirteensecondstoburn.CasinoPractice.Actors.MessagePopup;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
+
+import java.time.ZonedDateTime;
 
 /**
  * Created by Nick on 2/3/2015.
@@ -43,12 +49,20 @@ public class MenuScreen implements Screen {
     Button crapsButton;
     Button rouletteButton;
 
+    Label currentBalance;
+
     Image tcpTitle;
     Image cfpTitle;
     Image cStudTitle;
     Image blackjackTitle;
     Image crapsTitle;
     Image rouletteTitle;
+
+    MessagePopup dailyChipsPopup;
+    Window dailyChipsWindow;
+    Label dailyChipsMessage;
+
+    Window newInstallWindow;
 
     Sprite background;
 
@@ -117,10 +131,14 @@ public class MenuScreen implements Screen {
             }
         });
 
+        currentBalance = new Label("", skin);
+        updateBalanceLabel();
+
         windowTable = new Table();
         windowTable.setWidth(stage.getWidth());
         windowTable.setHeight(120);
         windowTable.add(storeButton).left().pad(10);
+        windowTable.add(currentBalance).center();
         windowTable.add(settingsButton).right().pad(10);
         windowTable.row();
 
@@ -245,9 +263,102 @@ public class MenuScreen implements Screen {
 //        scrollPane.setWidth(stage.getWidth());
 //        scrollPane.setHeight(stage.getHeight());
 
-        windowTable.add(gamesTable).colspan(2).fill().expand();
+        windowTable.add(gamesTable).colspan(3).fill().expand();
         windowTable.setFillParent(true);
         stage.addActor(windowTable);
+
+        dailyChipsWindow = new Window("", skin);
+        dailyChipsWindow.setVisible(false);
+        dailyChipsWindow.setWidth(600);
+        dailyChipsWindow.setHeight(500);
+        dailyChipsWindow.setPosition(stage.getWidth() / 2 - 300, stage.getHeight() / 2 - 250);
+        dailyChipsWindow.setModal(true);
+
+        Texture popupBack = assets.getTexture(Assets.TEX_NAME.BACKGROUND);
+        popupBack.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        Sprite popupBackground = new Sprite(popupBack, (int)dailyChipsWindow.getWidth(), (int)dailyChipsWindow.getHeight());
+        popupBackground.setSize(dailyChipsWindow.getWidth(), dailyChipsWindow.getHeight());
+        popupBackground.setColor(Color.GRAY);
+
+        dailyChipsWindow.setBackground(new SpriteDrawable(popupBackground));
+
+        dailyChipsMessage = new Label("", skin);
+        dailyChipsMessage.setWrap(true);
+
+        Button dailyChipsCancelButton = new Button(skin);
+        dailyChipsCancelButton.setColor(menuButtonColor);
+        Label closeLabel = new Label("Get some chips", skin);
+        closeLabel.setColor(Color.BLACK);
+        dailyChipsCancelButton.add(closeLabel);
+        dailyChipsCancelButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                dailyChipsWindow.setVisible(false);
+                game.addToBalance(1000);
+                updateBalanceLabel();
+                game.setLastDailyChips(ZonedDateTime.now());
+                dailyChipsPopup.pop(MessagePopup.Message.WIN, stage.getWidth() / 2, stage.getHeight() * .75f, 10);
+            }
+        });
+
+        dailyChipsWindow.add(new Label("Daily Chips!", skin, "large-font"));
+        dailyChipsWindow.row();
+        dailyChipsWindow.add(dailyChipsMessage).center().fill().expand().padLeft(30).padRight(30);
+        dailyChipsWindow.row();
+        dailyChipsWindow.add(dailyChipsCancelButton).center().pad(30);
+
+        dailyChipsPopup = new MessagePopup(assets);
+
+        newInstallWindow = new Window("", skin);
+        newInstallWindow.setVisible(false);
+        newInstallWindow.setWidth(600);
+        newInstallWindow.setHeight(500);
+        newInstallWindow.setPosition(stage.getWidth() / 2 - 300, stage.getHeight() / 2 - 250);
+        newInstallWindow.setModal(true);
+        newInstallWindow.setBackground(new SpriteDrawable(popupBackground));
+
+        Button newInstallCancelButton = new Button(skin);
+        newInstallCancelButton.setColor(menuButtonColor);
+        Label closeNewInstallLabel = new Label("Got it. Let's play!", skin);
+        closeNewInstallLabel.setColor(Color.BLACK);
+        newInstallCancelButton.add(closeNewInstallLabel);
+        newInstallCancelButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                newInstallWindow.setVisible(false);
+                game.setIsNewInstall(false);
+                checkDailyChips();
+            }
+        });
+
+        Label hyperlink = new Label("casino.13stb.com", skin);
+        hyperlink.setColor(Color.BLUE);
+        hyperlink.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                Gdx.net.openURI("http://casino.13secondstoburn.com");
+            }
+        });
+
+        newInstallWindow.add(new Label("Welcome to Casino Practice", skin, "large-font")).center().pad(30);
+        newInstallWindow.row();
+        Label welcomeText = new Label("Test your skills on many games that you'll find in casinos around the world!\n\n If you need help at any point, please go to:", skin);
+        welcomeText.setWrap(true);
+        newInstallWindow.add(welcomeText).center().expand().fill();
+        newInstallWindow.row();
+        newInstallWindow.add(hyperlink).center().pad(10);
+        newInstallWindow.row();
+        newInstallWindow.add(newInstallCancelButton).center().pad(10).expand();
+
+        stage.addActor(newInstallWindow);
+        stage.addActor(dailyChipsWindow);
+        stage.addActor(dailyChipsPopup);
+
+        if(game.isNewInstall()) {
+            newInstallWindow.setVisible(true);
+        } else {
+            checkDailyChips();
+        }
 
 //        windowTable.debug();
 //        gamesTable.debug();
@@ -265,6 +376,28 @@ public class MenuScreen implements Screen {
 
         stage.act(delta);
         stage.draw();
+    }
+
+    private void updateBalanceLabel() {
+        String balance;
+        if(game.getBalance() == (int)game.getBalance()) {
+            balance = String.format("%.0f", game.getBalance());
+        } else {
+            balance = String.format("%.2f", game.getBalance());
+        }
+
+        currentBalance.setText("Current Chips: " + balance);
+    }
+
+    private void checkDailyChips() {
+        ZonedDateTime now = ZonedDateTime.now();
+        long lastDay = game.getLastDailyChips().getYear() * 1000 + game.getLastDailyChips().getDayOfYear();
+        long nowDay = now.getYear() * 1000 + now.getDayOfYear();
+
+        if(nowDay > lastDay) {
+            dailyChipsMessage.setText("Time for some more chips!\n\nCome back every day to receive 1000 more chips!");
+            dailyChipsWindow.setVisible(true);
+        }
     }
 
     @Override

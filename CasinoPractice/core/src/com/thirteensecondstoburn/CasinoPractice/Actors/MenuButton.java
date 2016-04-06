@@ -18,8 +18,7 @@ public class MenuButton extends Actor {
     public MenuButton(Assets assets) {
         menuDown = new Image(assets.getTexture(Assets.TEX_NAME.MENU_BUTTON_DOWN));
         menuUp = new Image(assets.getTexture(Assets.TEX_NAME.MENU_BUTTON));
-        setWidth(200);
-        setHeight(150);
+        setSize(200, 150);
 
         addListener(new ActorGestureListener() {
             @Override
