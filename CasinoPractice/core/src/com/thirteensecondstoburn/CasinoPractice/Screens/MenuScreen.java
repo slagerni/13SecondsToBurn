@@ -24,7 +24,8 @@ import com.thirteensecondstoburn.CasinoPractice.Actors.MessagePopup;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 
-import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * Created by Nick on 2/3/2015.
@@ -86,6 +87,8 @@ public class MenuScreen implements Screen {
         }
 
         Gdx.input.setInputProcessor(stage);
+        stage.clear();
+        stage.addAction(Actions.fadeIn(0.5f));
 
         Color menuButtonColor = skin.getColor("menuButtonColor");
 
@@ -296,7 +299,7 @@ public class MenuScreen implements Screen {
                 dailyChipsWindow.setVisible(false);
                 game.addToBalance(1000);
                 updateBalanceLabel();
-                game.setLastDailyChips(ZonedDateTime.now());
+                game.setLastDailyChips(GregorianCalendar.getInstance());
                 dailyChipsPopup.pop(MessagePopup.Message.WIN, stage.getWidth() / 2, stage.getHeight() * .75f, 10);
             }
         });
@@ -390,9 +393,9 @@ public class MenuScreen implements Screen {
     }
 
     private void checkDailyChips() {
-        ZonedDateTime now = ZonedDateTime.now();
-        long lastDay = game.getLastDailyChips().getYear() * 1000 + game.getLastDailyChips().getDayOfYear();
-        long nowDay = now.getYear() * 1000 + now.getDayOfYear();
+        Calendar now = GregorianCalendar.getInstance();
+        long lastDay = game.getLastDailyChips().get(Calendar.YEAR) * 1000 + game.getLastDailyChips().get(Calendar.DAY_OF_YEAR);
+        long nowDay = now.get(Calendar.YEAR) * 1000 + now.get(Calendar.DAY_OF_YEAR);
 
         if(nowDay > lastDay) {
             dailyChipsMessage.setText("Time for some more chips!\n\nCome back every day to receive 1000 more chips!");

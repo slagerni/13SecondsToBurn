@@ -19,7 +19,9 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.SplashScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.StoreScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.ThreeCardPokerScreen;
 
-import java.time.ZonedDateTime;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public class CasinoPracticeGame extends Game {
     public static IGoogleServices googleServices;
@@ -39,7 +41,7 @@ public class CasinoPracticeGame extends Game {
     private RouletteScreen rouletteScreen;
     private double balance;
 
-    private ZonedDateTime lastDailyChips = null;
+    private Calendar lastDailyChips = null;
     private Preferences saveData;
 
     private static final String SAVE_KEY = Base64Coder.encodeString("encodedSettings");
@@ -145,13 +147,14 @@ public class CasinoPracticeGame extends Game {
             try {
                 EncodedSettings encodedSettings = json.fromJson(EncodedSettings.class, Base64Coder.decodeString(encodedKey));
                 balance = encodedSettings.balance;
-                lastDailyChips = ZonedDateTime.parse(encodedSettings.lastDailyChips);
+                lastDailyChips = GregorianCalendar.getInstance();
+                lastDailyChips.setTimeInMillis(encodedSettings.lastDailyChips);
             } catch (Exception ex) {
                 // corrupt file, assume someone tampered with it
                 System.out.println("Error reading JSON settings: " + ex.getMessage());
 
                 balance = 1000;
-                lastDailyChips = ZonedDateTime.now();
+                lastDailyChips = GregorianCalendar.getInstance();
             }
         } else {
             if(isNewInstall) {
@@ -159,13 +162,13 @@ public class CasinoPracticeGame extends Game {
             } else {
                 balance = 0; // assume someone is messing w/ the config file
             }
-            lastDailyChips = ZonedDateTime.now().minusDays(1); // allow the daily pop to happen
+            lastDailyChips.add(Calendar.DAY_OF_MONTH, -1); // allow the daily pop to happen
         }
     }
 
     private static class EncodedSettings {
         public double balance;
-        public String lastDailyChips;
+        public long lastDailyChips;
     }
 
     public void saveSettings() {
@@ -181,7 +184,7 @@ public class CasinoPracticeGame extends Game {
 
         EncodedSettings encodedSettings = new EncodedSettings();
         encodedSettings.balance = balance;
-        encodedSettings.lastDailyChips = lastDailyChips.toString();
+        encodedSettings.lastDailyChips = lastDailyChips.getTimeInMillis();
 
         Json json = new Json();
         json.setOutputType(JsonWriter.OutputType.json);
@@ -301,11 +304,11 @@ public class CasinoPracticeGame extends Game {
         this.rouletteType = rouletteType;
     }
 
-    public ZonedDateTime getLastDailyChips() {
+    public Calendar getLastDailyChips() {
         return lastDailyChips;
     }
 
-    public void setLastDailyChips(ZonedDateTime lastDailyChips) {
+    public void setLastDailyChips(Calendar lastDailyChips) {
         this.lastDailyChips = lastDailyChips;
         saveSettings();
     }
