@@ -70,7 +70,7 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         paytable.setPosition(stage.getWidth() - 350 * paytable.getScaleX(), stage.getHeight() - 500 * paytable.getScaleY());
 
         title = new Image(assets.getTexture(Assets.TEX_NAME.CRAZY_FOUR_POKER_TITLE));
-        title.setColor(mainColor);
+        title.setColor(Color.WHITE);
         title.setPosition(315, stage.getHeight() - 200);
 
         queensUpStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.QUEENS_UP_CIRCLE);

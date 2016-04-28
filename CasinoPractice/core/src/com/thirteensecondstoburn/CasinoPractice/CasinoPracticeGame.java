@@ -12,6 +12,7 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.BlackJackScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CaribbeanStudPokerScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CrapsScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.CrazyFourPokerScreen;
+import com.thirteensecondstoburn.CasinoPractice.Screens.LetItRideScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.MenuScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.RouletteScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SettingsScreen;
@@ -39,6 +40,7 @@ public class CasinoPracticeGame extends Game {
     private BlackJackScreen blackJackScreen;
     private CrapsScreen crapsScreen;
     private RouletteScreen rouletteScreen;
+    private LetItRideScreen letItRideScreen;
     private double balance;
 
     private Calendar lastDailyChips = null;
@@ -112,6 +114,11 @@ public class CasinoPracticeGame extends Game {
     public RouletteScreen getRouletteScreen() {
         if(rouletteScreen == null) rouletteScreen = new RouletteScreen(this);
         return rouletteScreen;
+    }
+
+    public LetItRideScreen getLetItRideScreen() {
+        if(letItRideScreen == null) letItRideScreen = new LetItRideScreen(this);
+        return letItRideScreen;
     }
 
     @Override
@@ -206,6 +213,7 @@ public class CasinoPracticeGame extends Game {
         if(blackJackScreen != null) try {blackJackScreen.dispose();} catch (Exception ex) {}
         if(crapsScreen != null) try {crapsScreen.dispose();} catch (Exception ex) {}
         if(rouletteScreen != null) try {rouletteScreen.dispose();} catch (Exception ex) {}
+        if(letItRideScreen != null) try {letItRideScreen.dispose();} catch (Exception ex) {}
         if(menuScreen != null) try {menuScreen.dispose();} catch (Exception ex) {}
         if(settingsScreen != null) try {settingsScreen.dispose();} catch (Exception ex) {}
         if(storeScreen != null) try {storeScreen.dispose();} catch (Exception ex) {}

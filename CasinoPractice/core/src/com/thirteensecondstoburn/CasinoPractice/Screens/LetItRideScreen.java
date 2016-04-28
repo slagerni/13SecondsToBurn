@@ -1,115 +1,100 @@
 package com.thirteensecondstoburn.CasinoPractice.Screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Card;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStackGroup;
+import com.thirteensecondstoburn.CasinoPractice.Actors.Hand;
+import com.thirteensecondstoburn.CasinoPractice.Actors.MultiLineTableButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 import com.thirteensecondstoburn.CasinoPractice.Deck;
-import com.thirteensecondstoburn.CasinoPractice.Actors.Hand;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by Nick on 2/18/2015.
+ * Created by Nick on 4/27/2016.
  */
-public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompletedListener {
+public class LetItRideScreen extends TableScreen implements ActionCompletedListener {
     public static final float HAND_X_START = (CasinoPracticeGame.SCREEN_WIDTH - Card.CARD_WIDTH * 3) / 2;
-
     Deck deck;
-
     boolean isFirstDeck = true;
     boolean canBet = true;
 
-    ChipStackGroup anteStack;
-    ChipStackGroup playStack;
+    ChipStackGroup bet1Stack;
+    ChipStackGroup bet2Stack;
+    ChipStackGroup bet3Stack;
 
     TableButton dealButton;
-    TableButton playButton;
-    TableButton foldButton;
+    MultiLineTableButton letItRideButton;
+    MultiLineTableButton pullItBackButton;
     TableButton clearButton;
 
-    Hand dealerHand;
+    Hand communityHand;
     Hand playerHand;
 
     Image paytable;
     Image title;
 
-    Text dealerHandText;
     Text playerHandText;
-    Text qualifyText;
 
-    int lastAnteBet = 5;
-    BestHand bestHandPlayer = null;
+    int lastBet = 5;
 
-    Card visibleCard;
+    String letItRideReason = "";
 
-    public CaribbeanStudPokerScreen(CasinoPracticeGame game) {
+    public LetItRideScreen(CasinoPracticeGame game) {
         super(game);
     }
 
     @Override
     public void setup() {
-        lastAnteBet = game.getTableMinimum();
+        Gdx.input.setInputProcessor(stage);
+        stage.addAction(Actions.alpha(1));
 
-        Texture paytableTex = assets.getTexture(Assets.TEX_NAME.CARIBBEAN_STUD_PAYTABLE);
-        paytable = new Image(paytableTex);
-        paytable.setScale(.75f, .75f);
+        lastBet = game.getTableMinimum();
+
+        paytable = new Image(assets.getTexture(Assets.TEX_NAME.LET_IT_RIDE_PAYTABLE));
         paytable.setColor(1, 1, 1, .75f);
-        paytable.setPosition(stage.getWidth() - 350 * paytable.getScaleX(), stage.getHeight() - paytableTex.getHeight() * paytable.getScaleY());
+        paytable.setPosition(stage.getWidth() - paytable.getWidth() - 10, stage.getHeight() - paytable.getHeight() - 10);
 
-        title = new Image(assets.getTexture(Assets.TEX_NAME.CARIBBEAN_STUD_POKER_TITLE));
+        title = new Image(assets.getTexture(Assets.TEX_NAME.LET_IT_RIDE_TITLE));
         title.setColor(Color.WHITE);
-        title.setPosition(315, stage.getHeight() - 250);
+        title.setPosition(315, stage.getHeight() - 270);
 
-
-        anteStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.ANTE_CIRCLE);
-        anteStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + anteStack.getWidth()) / 2, stage.getHeight()/2 + 10);
-        anteStack.addListener(new ActorGestureListener() {
+        bet1Stack = new ChipStackGroup(game, assets, Assets.TEX_NAME.LET_IT_RIDE_CIRCLE_1);
+        bet1Stack.setPosition(HAND_X_START + Card.CARD_WIDTH * 3 - Card.CARD_WIDTH / 2, stage.getHeight()/2 - 75);
+        bet1Stack.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (anteStack.hit(x, y, true) != null && canBet) {
-                    clearButton.setVisible(true);
-                    int betAmount = leftSide.getBetAmount();
-                    if(anteStack.getTotal() + leftSide.getBetAmount() * 2 > game.getBalance() - betAmount) {
-                        showHint("Insufficient funds to make that bet");
-                        playerHandText.setText("");
-                        dealerHandText.setText("");
-                        return;
-                    }
-                    if(anteStack.getTotal() + betAmount >  game.getTableMaximum()) {
-                        showHint("Table maximum of " +  game.getTableMaximum());
-                        playerHandText.setText("");
-                        dealerHandText.setText("");
-                        return;
-                    }
-                    anteStack.increaseTotal(betAmount);
-                    lastAnteBet = anteStack.getTotal();
-                    subtractFromBalance(betAmount);
-                    calculateWager();
-                    dealButton.setVisible(true);
-                }
+                addToBet();
             }
         });
 
-        playStack = new ChipStackGroup(game, assets, Assets.TEX_NAME.PLAY_CIRCLE);
-        playStack.setPosition(HAND_X_START - (HAND_X_START - leftSide.getWidth() + playStack.getWidth()) / 2, anteStack.getY() - 200);
-        playStack.addListener(new ActorGestureListener() {
+        bet2Stack = new ChipStackGroup(game, assets, Assets.TEX_NAME.LET_IT_RIDE_CIRCLE_2);
+        bet2Stack.setPosition(HAND_X_START + Card.CARD_WIDTH * 2 - Card.CARD_WIDTH / 2, stage.getHeight()/2 - 75);
+        bet2Stack.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (playStack.hit(x, y, true) != null && !canBet) {
-                    playHand(playButton);
-                }
+                addToBet();
+            }
+        });
+
+        bet3Stack = new ChipStackGroup(game, assets, Assets.TEX_NAME.LET_IT_RIDE_CIRCLE_DOLLAR_SIGN);
+        bet3Stack.setPosition(HAND_X_START + Card.CARD_WIDTH / 2, stage.getHeight()/2 - 75);
+        bet3Stack.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                addToBet();
             }
         });
 
@@ -120,24 +105,13 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (dealButton.isInside(x, y)) {
                     dealHand();
+                    if(game.usePreActionHints()) {
+                        setPreBetHint();
+                    }
                 }
             }
         });
         dealButton.setVisible(true);
-
-        playButton = new TableButton(assets, "Bet 1x", mainColor);
-        playButton.setPosition(stage.getWidth() - TableButton.BUTTON_WIDTH, 0);
-        playButton.setName("1xButton");
-        playButton.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (playButton.isInside(x, y) && !canBet) {
-                    playHand(playButton);
-                    playButton.setVisible(false);
-                }
-            }
-        });
-        playButton.setVisible(false);
 
         clearButton = new TableButton(assets, "Clear", mainColor);
         clearButton.setPosition(stage.getWidth() - TableButton.BUTTON_WIDTH, TableButton.BUTTON_HEIGHT + 10);
@@ -151,276 +125,403 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
         });
         clearButton.setVisible(false);
 
-        foldButton = new TableButton(assets, "Fold", mainColor);
-        foldButton.setPosition(stage.getWidth() - TableButton.BUTTON_WIDTH, TableButton.BUTTON_HEIGHT + 10);
-        foldButton.setName("foldButton");
-        foldButton.addListener(new ActorGestureListener() {
+        letItRideButton = new MultiLineTableButton(assets, "Let|It|Ride", mainColor);
+        letItRideButton.setPosition(stage.getWidth() - TableButton.BUTTON_WIDTH, 0);
+        letItRideButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (foldButton.isInside(x, y)) {
-                    foldHand();
+                if (letItRideButton.isInside(x, y) && !canBet) {
+                    if(game.useHintText()) {
+                        TableButton correctButton = getCorrectButtonForHint();
+                        if(correctButton != letItRideButton) {
+                            showHint("Pull it back. Strategy conditions not met.");
+                        }
+                    }
+                    play(false);
                 }
             }
         });
-        foldButton.setVisible(false);
+        letItRideButton.setVisible(false);
 
-        dealerHandText = new Text(assets, "", 1.5f);
-        dealerHandText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - Card.CARD_HEIGHT - 90);
+        pullItBackButton = new MultiLineTableButton(assets, "Pull|It|Back", mainColor);
+        pullItBackButton.setPosition(stage.getWidth() - TableButton.BUTTON_WIDTH, TableButton.BUTTON_HEIGHT + 10);
+        pullItBackButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if (pullItBackButton.isInside(x, y)) {
+                    if(game.useHintText()) {
+                        TableButton correctButton = getCorrectButtonForHint();
+                        if(correctButton != pullItBackButton) {
+                            showHint(letItRideReason);
+                        }
+                    }
+                    play(true);
+                }
+            }
+        });
+        pullItBackButton.setVisible(false);
 
         playerHandText = new Text(assets, "", 1.5f);
         playerHandText.setPosition(HAND_X_START, Card.CARD_HEIGHT + 60);
 
-        qualifyText = new Text(assets, "DEALER QUALIFIES WITH ACE KING OR BETTER", 1);
-        qualifyText.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - 40);
-        qualifyText.setColor(.5f, .5f, .5f, .5f);
-
         stage.addActor(paytable);
         stage.addActor(title);
 
-        stage.addActor(anteStack);
-        stage.addActor(playStack);
+        stage.addActor(bet1Stack);
+        stage.addActor(bet2Stack);
+        stage.addActor(bet3Stack);
 
         stage.addActor(dealButton);
         stage.addActor(clearButton);
-        stage.addActor(playButton);
-        stage.addActor(foldButton);
+        stage.addActor(letItRideButton);
+        stage.addActor(pullItBackButton);
 
-        stage.addActor(dealerHandText);
         stage.addActor(playerHandText);
-        stage.addActor(qualifyText);
     }
 
-    private void dealHand() {
-        if(playerHand != null) playerHand.remove();
-        if(dealerHand != null) dealerHand.remove();
-        playStack.setTotal(0);
-        if(anteStack.getTotal() == 0) {
-            if(lastAnteBet * 3 > game.getBalance()) {
-                playerHandText.setText("You can't repeat your last bet");
-                dealerHandText.setText("");
-                return;
-            }
-            anteStack.setTotal(lastAnteBet);
-            leftSide.setWagerText("" + (lastAnteBet));
-            subtractFromBalance(lastAnteBet);
+    @Override
+    public void actionCompleted(Actor caller) {
+        if(caller == playerHand) {
+            communityHand.setVisible(true);
+            communityHand.dealAction(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT);
+        } else if(caller == communityHand) {
+            toggleButtons(true);
         }
-
-        if(anteStack.getTotal() < game.getTableMinimum()) {
-            showHint("Minimum bet is " + game.getTableMinimum());
-            dealerHandText.setText("");
-            return;
-        }
-
-        Card.Back back;
-        if(isFirstDeck) { back = Card.Back.BACK1;} else {back = Card.Back.BACK2;}
-        isFirstDeck = !isFirstDeck;
-        deck = new Deck(assets, back);
-        deck.shuffle();
-
-        dealerHand = new Hand(deck.getCards().subList(0, 5), 125);
-        dealerHand.getCards().get(4).setFaceUp(true); // one card shows from the dealer
-        // TEST
-//        ArrayList<Card> dealerTestCards = new ArrayList<Card>();
-//        dealerTestCards.add(new Card(Card.FaceValue.KING, Card.Suit.SPADE, Card.Back.BACK1, false, assets));
-//        dealerTestCards.add(new Card(Card.FaceValue.FIVE, Card.Suit.DIAMOND, Card.Back.BACK1, false, assets));
-//        dealerTestCards.add(new Card(Card.FaceValue.FIVE, Card.Suit.CLUB, Card.Back.BACK1, false, assets));
-//        dealerTestCards.add(new Card(Card.FaceValue.FIVE, Card.Suit.HEART, Card.Back.BACK1, false, assets));
-//        dealerTestCards.add(new Card(Card.FaceValue.ACE, Card.Suit.HEART, Card.Back.BACK1, true, assets));
-//        dealerHand = new Hand(dealerTestCards, 125);
-
-        visibleCard = dealerHand.getCards().get(4);
-        dealerHand.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - Card.CARD_HEIGHT - 50);
-        dealerHand.dealAction(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT);
-        dealerHand.addActionListener(this);
-
-        // TEST
-//        ArrayList<Card> playerTestCards = new ArrayList<Card>();
-//        playerTestCards.add(new Card(Card.FaceValue.EIGHT, Card.Suit.HEART, Card.Back.BACK1, true, assets));
-//        playerTestCards.add(new Card(Card.FaceValue.THREE, Card.Suit.SPADE, Card.Back.BACK1, true, assets));
-//        playerTestCards.add(new Card(Card.FaceValue.THREE, Card.Suit.CLUB, Card.Back.BACK1, true, assets));
-//        playerTestCards.add(new Card(Card.FaceValue.EIGHT, Card.Suit.CLUB, Card.Back.BACK1, true, assets));
-//        playerTestCards.add(new Card(Card.FaceValue.THREE, Card.Suit.HEART, Card.Back.BACK1, true, assets));
-//        bestHandPlayer = new BestHand(playerTestCards);
-
-        bestHandPlayer = new BestHand(deck.getCards().subList(5, 10));
-        playerHand = new Hand(bestHandPlayer.sortedCards, 125);
-        playerHand.setPosition(HAND_X_START, 50);
-        playerHand.setVisible(false);
-
-        playerHand.showHand();
-        playerHand.addActionListener(this);
-
-        stage.addActor(dealerHand);
-        stage.addActor(playerHand);
-
-        canBet = false;
-        hideButtons(); // cause we're dealing and we'll turn them on when it's done
-        leftSide.setWonText("");
-        dealerHandText.setText("");
-        playerHandText.setText("");
-    }
-
-    private void playHand(TableButton buttonPressed) {
-        playStack.setTotal(anteStack.getTotal() * 2);
-        subtractFromBalance(anteStack.getTotal() * 2);
-        calculateWager();
-        showDealerHand();
-        calculateWinner(false);
-        canBet = true;
-        toggleButtons(false);
-        if(game.useHintText()) {
-            TableButton correctButton = getCorrectButtonForHint();
-            if(correctButton != buttonPressed) {
-                showHint(getHintText(correctButton));
-            }
-        }
-    }
-
-    private void foldHand() {
-        calculateWinner(true);
-        canBet = true;
-        toggleButtons(false);
-        showDealerHand();
-        anteStack.clear();
-        if(game.useHintText()) {
-            TableButton correctButton = getCorrectButtonForHint();
-            if(correctButton != foldButton) {
-                showHint(getHintText(correctButton));
-            }
-        }
-    }
-
-    private void clearHand() {
-        addToBalance(anteStack.getTotal());
-        lastAnteBet = game.getTableMinimum();
-        anteStack.setTotal(0);
-        playStack.setTotal(0);
-        leftSide.setWonText("");
-        dealerHandText.setText("");
-        playerHandText.setText("");
-        leftSide.setWagerText("");
-        canBet = true;
-        toggleButtons(false);
     }
 
     private void calculateWager() {
-        leftSide.setWagerText("" + (anteStack.getTotal() + playStack.getTotal()));
+        leftSide.setWagerText("" + (bet1Stack.getTotal() + bet2Stack.getTotal() + bet3Stack.getTotal()));
     }
 
-    private void toggleButtons(boolean isPlaying) {
-        dealButton.setVisible(!isPlaying);
-        clearButton.setVisible(!isPlaying);
-        playButton.setVisible(isPlaying);
-        foldButton.setVisible(isPlaying);
+    private void addToBet() {
+        int betAmount = leftSide.getBetAmount();
+        if (bet1Stack.getTotal() * 3 + betAmount * 3 > game.getBalance() - betAmount * 3) {
+            showHint("Insufficient funds to make that bet");
+            playerHandText.setText("");
+            return;
+        }
+        if (bet1Stack.getTotal() * 3 + betAmount * 3 > game.getTableMaximum()) {
+            showHint("Table maximum of " + game.getTableMaximum());
+            playerHandText.setText("");
+            return;
+        }
+        bet1Stack.increaseTotal(betAmount);
+        bet2Stack.increaseTotal(betAmount);
+        bet3Stack.increaseTotal(betAmount);
+        lastBet = bet1Stack.getTotal();
+        subtractFromBalance(betAmount * 3);
+        calculateWager();
+
+        toggleButtons(false);
     }
 
     private void hideButtons() {
         dealButton.setVisible(false);
         clearButton.setVisible(false);
-        playButton.setVisible(false);
-        foldButton.setVisible(false);
+        letItRideButton.setVisible(false);
+        pullItBackButton.setVisible(false);
     }
 
-    private void showDealerHand() {
-        dealerHand.showHand();
+    private void toggleButtons(boolean isPlaying) {
+        dealButton.setVisible(!isPlaying);
+        clearButton.setVisible(!isPlaying);
+        letItRideButton.setVisible(isPlaying);
+        pullItBackButton.setVisible(isPlaying);
     }
 
-    @Override
-    public void actionCompleted(Actor caller) {
-        if(caller == dealerHand) {
-            playerHand.setVisible(true);
-            playerHand.dealAction(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT);
-        } else if(caller == playerHand) {
-
-            toggleButtons(true);
-            if(game.usePreActionHints()) {
-                setPreBetHint();
+    private void dealHand() {
+        if (playerHand != null) playerHand.remove();
+        if (communityHand != null) communityHand.remove();
+        if (bet1Stack.getTotal() == 0) {
+            if (lastBet * 3 > game.getBalance()) {
+                playerHandText.setText("You can't repeat your last bet");
+                return;
             }
+            bet1Stack.setTotal(lastBet);
+            bet2Stack.setTotal(lastBet);
+            bet3Stack.setTotal(lastBet);
+            calculateWager();
+            subtractFromBalance(lastBet * 3);
+        }
+
+        if (bet1Stack.getTotal() < game.getTableMinimum()) {
+            showHint("Minimum bet is " + game.getTableMinimum());
+            return;
+        }
+
+        Card.Back back;
+        if (isFirstDeck) {
+            back = Card.Back.BACK1;
+        } else {
+            back = Card.Back.BACK2;
+        }
+        isFirstDeck = !isFirstDeck;
+        deck = new Deck(assets, back);
+        deck.shuffle();
+
+        communityHand = new Hand(deck.getCards().subList(0, 2), Card.CARD_WIDTH);
+        communityHand.setPosition(HAND_X_START, CasinoPracticeGame.SCREEN_HEIGHT - Card.CARD_HEIGHT - 50);
+        communityHand.addActionListener(this);
+        communityHand.setVisible(false);
+
+        playerHand = new Hand(deck.getCards().subList(2, 5), Card.CARD_WIDTH);
+        playerHand.setPosition(HAND_X_START, 50);
+        playerHand.setVisible(true);
+        playerHand.showHand();
+        playerHand.dealAction(CasinoPracticeGame.SCREEN_WIDTH, CasinoPracticeGame.SCREEN_HEIGHT);
+        playerHand.addActionListener(this);
+
+        stage.addActor(communityHand);
+        stage.addActor(playerHand);
+
+        canBet = false;
+        hideButtons(); // cause we're dealing and we'll turn them on when it's done
+        leftSide.setWonText("");
+        playerHandText.setText("");
+    }
+
+    private void clearHand() {
+        addToBalance(bet1Stack.getTotal() + bet2Stack.getTotal() + bet3Stack.getTotal());
+        lastBet = game.getTableMinimum();
+        bet1Stack.setTotal(0);
+        bet2Stack.setTotal(0);
+        bet3Stack.setTotal(0);
+        leftSide.setWonText("");
+        leftSide.setWagerText("");
+        playerHandText.setText("");
+        canBet = true;
+        toggleButtons(false);
+        clearButton.setVisible(false);
+    }
+
+    private void setPreBetHint() {
+        letItRideButton.setColor(mainColor);
+        pullItBackButton.setColor(mainColor);
+
+        TableButton button = getCorrectButtonForHint();
+        button.setColor(hintColor);
+    }
+
+    TableButton getCorrectButtonForHint() {
+        int communityCardsVisible = countVisibleCommunityCards();
+        Hand checkHand = new Hand(playerHand.getCards(), 0);
+        checkHand.sort();
+        if(communityCardsVisible == 0) {
+            int card0 = checkHand.getCards().get(0).getFaceValue().getStraightValue();
+            int card1 = checkHand.getCards().get(1).getFaceValue().getStraightValue();
+            int card2 = checkHand.getCards().get(2).getFaceValue().getStraightValue();
+
+            // paying hand?
+            if((card0 == card1 && card0 == card2)
+                    || (card0 == card1 && card0 >= 10)
+                    || (card1 == card2 && card1 >= 10)){
+                letItRideReason = "Let it Ride: Paying Hand";
+                return letItRideButton;
+            }
+
+            // everything else needs to include a potential flush
+            if(isFlush(checkHand.getCards())){
+                // any 3 to a royal flush
+                if(card2 >= 10) {
+                    letItRideReason = "Let it Ride: Any 3 to a royal flush";
+                    return letItRideButton;
+                }
+
+                // any 3 in a row except 2-3-4 and A-2-3
+                if(card0 - card2 == 2 && card2 >= 3) {
+                    letItRideReason = "Let it Ride: 3 to a straight flush with a low card of a 3";
+                    return letItRideButton;
+                }
+
+                // any 3 to a straight spread 4 with a 10 or greater
+                if(card0 - card2 == 3 && card0 >= 10) {
+                    letItRideReason = "Let it Ride: Any 3 cards to a straight flush with a spread of 4 and a 10 or greater";
+                    return letItRideButton;
+                }
+
+                // any 3 to a straight spread 5 with the at least 2 >= 10
+                if(card0 - card2 == 4 && card0 >= 10 && card2 >= 10) {
+                    letItRideReason = "Let it Ride: Any 3 cards to a straight flush with a spread of 5 and 2 cards 10 or greater";
+                    return letItRideButton;
+                }
+            }
+        } else if (communityCardsVisible == 1) {
+            checkHand.getCards().add(new Card(communityHand.getCards().get(1)));
+            checkHand.sort();
+            int card0 = checkHand.getCards().get(0).getFaceValue().getStraightValue();
+            int card1 = checkHand.getCards().get(1).getFaceValue().getStraightValue();
+            int card2 = checkHand.getCards().get(2).getFaceValue().getStraightValue();
+            int card3 = checkHand.getCards().get(3).getFaceValue().getStraightValue();
+
+            // paying hand
+            if((card0 == card1 && card0 >= 10) // pair of 10+
+                    || (card1 == card2 && card1 >= 10) // pair of 10+
+                    || (card2 == card3 && card2 >= 10) // pair of 10+
+                    || (card0 == card1 && card2 == card3) // 2 pair
+                    || (card0 == card1 && card0 == card2) // 3 of a kind
+                    || (card1 == card2 && card1 == card3)){ // 3 of a kind
+                letItRideReason = "Let it Ride: Paying Hand";
+                return letItRideButton;
+            }
+
+            // is flush
+            if(isFlush(checkHand.getCards())) {
+                letItRideReason = "Let it Ride: Flush potential";
+                return letItRideButton;
+            }
+
+            // any 4 to an outside straight
+            if(card0 - card3 == 3) {
+                letItRideReason = "Let it Ride: Outside straight draw";
+                return letItRideButton;
+            }
+
+            // any 4 to an inside straight where the bottom is 10
+            if(card0 - card3 == 4 && card3 >= 10) {
+                letItRideReason = "Let it Ride: Inside straight draw w/ a 10 or higher as the low card";
+                return letItRideButton;
+            }
+        }
+
+        return pullItBackButton;
+    }
+
+    private boolean isFlush(List<Card>cards) {
+        Card.Suit suit = cards.get(0).getSuit();
+        for(Card c : cards) {
+            if(c.getSuit() != suit) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int countVisibleCommunityCards() {
+        int cardsVisible = 0;
+        for(Card card : communityHand.getCards()) {
+            if(card.isFaceUp()) {
+                cardsVisible++;
+            }
+        }
+        return cardsVisible;
+    }
+
+    private void play(boolean pullItBack) {
+        int cardsVisible = countVisibleCommunityCards();
+
+        switch (cardsVisible) {
+            case 0:
+                if(pullItBack) {
+                    addToBalance(bet1Stack.getTotal());
+                    bet1Stack.clear();
+                    calculateWager();
+                    toggleButtons(true);
+                }
+                communityHand.getCards().get(1).setFaceUp(true);
+                if(game.usePreActionHints()) {
+                    setPreBetHint();
+                }
+                break;
+            case 1:
+                if(pullItBack) {
+                    addToBalance(bet2Stack.getTotal());
+                    bet2Stack.clear();
+                    calculateWager();
+                }
+                communityHand.getCards().get(0).setFaceUp(true);
+                calculateWinner();
+                toggleButtons(false);
+                break;
+            default:
+                toggleButtons(true);
+                break;
         }
     }
 
-    enum HandType {HIGH_CARD, PAIR, TWO_PAIR, THREE_OF_A_KIND, STRAIGHT, FLUSH, FULL_HOUSE, FOUR_OF_A_KIND, STRAIGHT_FLUSH, ROYAL_FLUSH};
-    private void calculateWinner(boolean playerFolded) {
-        BestHand bestHandDealer = new BestHand(dealerHand.getCards());
-        dealerHand.setCards(bestHandDealer.sortedCards);
+    private void calculateWinner() {
+        List<Card> allCards = new ArrayList<>();
+        allCards.addAll(playerHand.getCards());
+        allCards.addAll(communityHand.getCards());
+        BestHand fullHand = new BestHand(allCards);
 
-        // ok, now that we know what they both have, who won and how much?
-        int playerWon = bestHandPlayer.getHandType().ordinal() - bestHandDealer.getHandType().ordinal();
-        if(playerFolded) playerWon = -1;
+        int mulitplier = 0;
+        boolean won = true;
 
-        if(playerWon == 0) {
-            // run through the top values
-            for(int i=0; i<bestHandPlayer.getStraightValues().size(); i++) {
-                if(bestHandPlayer.getStraightValues().get(i) > bestHandDealer.getStraightValues().get(i)) {
-                    playerWon = 1;
-                    break;
-                } else if(bestHandPlayer.getStraightValues().get(i) < bestHandDealer.getStraightValues().get(i)) {
-                    playerWon = -1;
-                    break;
+        switch (fullHand.getHandType()) {
+            case ROYAL_FLUSH:
+                mulitplier = 1000;
+                break;
+            case STRAIGHT_FLUSH:
+                mulitplier = 200;
+                break;
+            case FOUR_OF_A_KIND:
+                mulitplier = 50;
+                break;
+            case FULL_HOUSE:
+                mulitplier = 11;
+                break;
+            case FLUSH:
+                mulitplier = 8;
+                break;
+            case STRAIGHT:
+                mulitplier = 5;
+                break;
+            case THREE_OF_A_KIND:
+                mulitplier = 3;
+                break;
+            case TWO_PAIR:
+                mulitplier = 2;
+                break;
+            case PAIR:
+                mulitplier = 1;
+                if(fullHand.getStraightValues().get(0) < 10) {
+                    won = false;
                 }
-            }
+                break;
+            default:
+                won = false;
+                break;
         }
 
-        // dealer must have A,K,x,x,x or better to qualify
-        boolean dealerQualifies = bestHandDealer.getHandType().ordinal() > 0 || (bestHandDealer.getStraightValues().get(0) == 14 && bestHandDealer.getStraightValues().get(1) == 13);
-        int total;
-        if(playerWon > 0 || (!dealerQualifies && !playerFolded)) {
-            // the player really won
-            if(dealerQualifies) {
-                //If the player has the higher poker hand then the Ante pays even money and the Play goes to the paytable.
-                total = anteStack.getTotal() * 2 + playStack.getTotal();
-                switch (bestHandPlayer.getHandType()) {
-                    case ROYAL_FLUSH:
-                        total += playStack.getTotal() * 100;
-                        break;
-                    case STRAIGHT_FLUSH:
-                        total += playStack.getTotal() * 50;
-                        break;
-                    case FOUR_OF_A_KIND:
-                        total += playStack.getTotal() * 20;
-                        break;
-                    case FULL_HOUSE:
-                        total += playStack.getTotal() * 7;
-                        break;
-                    case FLUSH:
-                        total += playStack.getTotal() * 5;
-                        break;
-                    case STRAIGHT:
-                        total += playStack.getTotal() * 4;
-                        break;
-                    case THREE_OF_A_KIND:
-                        total += playStack.getTotal() * 3;
-                        break;
-                    case TWO_PAIR:
-                        total += playStack.getTotal() * 2;
-                        break;
-                    default:
-                        total += playStack.getTotal();
-                        break;
-                }
-                anteStack.popStack(true);
-                playStack.popStack(true);
-            } else {
-                // If the dealer does not qualify then the Ante bet will pay even money and the play will push.
-                total = anteStack.getTotal() * 2 + playStack.getTotal();
-                anteStack.popStack(true);
+        if(won) {
+            playerHandText.setText(setHandValueText(fullHand));
+        } else {
+            playerHandText.setText("No Hand");
+        }
+
+        long initialBet = bet1Stack.getTotal() + bet2Stack.getTotal() + bet3Stack.getTotal(); // original bets still out
+        long total = 0;
+        if(won) {
+            total = initialBet + initialBet * mulitplier;
+
+            if(bet1Stack.getTotal() > 0) {
+                bet1Stack.popStack(true);
+                bet1Stack.clear();
             }
-        } else if(playerWon < 0) {
-            // the player lost
-            total = 0; // we've already pulled this from the balance. no need to re-deduct
-            anteStack.popStack(false);
-            if(playStack.getTotal() > 0) {
-                playStack.popStack(false);
+            if(bet2Stack.getTotal() > 0) {
+                bet2Stack.popStack(true);
+                bet2Stack.clear();
+            }
+            if(bet3Stack.getTotal() > 0) {
+                bet3Stack.popStack(true);
+                bet3Stack.clear();
             }
         } else {
-            // tie.
-            total = anteStack.getTotal() + playStack.getTotal();
+            if(bet1Stack.getTotal() > 0) {
+                bet1Stack.popStack(false);
+                bet1Stack.clear();
+            }
+            if(bet2Stack.getTotal() > 0) {
+                bet2Stack.popStack(false);
+                bet2Stack.clear();
+            }
+            if(bet3Stack.getTotal() > 0) {
+                bet3Stack.popStack(false);
+                bet3Stack.clear();
+            }
         }
 
         addToBalance(total);
-
-        int initialBet = anteStack.getTotal() + playStack.getTotal();
-
         if(total - initialBet > 0)
             leftSide.setWonColor(Color.GREEN);
         else if(total - initialBet < 0)
@@ -430,29 +531,6 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
 
         leftSide.setWonText("" + (total - initialBet));
 
-        setHandText(bestHandPlayer, bestHandDealer, dealerQualifies, playerFolded);
-
-        anteStack.clear();
-        playStack.clear();
-    }
-
-    private void setHandText(BestHand playerHand, BestHand dealerHand, boolean dealerQualified, boolean playerFolded) {
-        StringBuilder pb = new StringBuilder();
-        StringBuilder db = new StringBuilder();
-
-        if(playerFolded) {
-            pb.append("Folded: ");
-        } else {
-            if(!dealerQualified) {
-                db.append("Dealer doesn't qualify: ");
-            }
-        }
-
-        pb.append(setHandValueText(playerHand));
-        db.append(setHandValueText(dealerHand));
-
-        dealerHandText.setText(db.toString());
-        playerHandText.setText(pb.toString());
     }
 
     private String setHandValueText(BestHand hand) {
@@ -481,65 +559,7 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
         }
     }
 
-    private void setPreBetHint() {
-        foldButton.setColor(mainColor);
-        playButton.setColor(mainColor);
-
-        TableButton button = getCorrectButtonForHint();
-        button.setColor(hintColor);
-    }
-
-    private TableButton getCorrectButtonForHint() {
-        if(bestHandPlayer.getHandType().ordinal() > HandType.HIGH_CARD.ordinal()) return playButton; // pair or better? play on
-        if(bestHandPlayer.getStraightValues().get(0) != 14 || bestHandPlayer.getStraightValues().get(1) != 13) return foldButton; // less than the dealer's qualifying hand? bail.
-
-        int vcValue = visibleCard.getFaceValue().getStraightValue();
-        // Raise if the dealer's card is a 2 through queen and matches one of yours.
-        if(vcValue < 13 && bestHandPlayer.getStraightValues().contains(vcValue)) return playButton;
-
-        // Raise if the dealer's card is an ace or king and you have a queen or jack in your hand.
-        if(vcValue >= 13 && (bestHandPlayer.getStraightValues().contains(12) || bestHandPlayer.getStraightValues().contains(11))) return playButton;
-
-        // Raise if the dealer's rank does not match any of yours and you have a queen in your hand and the dealer's card is less than your fourth highest card.
-        if(!bestHandPlayer.getStraightValues().contains(vcValue) && bestHandPlayer.getStraightValues().get(2) == 12 && bestHandPlayer.getStraightValues().get(3) > vcValue) return playButton;
-
-        // everything's covered. fold it.
-        return foldButton;
-    }
-
-    private String getHintText(TableButton correctButton) {
-        int vcValue = visibleCard.getFaceValue().getStraightValue();
-        if(correctButton == playButton) {
-            // this means the player folded when they shouldn't have
-            if(bestHandPlayer.getHandType().ordinal() > HandType.HIGH_CARD.ordinal())
-                return "Always bet with a Pair or higher";
-
-            // Raise if the dealer's card is a 2 through queen and matches one of yours.
-            if(vcValue < 13 && bestHandPlayer.getStraightValues().contains(vcValue))
-                return "Raise if the dealer's card is a 2 through queen and matches one of yours";
-
-            // Raise if the dealer's card is an ace or king and you have a queen or jack in your hand.
-            if(vcValue >= 13 && (bestHandPlayer.getStraightValues().contains(12) || bestHandPlayer.getStraightValues().contains(11)))
-                return "Raise if the dealer's card is an ace or king and you have a queen or jack in your hand";
-
-            // Raise if the dealer's rank does not match any of yours and you have a queen in your hand and the dealer's card is less than your fourth highest card.
-            if(!bestHandPlayer.getStraightValues().contains(vcValue) && bestHandPlayer.getStraightValues().get(2) == 12 && bestHandPlayer.getStraightValues().get(3) > vcValue)
-                return "Raise if the dealer's rank does not match any of yours and you have a queen in your hand and the dealer's card is less than your fourth highest card";
-        } else {
-            // this means the player played when they should have folded
-            System.out.println("card1: " + (bestHandPlayer.getStraightValues().get(0) != 14) + " card2: " + (bestHandPlayer.getStraightValues().get(1) != 13));
-            if(bestHandPlayer.getStraightValues().get(0) != 14 || bestHandPlayer.getStraightValues().get(1) != 13)
-                return "Always fold with worse than Ace, King";
-
-            return "Raise only if: the dealer's rank does not match any of yours and you have a queen in your hand and the dealer's card is less than your fourth highest card"
-                + " OR the dealer's card is an ace or king and you have a queen or jack in your hand"
-                + " OR the dealer's card is a 2 through queen and matches one of yours";
-        }
-
-        System.out.println("THIS SHOULDN'T HAPPEN");
-        return "This shouldn't happen"; // this shouldn't happen;
-    }
-
+    enum HandType {HIGH_CARD, PAIR, TWO_PAIR, THREE_OF_A_KIND, STRAIGHT, FLUSH, FULL_HOUSE, FOUR_OF_A_KIND, STRAIGHT_FLUSH, ROYAL_FLUSH};
     class BestHand implements Comparable<BestHand>{
         private HandType handType;
         private ArrayList<Integer> straightValues = new ArrayList<Integer>();
@@ -830,4 +850,5 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
             return sortedCards;
         }
     }
+
 }

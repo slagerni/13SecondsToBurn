@@ -49,6 +49,7 @@ public class MenuScreen implements Screen {
     Button blackjackButton;
     Button crapsButton;
     Button rouletteButton;
+    Button letItRideButton;
 
     Label currentBalance;
 
@@ -58,6 +59,7 @@ public class MenuScreen implements Screen {
     Image blackjackTitle;
     Image crapsTitle;
     Image rouletteTitle;
+    Image letItRideTitle;
 
     MessagePopup dailyChipsPopup;
     Window dailyChipsWindow;
@@ -152,17 +154,19 @@ public class MenuScreen implements Screen {
         gamesTable.setFillParent(true);
 
         tcpTitle = new Image(assets.getTexture(Assets.TEX_NAME.THREE_CARD_POKER_TITLE));
-        tcpTitle.setColor(Color.GREEN);
+        tcpTitle.setColor(Color.BLUE);
         cfpTitle = new Image(assets.getTexture(Assets.TEX_NAME.CRAZY_FOUR_POKER_TITLE));
-        cfpTitle.setColor(Color.GREEN);
+        cfpTitle.setColor(Color.WHITE);
         cStudTitle = new Image(assets.getTexture(Assets.TEX_NAME.CARIBBEAN_STUD_POKER_TITLE));
-        cStudTitle.setColor(Color.GREEN);
+        cStudTitle.setColor(Color.WHITE);
         blackjackTitle = new Image(assets.getTexture(Assets.TEX_NAME.BLACKJACK_TITLE));
         blackjackTitle.setColor(Color.WHITE);
         crapsTitle = new Image(assets.getTexture(Assets.TEX_NAME.CRAPS_TITLE));
         crapsTitle.setColor(Color.WHITE);
         rouletteTitle = new Image(assets.getTexture(Assets.TEX_NAME.ROULETTE_TITLE));
         rouletteTitle.setColor(Color.WHITE);
+        letItRideTitle = new Image(assets.getTexture(Assets.TEX_NAME.LET_IT_RIDE_TITLE));
+        letItRideTitle.setColor(Color.WHITE);
 
         tcpButton = new Button(skin);
         tcpButton.setColor(menuButtonColor);
@@ -253,6 +257,21 @@ public class MenuScreen implements Screen {
             }
         });
 
+        letItRideButton = new Button(skin);
+        letItRideButton.setColor(menuButtonColor);
+        letItRideButton.add(letItRideTitle).center().expand();
+        letItRideButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        game.setScreen(game.getLetItRideScreen());
+                    }
+                })));
+            }
+        });
+
         gamesTable.defaults().minSize(300,300).prefSize(320,320).maxSize(320,320).pad(15);
         gamesTable.add(tcpButton);
         gamesTable.add(cfpButton);
@@ -261,6 +280,7 @@ public class MenuScreen implements Screen {
         gamesTable.row();
         gamesTable.add(crapsButton);
         gamesTable.add(rouletteButton);
+        gamesTable.add(letItRideButton);
 //        scrollPane = new ScrollPane(gamesTable, skin);
 //        scrollPane.setTouchable(Touchable.enabled);
 //        scrollPane.setWidth(stage.getWidth());
