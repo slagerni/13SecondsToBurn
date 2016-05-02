@@ -23,6 +23,7 @@ public class LeftSide extends Group {
     Text wager;
     Text balance;
     Text won;
+    Text sessionBalance;
     BetButton betButton;
     MenuButton menuButton;
     HelpButton helpButton;
@@ -34,7 +35,7 @@ public class LeftSide extends Group {
         backgroundImage = new Image(assets.getTexture(Assets.TEX_NAME.LEFT_SIDE));
 
         betButton = new BetButton(assets);
-        betButton.setPosition(0,0);
+        betButton.setPosition(0, 0);
         betButton.addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
@@ -69,16 +70,18 @@ public class LeftSide extends Group {
 
 
         balance = new Text(assets, "", 1.0f);
-        updateBalance();
-
         wager = new Text(assets, "0", 1.5f);
         won = new Text(assets, "0", 1.5f);
+        sessionBalance = new Text(assets, "0", 1.0f);
+
+        updateBalance();
 
         addActor(backgroundImage);
         addActor(betButton);
         addActor(balance);
         addActor(wager);
         addActor(won);
+        addActor(sessionBalance);
         addActor(menuButton);
         addActor(helpButton);
 
@@ -91,10 +94,11 @@ public class LeftSide extends Group {
             balance.setPosition(30, stage.getHeight() - 100);
             wager.setPosition(30, stage.getHeight() - 215);
             won.setPosition(30, stage.getHeight() - 325);
+            sessionBalance.setPosition(30, stage.getHeight() - 430);
             backgroundImage.setColor(this.getColor());
-            menuButton.setPosition(30, stage.getHeight() - 500);
+            menuButton.setPosition(30, stage.getHeight() - 600);
             menuButton.setColor(this.getColor());
-            helpButton.setPosition(68, stage.getHeight() - 650);
+            helpButton.setPosition(68, stage.getHeight() - 750);
             helpButton.setColor(this.getColor());
         }
     }
@@ -118,6 +122,27 @@ public class LeftSide extends Group {
         } else {
             balance.setScale(.75f);
         }
+        
+        // update the session winning as well
+        if(game.getSessionBalance() > 0) {
+            sessionBalance.setColor(Color.GREEN);
+        } else if (game.getSessionBalance() == 0) {
+            sessionBalance.setColor(Color.WHITE);
+        } else {
+            sessionBalance.setColor(Color.RED);
+        }
+
+        if(game.getSessionBalance() == (int)game.getSessionBalance()) {
+            sessionBalance.setText(String.format("%.0f", game.getSessionBalance()));
+        } else {
+            sessionBalance.setText(String.format("%.2f", game.getSessionBalance()));
+        }
+        if(game.getSessionBalance() < 500000000) {
+            sessionBalance.setScale(1.0f);
+        } else {
+            sessionBalance.setScale(.75f);
+        }
+        
     }
 
     public void setWonText(String text) {

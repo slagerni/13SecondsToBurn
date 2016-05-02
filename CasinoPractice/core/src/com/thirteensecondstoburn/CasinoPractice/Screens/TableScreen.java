@@ -45,6 +45,9 @@ abstract public class TableScreen implements Screen {
 
     @Override
     public void show() {
+        // showing a new screen, reset the session balance
+        game.resetSessionBalance();
+
         Gdx.input.setInputProcessor(stage);
         stage.addAction(Actions.alpha(1));
 

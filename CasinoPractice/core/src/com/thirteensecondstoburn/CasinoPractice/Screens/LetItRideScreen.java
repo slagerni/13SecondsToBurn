@@ -340,7 +340,8 @@ public class LetItRideScreen extends TableScreen implements ActionCompletedListe
                 }
 
                 // any 3 to a straight spread 5 with the at least 2 >= 10
-                if(card0 - card2 == 4 && card0 >= 10 && card2 >= 10) {
+                if(card0 - card2 == 4 && card0 >= 10 && card2 >= 10
+                        && card0 != card1 && card1 != card2) {
                     letItRideReason = "Let it Ride: Any 3 cards to a straight flush with a spread of 5 and 2 cards 10 or greater";
                     return letItRideButton;
                 }
@@ -371,13 +372,15 @@ public class LetItRideScreen extends TableScreen implements ActionCompletedListe
             }
 
             // any 4 to an outside straight
-            if(card0 - card3 == 3) {
+            if(card0 - card3 == 3
+                    && card0 != card1 && card1 != card2 && card2 != card3) {
                 letItRideReason = "Let it Ride: Outside straight draw";
                 return letItRideButton;
             }
 
             // any 4 to an inside straight where the bottom is 10
-            if(card0 - card3 == 4 && card3 >= 10) {
+            if(card0 - card3 == 4 && card3 >= 10
+                    && card0 != card1 && card1 != card2 && card2 != card3) {
                 letItRideReason = "Let it Ride: Inside straight draw w/ a 10 or higher as the low card";
                 return letItRideButton;
             }

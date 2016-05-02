@@ -42,6 +42,7 @@ public class CasinoPracticeGame extends Game {
     private RouletteScreen rouletteScreen;
     private LetItRideScreen letItRideScreen;
     private double balance;
+    private double sessionBalance;
 
     private Calendar lastDailyChips = null;
     private Preferences saveData;
@@ -221,6 +222,10 @@ public class CasinoPracticeGame extends Game {
         billing.dispose();
     }
 
+    public void resetSessionBalance() {
+        sessionBalance = 0;
+    }
+
     public Assets getAssets() {
         if(assets == null) assets = new Assets();
         return assets;
@@ -228,15 +233,19 @@ public class CasinoPracticeGame extends Game {
 
     public void addToBalance(float amount) {
         balance += amount;
+        sessionBalance += amount;
     }
 
     public void subtractFromBalance(long amount) {
         balance -= amount;
+        sessionBalance -= amount;
     }
 
     public double getBalance() {
         return balance;
     }
+
+    public double getSessionBalance() { return sessionBalance; }
 
     public boolean usePreActionHints() {
         return ALLOW_HINTS && actionHints;
