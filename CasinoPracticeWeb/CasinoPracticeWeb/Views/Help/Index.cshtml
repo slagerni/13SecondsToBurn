@@ -1,0 +1,169 @@
+﻿<h2>@ViewBag.Title</h2>
+
+<script>
+    $(function () {
+        $("#accordion").accordion(
+            {
+                collapsible: true,
+                heightStyle: "content"
+            }
+            );
+    });
+</script>
+
+<p>Ok. So you need a little help. It's nothing to be ashamed of. Just select the topic you need help on.</p>
+
+<div id="accordion">
+    <h3>How do I get it?</h3>
+    <div>
+        <p>
+            Perhaps you missed all the other big
+            <a href="/Home/GetIt" class="btn btn-primary" style="color: black;">Get it now! &raquo;</a>
+            buttons. That's ok. Just click that one. It's on the Google Play Store.
+        </p>
+    </div>
+    <h2>What's with the chips?</h2>
+    <div>
+        <p>
+            Chips are the currency used to play the games in app. They simulate the chips you'd actually purchace in a casino.
+        </p>
+        <div class="panel-warning">
+            <h3 class="panel-heading">Chips Disclaimer</h3>
+            <div class="panel-body">
+                <blockquote>
+                    Chips have <span class="label label-warning">NO</span> actual real world value. Don't ever expect to get money out of this game.
+                    It's <span class="label label-warning">NOT</span> real gambling
+                    where you can actually get real world currency back in your pocket for playing. This if for fun. Hell, I'm doing you a favor by letting
+                    you play these games without losing your hard earned dough.
+                </blockquote>
+            </div>
+        </div>
+
+        <p>
+            All right then. With that out of the way, you start the game with 5,000 chips. From that point on I'll give you 1,000 more chips every day.
+            If you log in. You love my app so you'll be doing that often.
+        </p>
+        <p>
+            Should you run out of chips because you like to be a high roller. Or your strategy was poor. Or you played too much. You can always
+            run over to the in app store and buy more chips. I know, that's real dough. Remember, you can't get that back. Think of it as a donation
+            to encourage me to keep this app up to date if it makes you feel better.
+        </p>
+    </div>
+    <h2>What's all that on the left side of the games?</h2>
+    <div>
+        <p>
+            The left side of all of the game screens is the same.
+            <table class="table">
+                <tr><td rowspan="7"><img src="~/Content/images/LeftSide.png" /></td><td>Balance</td><td>This is how many chips you currently have.</td></tr>
+                <tr><td>Wager</td><td>This is how many chips you've bet</td></tr>
+                <tr><td>Win</td><td>Did you win your last hand, toss, spin? If so this will be a green number, if you lost, this will be a red number</td></tr>
+                <tr><td>Session</td><td>Who wants to try to keep how well your're doing during a game in your head? This will show how much you've won/lost 
+                    for a given play session. If you return to the main menu and come back to the same game this number will be reset. Green for winners, red for losers.</td></tr>
+                <tr><td>Menu</td><td>Get back to the main menu</td></tr>
+                <tr><td>Help</td><td>Takes you to this wonderfully written document (I'm a coder, not a writer stop judging me)</td></tr>
+                <tr><td>Bet</td><td>Cycle through the chip amout you want to bet with. Whatever this is set to will be what's placed on the table
+                    at any valid betting location. You know you want to bet 500 chips at a time.</td></tr>
+            </table>
+        </p>
+    </div>
+    <h2>So what games are there and how do I play them?</h2>
+    <div>
+        <p>
+            If you're looking for the actual "rules of the game" or "stragegy for playing" I'm just going to cop out and send you to the
+            site I went to to get all the infomation I needed to write these puppies in the first place. 
+            <blockquote>
+                <a href="http://www.wizardofodds.com" style="color: #eded00">Wizard of Odds</a>
+            </blockquote>
+            This is a plethora of infomation including rules, statistics and optimal strategies for pretty much every gambling game in existance. There's
+            no reason for me to try to reinvent this wheel. It probably would have come out square anyway.
+        </p>
+        <p>
+            In general, after reading about the game above or using some common sense, all games have locations that you can place bets. This is done either by
+            touching the table where appropriate, or in many cases just hitting the default button which will redo your last bet. Mash your screen. It'll become
+            pretty obvious what you can do pretty quickly. 
+        </p>
+        @*<p>
+            Got the basics down? Need to know the specifics of how a game works in my app? Click on one of the icons below to go to the game of your choice.
+        </p>
+        <p>
+            <a href="/Help/Blackjack"><img src="~/Content/images/BlackjackTitle.png" width="100" /></a>
+            <a href="/Help/Crazy4Poker"><img src="~/Content/images/CFPTitle.png" width="100" /></a>
+            <a href="/Help/Craps"><img src="~/Content/images/CrapsTitle.png" width="100" /></a>
+            <a href="/Help/CaribbeanStud"><img src="~/Content/images/cStudTitle.png" width="100" /></a>
+            <a href="/Help/LetItRide"><img src="~/Content/images/LetItRideTitle.png" width="100" /></a>
+            <a href="/Help/Roulette"><img src="~/Content/images/RouletteTitle.png" width="100" /></a>
+            <a href="/Help/ThreeCardPoker"><img src="~/Content/images/TCPTitle.png" width="100" /></a>
+        </p>*@
+    </div>
+    <h2>Wait, there's a store?</h2>
+    <div>
+        <h2>Of course there's a store!</h2>
+        <img src="~/Content/images/Store.png" width="400px" align="left" hspace="10"/>
+        <p>
+            Right now all you can buy is more chips. If you're going through your chips too quickly, there's lots of options for you. Buy anywhere from 5,000 to 5,000,000 chips at a time.
+        </p>
+        <p>
+            The more you pay, the better the return on how many chips you get.
+        </p>
+        <p>
+            I'll be honest here. I mostly put the in app store in to see how it worked. If you want to buy some chips to thank me for putting this together and throwing it out there
+            without any ads in it I'm not going to complain. Got a cool idea about something you'd buy if I implemented it? Drop me a line on the @Html.ActionLink("Contact Page", "Contact", "Home")
+        </p>
+    </div>
+    <h2>Settings, what are those?</h2>
+    <div>
+        <p>
+            There are a few settings that I let you tweak if you want.
+        </p>
+        <div class="panel panel-primary">
+            <h3 class="panel-title">General Settings</h3>
+        </div>
+        <div class="panel-body">
+            <p>
+                When I first started writing this app, I wanted to know what the "correct" way of playing certain game was. There are 2 options for hints.
+                Before you play and after you play. If you select "Show Visual Hints Ahead of Time" option, the best button(s) to be pressing will be highlighted.
+                Select the "Show Hints After a Play" and a scrolling message will be displayed telling you that something was wrong. Think you know everything?
+                Just turn them off.
+            </p>
+            <p>
+                Additionally you have the option to change the table minimum from the default of 5 chips. You can set it to 5, 10, 25, 100 or 500. The table 
+                maximum will always be 10x this amount. Want to be a high roller? Set it to 500! 
+                My store will thank you and be there to catch you when you run out of chips.
+            </p>
+        </div>
+        <div class="panel panel-primary">
+            <h3 class="panel-title">Blackjack Settings</h3>
+        </div>
+        <div class="panel-body">
+            <p>
+                Lots of blackjack options. 
+                <ul>
+                    <li>Want the dealer to hit a soft 17? turn it on.</li>
+                    <li>
+                        You can set the penetration into the shoe to be anywhere from 35% to 75%.
+                        This is the percent into the shoe when the shoe gets reshuffled. The higher it is, the more card counting you can do.
+                    </li>
+                    <li>You can set the number of decks in the shoe to 1, 2, 4, 6 or 8</li>
+                    <li>If you're using hints, over at <a href="http://www.wizardofodds.com">Wizard of Odds</a> they have a number of different strategies to use.
+                        The default is to use the standard stategy. However, they offer a simple strategy as well and you can turn that on. If you're an expert,
+                        all the hinting is up to you.
+                    </li>
+                </ul>
+            </p>
+        </div>
+        <div class="panel panel-primary">
+            <h3 class="panel-title">Roulette Settings</h3>
+        </div>
+        <div class="panel-body">
+            There's only one roulette option and it's weather to use the European or American wheel. What's the difference? The european wheel only has a single 0.
+            The american wheel has both a single 0 and a double 00. Odds are slightly better w/ the european wheel.
+        </div>
+        <div class="panel panel-primary">
+            <h3 class="panel-title">User Settings</h3>
+        </div>
+        <div class="panel-body">
+            This is simply so you can change your google user that you logged on with. This is so you can buy stuff in the store.
+        </div>
+    </div>
+
+</div>
