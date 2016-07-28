@@ -24,7 +24,7 @@ public class HelpButton extends Actor {
         addListener(new ActorGestureListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                Gdx.net.openURI("http://casino.13secondstoburn.com");
+                Gdx.net.openURI("http://casino.13secondstoburn.com/Help");
             }
         });
     }

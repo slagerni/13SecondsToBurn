@@ -670,7 +670,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
     }
 
     private void showActionButtons() {
-        comeButton.setVisible(thePoint > -1 && comeStack.getTotal() == 0 && dontComeStack.getTotal() == 0);
+        comeButton.setVisible(thePoint > -1 && comeStack.getTotal() == 0 && dontComeStack.getTotal() == 0 && (passLineStack.getTotal() > 0 || dontPassLineStack.getTotal() > 0));
         comeButton.setColor((game.usePreActionHints() && thePoint > -1 && comeStack.getTotal() == 0 && dontComeStack.getTotal() == 0) ? hintColor : mainColor);
         comeButton.setText(dontPassLineStack.getTotal() > 0 ? "Don't|Come" : "Come");
 

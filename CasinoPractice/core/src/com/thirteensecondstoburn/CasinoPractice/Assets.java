@@ -160,7 +160,7 @@ public class Assets {
 
     public Skin getSkin() { return uiSkin; }
 
-    private Color backgroundColor = new Color().valueOf("265614FF");
+    private Color backgroundColor = new Color().valueOf("0C530FFF");
     public Color getBackgroundColor(){ return backgroundColor; }
 
 }
