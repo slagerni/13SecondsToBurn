@@ -23,9 +23,12 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.thirteensecondstoburn.CasinoPractice.Actors.MessagePopup;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
+import com.thirteensecondstoburn.CasinoPractice.TableGame;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  * Created by Nick on 2/3/2015.
@@ -42,24 +45,9 @@ public class MenuScreen implements Screen {
 
     Button settingsButton;
     Button storeButton;
-
-    Button tcpButton;
-    Button cfpButton;
-    Button cStudButton;
-    Button blackjackButton;
-    Button crapsButton;
-    Button rouletteButton;
-    Button letItRideButton;
+    List<Button> gameButtons = new ArrayList<>();
 
     Label currentBalance;
-
-    Image tcpTitle;
-    Image cfpTitle;
-    Image cStudTitle;
-    Image blackjackTitle;
-    Image crapsTitle;
-    Image rouletteTitle;
-    Image letItRideTitle;
 
     MessagePopup dailyChipsPopup;
     Window dailyChipsWindow;
@@ -69,10 +57,13 @@ public class MenuScreen implements Screen {
 
     Sprite background;
 
+    Color menuButtonColor;
+
     public MenuScreen(CasinoPracticeGame game) {
         this.game = game;
         assets = game.getAssets();
         skin = assets.getSkin();
+        menuButtonColor = skin.getColor("menuButtonColor");
     }
 
     @Override
@@ -91,8 +82,6 @@ public class MenuScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
         stage.clear();
         stage.addAction(Actions.fadeIn(0.5f));
-
-        Color menuButtonColor = skin.getColor("menuButtonColor");
 
         Texture back = assets.getTexture(Assets.TEX_NAME.BACKGROUND);
         back.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
@@ -153,134 +142,22 @@ public class MenuScreen implements Screen {
         gamesTable.setHeight(stage.getHeight() - 120);
         gamesTable.setFillParent(true);
 
-        tcpTitle = new Image(assets.getTexture(Assets.TEX_NAME.THREE_CARD_POKER_TITLE));
-        tcpTitle.setColor(Color.BLUE);
-        cfpTitle = new Image(assets.getTexture(Assets.TEX_NAME.CRAZY_FOUR_POKER_TITLE));
-        cfpTitle.setColor(Color.WHITE);
-        cStudTitle = new Image(assets.getTexture(Assets.TEX_NAME.CARIBBEAN_STUD_POKER_TITLE));
-        cStudTitle.setColor(Color.WHITE);
-        blackjackTitle = new Image(assets.getTexture(Assets.TEX_NAME.BLACKJACK_TITLE));
-        blackjackTitle.setColor(Color.WHITE);
-        crapsTitle = new Image(assets.getTexture(Assets.TEX_NAME.CRAPS_TITLE));
-        crapsTitle.setColor(Color.WHITE);
-        rouletteTitle = new Image(assets.getTexture(Assets.TEX_NAME.ROULETTE_TITLE));
-        rouletteTitle.setColor(Color.WHITE);
-        letItRideTitle = new Image(assets.getTexture(Assets.TEX_NAME.LET_IT_RIDE_TITLE));
-        letItRideTitle.setColor(Color.WHITE);
-
-        tcpButton = new Button(skin);
-        tcpButton.setColor(menuButtonColor);
-        tcpButton.add(tcpTitle).center().expand();
-        tcpButton.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        game.setScreen(game.getThreeCardPokerScreen());
-                    }
-                })));
-            }
-        });
-        cfpButton = new Button(skin);
-        cfpButton.setColor(menuButtonColor);
-        cfpButton.add(cfpTitle).center().expand();
-        cfpButton.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        game.setScreen(game.getCrazyFourPokerScreen());
-                    }
-                })));
-            }
-        });
-
-        cStudButton = new Button(skin);
-        cStudButton.setColor(menuButtonColor);
-        cStudButton.add(cStudTitle).center().expand();
-        cStudButton.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        game.setScreen(game.getCaribbeanStudPokerScreen());
-                    }
-                })));
-            }
-        });
-
-        blackjackButton = new Button(skin);
-        blackjackButton.setColor(menuButtonColor);
-        blackjackButton.add(blackjackTitle).center().expand();
-        blackjackButton.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        game.setScreen(game.getBlackJackScreen());
-                    }
-                })));
-            }
-        });
-
-        crapsButton = new Button(skin);
-        crapsButton.setColor(menuButtonColor);
-        crapsButton.add(crapsTitle).center().expand();
-        crapsButton.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        game.setScreen(game.getCrapsScreen());
-                    }
-                })));
-            }
-        });
-
-        rouletteButton = new Button(skin);
-        rouletteButton.setColor(menuButtonColor);
-        rouletteButton.add(rouletteTitle).center().expand();
-        rouletteButton.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        game.setScreen(game.getRouletteScreen());
-                    }
-                })));
-            }
-        });
-
-        letItRideButton = new Button(skin);
-        letItRideButton.setColor(menuButtonColor);
-        letItRideButton.add(letItRideTitle).center().expand();
-        letItRideButton.addListener(new ActorGestureListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        game.setScreen(game.getLetItRideScreen());
-                    }
-                })));
-            }
-        });
+        gameButtons.clear();
+        gameButtons.add(createGameButton(TableGame.ThreeCardPoker));
+        gameButtons.add(createGameButton(TableGame.Crazy4Poker));
+        gameButtons.add(createGameButton(TableGame.CaribbeanStudPoker));
+        gameButtons.add(createGameButton(TableGame.Blackjack));
+        gameButtons.add(createGameButton(TableGame.Craps));
+        gameButtons.add(createGameButton(TableGame.Roulette));
+        gameButtons.add(createGameButton(TableGame.LetItRide));
 
         gamesTable.defaults().minSize(300,300).prefSize(320,320).maxSize(320,320).pad(15);
-        gamesTable.add(tcpButton);
-        gamesTable.add(cfpButton);
-        gamesTable.add(cStudButton);
-        gamesTable.add(blackjackButton);
-        gamesTable.row();
-        gamesTable.add(crapsButton);
-        gamesTable.add(rouletteButton);
-        gamesTable.add(letItRideButton);
+        for(int i=0; i< gameButtons.size(); i++) {
+            if(i > 0 && i % 4 == 0) {
+                gamesTable.row();
+            }
+            gamesTable.add(gameButtons.get(i));
+        }
 //        scrollPane = new ScrollPane(gamesTable, skin);
 //        scrollPane.setTouchable(Touchable.enabled);
 //        scrollPane.setWidth(stage.getWidth());
@@ -421,6 +298,53 @@ public class MenuScreen implements Screen {
             dailyChipsMessage.setText("Time for some more chips!\n\nCome back every day to receive 1000 more chips!");
             dailyChipsWindow.setVisible(true);
         }
+    }
+
+    private Button createGameButton(final TableGame tableGame) {
+        Button button = new Button(skin);
+        button.setColor(menuButtonColor);
+        Image titleImage = new Image(assets.getTexture(tableGame.getTitleTexture()));
+        if(tableGame == TableGame.ThreeCardPoker) {
+            titleImage.setColor(Color.BLUE);
+        } else {
+            titleImage.setColor(Color.WHITE);
+        }
+        button.add(titleImage).center().expand();
+        button.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        switch(tableGame) {
+                            case ThreeCardPoker:
+                                game.setScreen(game.getThreeCardPokerScreen());
+                                break;
+                            case Crazy4Poker:
+                                game.setScreen(game.getCrazyFourPokerScreen());
+                                break;
+                            case CaribbeanStudPoker:
+                                game.setScreen(game.getCaribbeanStudPokerScreen());
+                                break;
+                            case Blackjack:
+                                game.setScreen(game.getBlackJackScreen());
+                                break;
+                            case Craps:
+                                game.setScreen(game.getCrapsScreen());
+                                break;
+                            case Roulette:
+                                game.setScreen(game.getRouletteScreen());
+                                break;
+                            case LetItRide:
+                                game.setScreen(game.getLetItRideScreen());
+                                break;
+                        }
+                    }
+                })));
+            }
+        });
+
+        return button;
     }
 
     @Override

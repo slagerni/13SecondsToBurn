@@ -20,7 +20,6 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.SplashScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.StoreScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.ThreeCardPokerScreen;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -43,9 +42,12 @@ public class CasinoPracticeGame extends Game {
     private LetItRideScreen letItRideScreen;
     private double balance;
     private double sessionBalance;
+    private TableGame currentGame;
 
     private Calendar lastDailyChips = null;
     private Preferences saveData;
+
+    private com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics statistics;
 
     private static final String SAVE_KEY = Base64Coder.encodeString("encodedSettings");
     public static final boolean ALLOW_HINTS = true;
@@ -69,56 +71,67 @@ public class CasinoPracticeGame extends Game {
 
     public SplashScreen getSplashScreen() {
         if(splashScreen == null) splashScreen = new SplashScreen(this);
+        currentGame = null;
         return splashScreen;
     }
 
     public MenuScreen getMenuScreen() {
         if(menuScreen == null) menuScreen = new MenuScreen(this);
+        currentGame = null;
         return menuScreen;
     }
 
     public SettingsScreen getSettingsScreen() {
         if(settingsScreen == null) settingsScreen = new SettingsScreen(this);
+        currentGame = null;
         return settingsScreen;
     }
 
     public StoreScreen getStoreScreen() {
         if(storeScreen == null) storeScreen = new StoreScreen(this);
+        currentGame = null;
         return storeScreen;
     }
 
     public ThreeCardPokerScreen getThreeCardPokerScreen() {
         if(threeCardPokerScreen == null) threeCardPokerScreen = new ThreeCardPokerScreen(this);
+        currentGame = TableGame.ThreeCardPoker;
         return threeCardPokerScreen;
     }
 
     public CrazyFourPokerScreen getCrazyFourPokerScreen() {
         if(crazyFourPokerScreen == null) crazyFourPokerScreen = new CrazyFourPokerScreen(this);
+        currentGame = TableGame.Crazy4Poker;
         return crazyFourPokerScreen;
     }
 
     public CaribbeanStudPokerScreen getCaribbeanStudPokerScreen() {
         if(caribbeanStudPokerScreen == null) caribbeanStudPokerScreen = new CaribbeanStudPokerScreen(this);
+        currentGame = TableGame.CaribbeanStudPoker;
         return caribbeanStudPokerScreen;
     }
 
     public BlackJackScreen getBlackJackScreen() {
         if(blackJackScreen == null) blackJackScreen = new BlackJackScreen(this);
+        currentGame = TableGame.Blackjack;
         return blackJackScreen;
     }
 
     public CrapsScreen getCrapsScreen() {
         if(crapsScreen == null) crapsScreen = new CrapsScreen(this);
+        currentGame = TableGame.Craps;
         return crapsScreen;
     }
 
     public RouletteScreen getRouletteScreen() {
         if(rouletteScreen == null) rouletteScreen = new RouletteScreen(this);
+        currentGame = TableGame.Roulette;
         return rouletteScreen;
     }
 
     public LetItRideScreen getLetItRideScreen() {
         if(letItRideScreen == null) letItRideScreen = new LetItRideScreen(this);
+        currentGame = TableGame.LetItRide;
         return letItRideScreen;
     }
 
@@ -143,6 +156,14 @@ public class CasinoPracticeGame extends Game {
         isNewInstall = saveData.getBoolean("newInstall");
 
         loadEncodedSettings();
+
+        String statsString = saveData.getString("statistics");
+        if(statsString == null || "null".equals(statsString)) {
+            statistics = new com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics();
+        } else {
+            Json json = new Json();
+            statistics = json.fromJson(com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics.class, statsString);
+        }
 
         setScreen(getSplashScreen());
 	}
@@ -199,6 +220,9 @@ public class CasinoPracticeGame extends Game {
 
         String encodedJson = Base64Coder.encodeString(json.toJson(encodedSettings));
         saveData.putString(SAVE_KEY, encodedJson);
+
+        String statString = json.toJson(statistics);
+        saveData.putString("statistics", statString);
 
         saveData.flush();
     }
@@ -337,4 +361,9 @@ public class CasinoPracticeGame extends Game {
     public void setIsNewInstall(boolean isNewInstall) {
         this.isNewInstall = isNewInstall;
     }
+
+    public com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics getStatistics() {
+        return statistics;
+    }
+
 }

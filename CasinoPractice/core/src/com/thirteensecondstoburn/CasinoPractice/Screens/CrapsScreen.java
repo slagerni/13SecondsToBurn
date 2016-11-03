@@ -753,7 +753,6 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         leftSide.updateBalance();
     }
 
-
     private void calculateRollResult() {
         int total = die1.getRolledNumber() + die2.getRolledNumber();
         boolean hardWay = die1.getRolledNumber() == die2.getRolledNumber();
