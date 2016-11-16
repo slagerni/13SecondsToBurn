@@ -6,6 +6,8 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.utils.Base64Coder;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thirteensecondstoburn.CasinoPractice.GooglePlay.IGoogleServices;
 import com.thirteensecondstoburn.CasinoPractice.GooglePlay.IInternalApplicationBilling;
 import com.thirteensecondstoburn.CasinoPractice.Screens.BlackJackScreen;
@@ -19,7 +21,10 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.SettingsScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SplashScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.StoreScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.ThreeCardPokerScreen;
+import com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics;
+import com.thirteensecondstoburn.CasinoPractice.Statistics.StatisticSerializationModule;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -42,7 +47,7 @@ public class CasinoPracticeGame extends Game {
     private LetItRideScreen letItRideScreen;
     private double balance;
     private double sessionBalance;
-    private TableGame currentGame;
+    private static TableGame currentGame;
 
     private Calendar lastDailyChips = null;
     private Preferences saveData;
@@ -158,11 +163,17 @@ public class CasinoPracticeGame extends Game {
         loadEncodedSettings();
 
         String statsString = saveData.getString("statistics");
-        if(statsString == null || "null".equals(statsString)) {
+        if(statsString == null || "null".equals(statsString) || "".equals(statsString)) {
             statistics = new com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics();
         } else {
-            Json json = new Json();
-            statistics = json.fromJson(com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics.class, statsString);
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new StatisticSerializationModule());
+            try {
+                statistics = mapper.readValue(statsString, CasinoPracticeStatistics.class);
+            } catch (IOException e) {
+                statistics = new com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics();
+                e.printStackTrace();
+            }
         }
 
         setScreen(getSplashScreen());
@@ -221,8 +232,14 @@ public class CasinoPracticeGame extends Game {
         String encodedJson = Base64Coder.encodeString(json.toJson(encodedSettings));
         saveData.putString(SAVE_KEY, encodedJson);
 
-        String statString = json.toJson(statistics);
-        saveData.putString("statistics", statString);
+        ObjectMapper mapper = new ObjectMapper();
+        String statString = null;
+        try {
+            statString = mapper.writeValueAsString(statistics);
+            saveData.putString("statistics", statString);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         saveData.flush();
     }
@@ -363,7 +380,11 @@ public class CasinoPracticeGame extends Game {
     }
 
     public com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics getStatistics() {
+        if(statistics == null) {
+            statistics = new CasinoPracticeStatistics();
+        }
         return statistics;
     }
 
+    public static TableGame getCurrentGame() {return currentGame;}
 }

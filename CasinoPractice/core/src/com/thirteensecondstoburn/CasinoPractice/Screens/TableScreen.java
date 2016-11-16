@@ -17,6 +17,7 @@ import com.thirteensecondstoburn.CasinoPractice.Actors.LeftSide;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
+import com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
@@ -34,6 +35,7 @@ abstract public class TableScreen implements Screen {
     CasinoPracticeGame game;
     Assets assets;
     Sprite background;
+    CasinoPracticeStatistics statistics;
 
     LeftSide leftSide;
     Text hintText;
@@ -41,6 +43,7 @@ abstract public class TableScreen implements Screen {
     public TableScreen(CasinoPracticeGame game) {
         this.game = game;
         this.assets = game.getAssets();
+        this.statistics = game.getStatistics();
     }
 
     @Override

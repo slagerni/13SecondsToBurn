@@ -18,6 +18,8 @@ import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 import com.thirteensecondstoburn.CasinoPractice.Deck;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Hand;
+import com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics;
+import com.thirteensecondstoburn.CasinoPractice.Statistics.TableGameStatistics;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -244,6 +246,8 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
             return;
         }
 
+        statistics.Increment(CasinoPracticeStatistics.Plays);
+
         Card.Back back;
         if (isFirstDeck) {
             back = Card.Back.BACK1;
@@ -404,15 +408,11 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
         BestHand bestHandDealer = new BestHand(dealerHand.getCards());
         dealerHand.setCards(bestHandDealer.sortedCards);
 
-        int dealerHighValue = 1;
-        int playerHighValue = 1;
-        Card.FaceValue dealerHighFaceValue;
-        Card.FaceValue playerHighFaceValue;
-
-
         // ok, now that we know what they both have, who won and how much?
         int playerWon = bestHandPlayer.getHandType().ordinal() - bestHandDealer.getHandType().ordinal();
-        if(playerFolded) playerWon = -1;
+        if(playerFolded) {
+            playerWon = -1;
+        }
 
         if(playerWon == 0) {
             // run through the top values
@@ -496,12 +496,18 @@ public class ThreeCardPokerScreen extends TableScreen implements ActionCompleted
 
         int initialBet = anteStack.getTotal() + playStack.getTotal() + pairPlusStack.getTotal();
 
-        if(total - initialBet > 0)
+        statistics.Increment(CasinoPracticeStatistics.Wagered, initialBet);
+        if(total - initialBet > 0) {
+            statistics.Increment(CasinoPracticeStatistics.Won, total - initialBet);
             leftSide.setWonColor(Color.GREEN);
-        else if(total - initialBet < 0)
+        }
+        else if(total - initialBet < 0) {
+            statistics.Increment(CasinoPracticeStatistics.Lost, initialBet);
             leftSide.setWonColor(Color.RED);
-        else
+        }
+        else {
             leftSide.setWonColor(Color.WHITE);
+        }
 
         leftSide.setWonText("" + (total - initialBet));
 

@@ -316,28 +316,20 @@ public class MenuScreen implements Screen {
                 stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
                     @Override
                     public void run() {
-                        switch(tableGame) {
-                            case ThreeCardPoker:
-                                game.setScreen(game.getThreeCardPokerScreen());
-                                break;
-                            case Crazy4Poker:
+                        if (tableGame.equals(TableGame.ThreeCardPoker)) {
+                            game.setScreen(game.getThreeCardPokerScreen());
+                        } else if (tableGame.equals(TableGame.Crazy4Poker)) {
                                 game.setScreen(game.getCrazyFourPokerScreen());
-                                break;
-                            case CaribbeanStudPoker:
+                        }else if (tableGame.equals(TableGame.CaribbeanStudPoker)) {
                                 game.setScreen(game.getCaribbeanStudPokerScreen());
-                                break;
-                            case Blackjack:
+                        } else if (tableGame.equals(TableGame.Blackjack)) {
                                 game.setScreen(game.getBlackJackScreen());
-                                break;
-                            case Craps:
+                        } else if (tableGame.equals(TableGame.Craps)) {
                                 game.setScreen(game.getCrapsScreen());
-                                break;
-                            case Roulette:
+                        } else if (tableGame.equals(TableGame.Roulette)) {
                                 game.setScreen(game.getRouletteScreen());
-                                break;
-                            case LetItRide:
+                        } else if (tableGame.equals(TableGame.LetItRide)){
                                 game.setScreen(game.getLetItRideScreen());
-                                break;
                         }
                     }
                 })));
