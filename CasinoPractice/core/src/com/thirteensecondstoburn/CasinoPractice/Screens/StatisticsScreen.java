@@ -158,7 +158,7 @@ public class StatisticsScreen implements Screen {
                 gameTable.row();
             }
 
-            statsTable.add(gameTable).pad(50).top();
+            statsTable.add(gameTable).pad(50).top().left();
             i++;
         }
     }

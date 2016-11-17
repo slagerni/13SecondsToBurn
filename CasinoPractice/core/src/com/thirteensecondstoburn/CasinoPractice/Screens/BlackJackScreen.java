@@ -393,6 +393,7 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
         Card card = nextCard();
         card.setRotation(90);
         currentHand.addCard(card);
+        subtractFromBalance(currentHand.getBetTotal());
         currentHand.setBetTotal(currentHand.getBetTotal() * 2);
         calculateWager();
 
