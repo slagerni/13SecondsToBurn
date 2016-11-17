@@ -29,8 +29,8 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
     public CrapsScreen(CasinoPracticeGame game) {
         super(game);
     }
-    public static final StatisticType Rolled = new StatisticType("rolled", "Rolled");
-    public static final StatisticType ReturnPerRoll = new StatisticType("returnPerRoll", "Return per Roll");
+    public static final StatisticType Rolled = new StatisticType("rolled", "Rolled", 2);
+    public static final StatisticType ReturnPerRoll = new StatisticType("returnPerRoll", "Return per Roll", 3);
 
     int thePoint = -1;
     int lastComeBet = game.getTableMinimum();

@@ -30,6 +30,8 @@ import com.thirteensecondstoburn.CasinoPractice.Statistics.StatisticType;
 import com.thirteensecondstoburn.CasinoPractice.TableGame;
 
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Created by Nick on 11/16/2016.
@@ -119,8 +121,14 @@ public class StatisticsScreen implements Screen {
         statsTable.clearChildren();
 
         final CasinoPracticeStatistics stats = game.getStatistics();
+        int i = 0;
         for (final TableGame tableGame : stats.getGameStatistics().keySet()) {
-            statsTable.add(new Label(tableGame.getDisplayName(), skin, "large-font")).pad(5).left();
+            if(i % 2 == 0 ) {
+                statsTable.row();
+            }
+            Table gameTable = new Table(skin);
+
+            gameTable.add(new Label(tableGame.getDisplayName(), skin, "large-font")).pad(5).left();
 
             TextButton clearGameButton = new TextButton("Clear", skin);
             clearGameButton.setColor(menuButtonColor);
@@ -133,27 +141,31 @@ public class StatisticsScreen implements Screen {
                 }
             });
 
-            statsTable.add(clearGameButton).pad(5).right();
+            gameTable.add(clearGameButton).pad(5).right();
 
-            statsTable.row();
+            gameTable.row();
 
             final Map<StatisticType, Double> individualStats = stats.getGameStatistics().get(tableGame);
-            for (final StatisticType type : individualStats.keySet()) {
-                statsTable.add(new Label(type.getDisplay(), skin)).pad(5).left();
+            final TreeSet<StatisticType> sortedKeys = new TreeSet<>(individualStats.keySet());
+            for (final StatisticType type : sortedKeys) {
+                gameTable.add(new Label(type.getDisplay(), skin)).pad(5).left();
                 double value = individualStats.get(type);
                 if(value == (int) value) {
-                    statsTable.add(new Label(String.format("%.0f", value), skin)).pad(5).left();
+                    gameTable.add(new Label(String.format("%.0f", value), skin)).pad(5).left();
                 } else {
-                    statsTable.add(new Label(String.format("%.2f", value), skin)).pad(5).left();
+                    gameTable.add(new Label(String.format("%.2f", value), skin)).pad(5).left();
                 }
-                statsTable.row();
+                gameTable.row();
             }
+
+            statsTable.add(gameTable).pad(50).top();
+            i++;
         }
     }
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(43f/255f,96f/255f,22f/255f,1);
+        Gdx.gl.glClearColor(43f / 255f, 96f / 255f, 22f / 255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         Batch batch = stage.getBatch();

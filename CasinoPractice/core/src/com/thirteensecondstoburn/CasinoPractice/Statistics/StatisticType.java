@@ -10,32 +10,32 @@ import java.io.IOException;
 /**
  * Created by Nick on 11/3/2016.
  */
-public class StatisticType {
+public class StatisticType implements Comparable{
     private String key;
     private String display;
+    private int displayOrder;
 
     @JsonCreator
-    public StatisticType(@JsonProperty("key") String key, @JsonProperty("display") String display) {
+    public StatisticType(@JsonProperty("key") String key, @JsonProperty("display") String display, @JsonProperty("displayOrder") int displayOrder) {
         this.key = key;
         this.display = display;
+        this.displayOrder = displayOrder;
     }
 
     public String getKey() {return key;}
     public String getDisplay() {return display;}
+    public int getDisplayOrder() {return displayOrder;}
 
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
-            System.out.println("StatisticType equals failed because null");
             return false;
         }
         if (!StatisticType.class.isAssignableFrom(obj.getClass())) {
-            System.out.println("StatisticType equals failed because not Statistic Type");
             return false;
         }
         final StatisticType other = (StatisticType) obj;
         if ((this.key == null) ? (other.key != null) : !this.key.equals(other.key)) {
-            System.out.println("StatisticType equals failed because not equal");
             return false;
         }
         return true;
@@ -50,10 +50,6 @@ public class StatisticType {
             e.printStackTrace();
             return "COULD NOT WRITE STATISTIC TYPE";
         }
-//        return "{" +
-//                "key='" + key + '\'' +
-//                ", display='" + display + '\'' +
-//                '}';
     }
 
     public static StatisticType parse(String toParse) {
@@ -70,5 +66,18 @@ public class StatisticType {
     public int hashCode() {
         final int prime = 31;
         return prime * key.hashCode();
+    }
+
+    // sort these by display order
+    @Override
+    public int compareTo(Object obj) {
+        if (obj == null) {
+            return -1;
+        }
+        if (!StatisticType.class.isAssignableFrom(obj.getClass())) {
+            return -1;
+        }
+        final StatisticType other = (StatisticType) obj;
+        return ((Integer)displayOrder).compareTo(other.displayOrder);
     }
 }

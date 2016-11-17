@@ -36,8 +36,8 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
 
     private enum BetType{ ON, LINE, CORNER };
 
-    public static final StatisticType Spun = new StatisticType("spun", "Spun");
-    public static final StatisticType ReturnPerSpin = new StatisticType("returnPerSpin", "Return per Spin");
+    public static final StatisticType Spun = new StatisticType("spun", "Spun", 2);
+    public static final StatisticType ReturnPerSpin = new StatisticType("returnPerSpin", "Return per Spin", 3);
 
     Image tableImage;
     TableButton spinButton;

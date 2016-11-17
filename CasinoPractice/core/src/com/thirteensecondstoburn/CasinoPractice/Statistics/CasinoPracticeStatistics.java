@@ -10,17 +10,17 @@ import com.thirteensecondstoburn.CasinoPractice.TableGame;
  */
 public class CasinoPracticeStatistics {
     // standard statistic types
-    public static final StatisticType Dealt = new StatisticType("plays", "Dealt");
-    public static final StatisticType Won = new StatisticType("won", "Total Won");
-    public static final StatisticType Lost = new StatisticType("lost", "Total Lost");
-    public static final StatisticType Wagered = new StatisticType("wagered", "Total Wagered");
-    public static final StatisticType TimesWon = new StatisticType("timesWon", "Times Won");
-    public static final StatisticType TimesLost = new StatisticType("timesLost", "Times Lost");
-    public static final StatisticType TimesPushed = new StatisticType("timesPushed", "Times Pushed");
-    public static final StatisticType Balance = new StatisticType("balance", "Balance");
-    public static final StatisticType ReturnPerHand = new StatisticType("returnPerHand", "Return per Hand");
-    public static final StatisticType MaxWon = new StatisticType("maxWon", "Biggest Win");
-    public static final StatisticType MaxLost = new StatisticType("maxLost", "Biggest Loss");
+    public static final StatisticType Dealt = new StatisticType("plays", "Dealt", 2);
+    public static final StatisticType Won = new StatisticType("won", "Total Won", 5);
+    public static final StatisticType Lost = new StatisticType("lost", "Total Lost", 6);
+    public static final StatisticType Wagered = new StatisticType("wagered", "Total Wagered", 4);
+    public static final StatisticType TimesWon = new StatisticType("timesWon", "Times Won", 7);
+    public static final StatisticType TimesLost = new StatisticType("timesLost", "Times Lost", 8);
+    public static final StatisticType TimesPushed = new StatisticType("timesPushed", "Times Pushed", 9);
+    public static final StatisticType Balance = new StatisticType("balance", "Balance", 1);
+    public static final StatisticType ReturnPerHand = new StatisticType("returnPerHand", "Return per Hand", 3);
+    public static final StatisticType MaxWon = new StatisticType("maxWon", "Biggest Win", 10);
+    public static final StatisticType MaxLost = new StatisticType("maxLost", "Biggest Loss", 11);
 
     public CasinoPracticeStatistics() {
         gameStatistics = new HashMap<>();
