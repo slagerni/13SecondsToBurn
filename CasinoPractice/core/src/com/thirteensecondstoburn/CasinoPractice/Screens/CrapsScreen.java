@@ -30,6 +30,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         super(game);
     }
     public static final StatisticType Rolled = new StatisticType("rolled", "Rolled");
+    public static final StatisticType ReturnPerRoll = new StatisticType("returnPerRoll", "Return per Roll");
 
     int thePoint = -1;
     int lastComeBet = game.getTableMinimum();
@@ -114,7 +115,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
             die2.setVisible(true);
             rollButton.setVisible(true);
 
-            statistics.Increment(Rolled);
+            statistics.increment(Rolled);
             calculateRollResult();
             showActionButtons();
         }
@@ -187,7 +188,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                                 newTotal = passLineStack.getTotal() * odds;
                             }
                             int oldTotal = passLineOddsStack.getTotal();
-                            statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                            statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                             game.subtractFromBalance(newTotal - oldTotal);
                             passLineOddsStack.setTotal(newTotal);
                         }
@@ -207,7 +208,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                                 newTotal = dontPassLineStack.getTotal() * 6;
                             }
                             int oldTotal = dontPassLineOddsStack.getTotal();
-                            statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                            statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                             game.subtractFromBalance(newTotal - oldTotal);
                             dontPassLineOddsStack.setTotal(newTotal);
                         }
@@ -295,7 +296,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = come4Stack.getTotal() * odds;
                         }
                         int oldTotal = come4OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         come4OddsStack.setTotal(newTotal);
                     }
@@ -306,7 +307,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = dontCome4Stack.getTotal() * 6;
                         }
                         int oldTotal = dontCome4OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         dontCome4OddsStack.setTotal(newTotal);
                     }
@@ -319,7 +320,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = come5Stack.getTotal() * odds;
                         }
                         int oldTotal = come5OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         come5OddsStack.setTotal(newTotal);
                     }
@@ -330,7 +331,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = dontCome5Stack.getTotal() * 6;
                         }
                         int oldTotal = dontCome5OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         dontCome5OddsStack.setTotal(newTotal);
                     }
@@ -343,7 +344,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = come6Stack.getTotal() * odds;
                         }
                         int oldTotal = come6OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         come6OddsStack.setTotal(newTotal);
                     }
@@ -354,7 +355,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = dontCome6Stack.getTotal() * 6;
                         }
                         int oldTotal = dontCome6OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         dontCome6OddsStack.setTotal(newTotal);
                     }
@@ -367,7 +368,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = come8Stack.getTotal() * odds;
                         }
                         int oldTotal = come8OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         come8OddsStack.setTotal(newTotal);
                     }
@@ -378,7 +379,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = dontCome8Stack.getTotal() * 6;
                         }
                         int oldTotal = dontCome8OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         dontCome8OddsStack.setTotal(newTotal);
                     }
@@ -391,7 +392,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = come9Stack.getTotal() * odds;
                         }
                         int oldTotal = come9OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         come9OddsStack.setTotal(newTotal);
                     }
@@ -402,7 +403,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = dontCome9Stack.getTotal() * 6;
                         }
                         int oldTotal = dontCome9OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         dontCome9OddsStack.setTotal(newTotal);
                     }
@@ -415,7 +416,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = come10Stack.getTotal() * odds;
                         }
                         int oldTotal = come10OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         come10OddsStack.setTotal(newTotal);
                     }
@@ -426,7 +427,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             newTotal = dontCome10Stack.getTotal() * 6;
                         }
                         int oldTotal = dontCome10OddsStack.getTotal();
-                        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
+                        statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
                         game.subtractFromBalance(newTotal - oldTotal);
                         dontCome10OddsStack.setTotal(newTotal);
                     }
@@ -509,12 +510,12 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 if (comeButton.isInside(x, y)) {
                     if (thePoint > -1) {
                         if (passLineStack.getTotal() > 0 && comeStack.getTotal() == 0) {
-                            statistics.Increment(CasinoPracticeStatistics.Wagered, lastComeBet);
+                            statistics.increment(CasinoPracticeStatistics.Wagered, lastComeBet);
                             game.subtractFromBalance(lastComeBet);
                             comeStack.setTotal(lastComeBet);
                         }
                         if (dontPassLineStack.getTotal() > 0 && dontComeStack.getTotal() == 0) {
-                            statistics.Increment(CasinoPracticeStatistics.Wagered, lastComeBet);
+                            statistics.increment(CasinoPracticeStatistics.Wagered, lastComeBet);
                             game.subtractFromBalance(lastComeBet);
                             dontComeStack.setTotal(lastComeBet);
                         }
@@ -671,7 +672,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if (checkStack.getTotal() > 0 && oddsStack.getTotal() == 0) {
             int oddsTotal = checkStack.getTotal() * odds;
             game.subtractFromBalance(oddsTotal);
-            statistics.Increment(CasinoPracticeStatistics.Wagered, oddsTotal);
+            statistics.increment(CasinoPracticeStatistics.Wagered, oddsTotal);
 
             oddsStack.setTotal(oddsTotal);
             switch (odds) {
@@ -1603,17 +1604,19 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         }
 
         if(won > 0) {
-            statistics.Increment(CasinoPracticeStatistics.TimesWon);
-            statistics.Increment(CasinoPracticeStatistics.Won, won);
+            statistics.increment(CasinoPracticeStatistics.TimesWon);
+            statistics.increment(CasinoPracticeStatistics.Won, won);
             leftSide.setWonColor(Color.GREEN);
         } else if(won < 0) {
-            statistics.Increment(CasinoPracticeStatistics.TimesLost);
-            statistics.Increment(CasinoPracticeStatistics.Lost, won);
+            statistics.increment(CasinoPracticeStatistics.TimesLost);
+            statistics.increment(CasinoPracticeStatistics.Lost, won);
             leftSide.setWonColor(Color.RED);
         } else {
-            statistics.Increment(CasinoPracticeStatistics.TimesPushed);
+            statistics.increment(CasinoPracticeStatistics.TimesPushed);
             leftSide.setWonColor(Color.WHITE);
         }
+        statistics.updateReturnPerHand(ReturnPerRoll, Rolled);
+
         leftSide.setWonText("" + (won));
 
         // now that we've payed up what we need to, set the new point if needed

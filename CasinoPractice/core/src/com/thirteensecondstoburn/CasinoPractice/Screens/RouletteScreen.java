@@ -37,6 +37,8 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
     private enum BetType{ ON, LINE, CORNER };
 
     public static final StatisticType Spun = new StatisticType("spun", "Spun");
+    public static final StatisticType ReturnPerSpin = new StatisticType("returnPerSpin", "Return per Spin");
+
     Image tableImage;
     TableButton spinButton;
     MultiLineTableButton undoBetButton;
@@ -58,7 +60,7 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
     public void actionCompleted(Actor caller) {
         numberBoard.push(wheel.getNumber());
         calculateWinnings(wheel.getNumber());
-        statistics.Increment(Spun);
+        statistics.increment(Spun);
     }
 
     @Override
@@ -350,17 +352,19 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
         }
         leftSide.setWagerText("" + 0);
         if(won > 0) {
-            statistics.Increment(CasinoPracticeStatistics.TimesWon);
-            statistics.Increment(CasinoPracticeStatistics.Won, won);
+            statistics.increment(CasinoPracticeStatistics.TimesWon);
+            statistics.increment(CasinoPracticeStatistics.Won, won);
             leftSide.setWonColor(Color.GREEN);
         } else if(won < 0) {
-            statistics.Increment(CasinoPracticeStatistics.TimesLost);
-            statistics.Increment(CasinoPracticeStatistics.Lost, won);
+            statistics.increment(CasinoPracticeStatistics.TimesLost);
+            statistics.increment(CasinoPracticeStatistics.Lost, won);
             leftSide.setWonColor(Color.RED);
         } else {
-            statistics.Increment(CasinoPracticeStatistics.TimesPushed);
+            statistics.increment(CasinoPracticeStatistics.TimesPushed);
             leftSide.setWonColor(Color.WHITE);
         }
+        statistics.updateReturnPerHand(ReturnPerSpin, Spun);
+
         leftSide.setWonText("" + (won));
     }
 

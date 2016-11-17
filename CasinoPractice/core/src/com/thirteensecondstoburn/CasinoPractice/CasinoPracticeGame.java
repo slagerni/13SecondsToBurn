@@ -289,7 +289,7 @@ public class CasinoPracticeGame extends Game {
     public void addToBalance(float amount) {
         balance += amount;
         sessionBalance += amount;
-        statistics.Increment(CasinoPracticeStatistics.Balance, amount);
+        statistics.increment(CasinoPracticeStatistics.Balance, amount);
     }
 
     public void subtractFromBalance(long amount) {

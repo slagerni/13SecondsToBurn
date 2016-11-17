@@ -18,6 +18,7 @@ public class CasinoPracticeStatistics {
     public static final StatisticType TimesLost = new StatisticType("timesLost", "Times Lost");
     public static final StatisticType TimesPushed = new StatisticType("timesPushed", "Times Pushed");
     public static final StatisticType Balance = new StatisticType("balance", "Balance");
+    public static final StatisticType ReturnPerHand = new StatisticType("returnPerHand", "Return per Hand");
 
     public CasinoPracticeStatistics() {
         gameStatistics = new HashMap<>();
@@ -33,7 +34,7 @@ public class CasinoPracticeStatistics {
 
     Map<TableGame, Map<StatisticType, Double>> gameStatistics;
 
-    public void Increment(StatisticType key, double amount) {
+    public void increment(StatisticType key, double amount) {
         TableGame currentGame = CasinoPracticeGame.getCurrentGame();
         Map<StatisticType, Double> stats = gameStatistics.get(currentGame);
         if(stats == null) {
@@ -47,8 +48,21 @@ public class CasinoPracticeStatistics {
         }
     }
 
-    public void Increment(StatisticType key) {
-        Increment(key, 1);
+    public void increment(StatisticType key) {
+        increment(key, 1);
+    }
+
+    // convenience since card games are all per hand
+    public void updateReturnPerHand() {
+        updateReturnPerHand(CasinoPracticeStatistics.ReturnPerHand, CasinoPracticeStatistics.Dealt);
+    }
+
+    public void updateReturnPerHand(StatisticType perRound, StatisticType countType) {
+        if(gameStatistics.keySet().contains(CasinoPracticeGame.getCurrentGame())) {
+            double balance = gameStatistics.get(CasinoPracticeGame.getCurrentGame()).get(CasinoPracticeStatistics.Balance);
+            double count = gameStatistics.get(CasinoPracticeGame.getCurrentGame()).get(countType);
+            gameStatistics.get(CasinoPracticeGame.getCurrentGame()).put(perRound, balance / count);
+        }
     }
 
     private Map<StatisticType, Double> initializeTableGameStatistics(TableGame tableGame) {

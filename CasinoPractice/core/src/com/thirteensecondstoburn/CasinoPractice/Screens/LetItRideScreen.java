@@ -1,7 +1,5 @@
 package com.thirteensecondstoburn.CasinoPractice.Screens;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -250,7 +248,7 @@ public class LetItRideScreen extends TableScreen implements ActionCompletedListe
             return;
         }
 
-        statistics.Increment(CasinoPracticeStatistics.Dealt);
+        statistics.increment(CasinoPracticeStatistics.Dealt);
 
         Card.Back back;
         if (isFirstDeck) {
@@ -528,22 +526,23 @@ public class LetItRideScreen extends TableScreen implements ActionCompletedListe
         }
 
         addToBalance(total);
-        statistics.Increment(CasinoPracticeStatistics.Wagered, initialBet);
+        statistics.increment(CasinoPracticeStatistics.Wagered, initialBet);
 
         if(total - initialBet > 0) {
-            statistics.Increment(CasinoPracticeStatistics.TimesWon);
-            statistics.Increment(CasinoPracticeStatistics.Won, total - initialBet);
+            statistics.increment(CasinoPracticeStatistics.TimesWon);
+            statistics.increment(CasinoPracticeStatistics.Won, total - initialBet);
             leftSide.setWonColor(Color.GREEN);
         }
         else if(total - initialBet < 0) {
-            statistics.Increment(CasinoPracticeStatistics.TimesLost);
-            statistics.Increment(CasinoPracticeStatistics.Lost, initialBet);
+            statistics.increment(CasinoPracticeStatistics.TimesLost);
+            statistics.increment(CasinoPracticeStatistics.Lost, initialBet);
             leftSide.setWonColor(Color.RED);
         }
         else {
-            statistics.Increment(CasinoPracticeStatistics.TimesPushed);
+            statistics.increment(CasinoPracticeStatistics.TimesPushed);
             leftSide.setWonColor(Color.WHITE);
         }
+        statistics.updateReturnPerHand();
 
         leftSide.setWonText("" + (total - initialBet));
 
