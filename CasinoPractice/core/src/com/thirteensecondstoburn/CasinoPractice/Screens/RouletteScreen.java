@@ -129,11 +129,17 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
         bettingSpots.add(new BettingSpot(new GridPoint2(1574, 460), 2, new int[]{2,5,8,11,14,17,20,23,26,29,32,35})); // middle dozen
         bettingSpots.add(new BettingSpot(new GridPoint2(1574, 342), 2, new int[]{1,4,7,10,13,16,19,22,25,28,31,34})); // bottom dozen
 
-        // loop to add the split numbers
+        // loop to add the left/right split numbers
         for(int i = 0; i < 11; i++) {
             bettingSpots.add(new BettingSpot(new GridPoint2(475 + i * 95, 588), 17, new int[]{i*3 + 3, (i+1)*3 + 3})); // top line
             bettingSpots.add(new BettingSpot(new GridPoint2(475 + i * 95, 460), 17, new int[]{i*3 + 2, (i+1)*3 + 3})); // middle line
             bettingSpots.add(new BettingSpot(new GridPoint2(475 + i * 95, 342), 17, new int[]{i*3 + 1, (i+1)*3 + 3})); // bottom line
+        }
+
+        // more split numbers, this time the top/bottom split
+        for(int i = 0; i < 12; i++) {
+            bettingSpots.add(new BettingSpot(new GridPoint2(428 + i * 95, 530), 17, new int[]{i * 3 + 2, i * 3 + 3})); // top line
+            bettingSpots.add(new BettingSpot(new GridPoint2(428 + i * 95, 410), 17, new int[]{i * 3 + 1, i * 3 + 2})); // bottom line
         }
 
         // loop to add the corner bets
