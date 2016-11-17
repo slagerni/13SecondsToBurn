@@ -116,8 +116,7 @@ abstract public class TableScreen implements Screen {
         int oldTotal = stack.getTotal();
         subtractFromBalance(newTotal - oldTotal);
         stack.setTotal(newTotal);
-
-        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal);
+        statistics.Increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
         return newTotal;
     }
 

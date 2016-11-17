@@ -157,7 +157,7 @@ public class CasinoPracticeGame extends Game {
         billing.create();
 
         Gdx.input.setCatchBackKey(true); // handle the back key
-        
+
         saveData = Gdx.app.getPreferences("com.thirteensecondstoburn.CasinoPractice.saveData");
         balance = Double.parseDouble(saveData.getString("balance", "5000.00"));
         if(balance < 5000)
