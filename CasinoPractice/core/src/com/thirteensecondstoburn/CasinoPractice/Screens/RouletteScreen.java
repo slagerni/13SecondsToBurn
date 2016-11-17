@@ -16,6 +16,8 @@ import com.thirteensecondstoburn.CasinoPractice.Actors.RouletteWheel;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
+import com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics;
+import com.thirteensecondstoburn.CasinoPractice.Statistics.StatisticType;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -30,6 +32,7 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
         super(game);
     }
 
+    public static final StatisticType Spun = new StatisticType("spun", "Spun");
     Image tableImage;
     TableButton spinButton;
     MultiLineTableButton undoBetButton;
@@ -43,6 +46,7 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
     public void actionCompleted(Actor caller) {
         numberBoard.push(wheel.getNumber());
         calculateWinnings(wheel.getNumber());
+        statistics.Increment(Spun);
     }
 
     @Override
@@ -197,11 +201,13 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
 
     private void calculateWinnings(int number) {
         int won = 0;
+        int initialWager = 0;
         for (BettingSpot spot : bettingSpots) {
             if(spot.stack.getTotal() > 0) {
+                initialWager += spot.stack.getTotal();
                 if(spot.winningNumbers.contains(number)) {
-                    won += spot.stack.getTotal() * spot.payout + spot.stack.getTotal();
-                    addToBalance(won);
+                    won += spot.stack.getTotal() * spot.payout;
+                    addToBalance(won  + spot.stack.getTotal());
                     spot.stack.popStack(true);
                 } else {
                     won -= spot.stack.getTotal();
@@ -211,12 +217,18 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
             }
         }
         leftSide.setWagerText("" + 0);
-        if(won > 0)
+        if(won > 0) {
+            statistics.Increment(CasinoPracticeStatistics.TimesWon);
+            statistics.Increment(CasinoPracticeStatistics.Won, won);
             leftSide.setWonColor(Color.GREEN);
-        else if(won < 0)
+        } else if(won < 0) {
+            statistics.Increment(CasinoPracticeStatistics.TimesLost);
+            statistics.Increment(CasinoPracticeStatistics.Lost, won);
             leftSide.setWonColor(Color.RED);
-        else
+        } else {
+            statistics.Increment(CasinoPracticeStatistics.TimesPushed);
             leftSide.setWonColor(Color.WHITE);
+        }
         leftSide.setWonText("" + (won));
     }
 

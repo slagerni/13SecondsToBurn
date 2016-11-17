@@ -10,12 +10,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.ActionCompletedListener;
 import com.thirteensecondstoburn.CasinoPractice.Actors.BlackjackHand;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Card;
-import com.thirteensecondstoburn.CasinoPractice.Actors.ChipStack;
 import com.thirteensecondstoburn.CasinoPractice.Actors.TableButton;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Text;
 import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 import com.thirteensecondstoburn.CasinoPractice.Deck;
+import com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -238,6 +238,8 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
             showHint("Minimum bet is " + game.getTableMinimum());
             return;
         }
+
+        statistics.Increment(CasinoPracticeStatistics.Dealt);
 
         if(deck == null || cardIndex > deck.getTotalCards() * game.getBlackjackPenetration()) {
             showHint("Cards Shuffled");
@@ -559,12 +561,22 @@ public class BlackJackScreen extends TableScreen implements ActionCompletedListe
 
         addToBalance(total);
 
-        if(total - initialBet > 0)
+        statistics.Increment(CasinoPracticeStatistics.Wagered, initialBet);
+
+        if(total - initialBet > 0) {
+            statistics.Increment(CasinoPracticeStatistics.TimesWon);
+            statistics.Increment(CasinoPracticeStatistics.Won, total - initialBet);
             leftSide.setWonColor(Color.GREEN);
-        else if(total - initialBet < 0)
+        }
+        else if(total - initialBet < 0) {
+            statistics.Increment(CasinoPracticeStatistics.TimesLost);
+            statistics.Increment(CasinoPracticeStatistics.Lost, initialBet);
             leftSide.setWonColor(Color.RED);
-        else
+        }
+        else {
+            statistics.Increment(CasinoPracticeStatistics.TimesPushed);
             leftSide.setWonColor(Color.WHITE);
+        }
 
         if(total != (int)total) {
             leftSide.setWonText(String.format("%.2f", total - initialBet));

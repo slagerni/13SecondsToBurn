@@ -14,6 +14,7 @@ import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 import com.thirteensecondstoburn.CasinoPractice.Deck;
 import com.thirteensecondstoburn.CasinoPractice.Actors.Hand;
+import com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -282,6 +283,8 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
             dealerHandText.setText("");
             return;
         }
+
+        statistics.Increment(CasinoPracticeStatistics.Dealt);
 
         Card.Back back;
         if(isFirstDeck) { back = Card.Back.BACK1;} else {back = Card.Back.BACK2;}
@@ -553,13 +556,22 @@ public class CrazyFourPokerScreen extends TableScreen implements ActionCompleted
         addToBalance(total);
 
         int initialBet = anteStack.getTotal() + superBonusStack.getTotal() + playStack.getTotal() + queensUpStack.getTotal();
+        statistics.Increment(CasinoPracticeStatistics.Wagered, initialBet);
 
-        if(total - initialBet > 0)
+        if(total - initialBet > 0) {
+            statistics.Increment(CasinoPracticeStatistics.TimesWon);
+            statistics.Increment(CasinoPracticeStatistics.Won, total - initialBet);
             leftSide.setWonColor(Color.GREEN);
-        else if(total - initialBet < 0)
+        }
+        else if(total - initialBet < 0) {
+            statistics.Increment(CasinoPracticeStatistics.TimesLost);
+            statistics.Increment(CasinoPracticeStatistics.Lost, initialBet);
             leftSide.setWonColor(Color.RED);
-        else
+        }
+        else {
+            statistics.Increment(CasinoPracticeStatistics.TimesPushed);
             leftSide.setWonColor(Color.WHITE);
+        }
 
         leftSide.setWonText("" + (total - initialBet));
 

@@ -45,6 +45,7 @@ public class MenuScreen implements Screen {
 
     Button settingsButton;
     Button storeButton;
+    Button statisticsButton;
     List<Button> gameButtons = new ArrayList<>();
 
     Label currentBalance;
@@ -125,6 +126,24 @@ public class MenuScreen implements Screen {
             }
         });
 
+        statisticsButton = new Button(skin);
+        statisticsButton.setColor(menuButtonColor);
+        Image statisticsImage = new Image(assets.getTexture(Assets.TEX_NAME.STATISTICS_BUTTON));
+        statisticsImage.setColor(Color.GRAY);
+        statisticsButton.add(statisticsImage);
+        statisticsButton.pad(10);
+        statisticsButton.addListener(new ActorGestureListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        game.setScreen(game.getStatisticsScreen());
+                    }
+                })));
+            }
+        });
+        
         currentBalance = new Label("", skin);
         updateBalanceLabel();
 
@@ -133,6 +152,7 @@ public class MenuScreen implements Screen {
         windowTable.setHeight(120);
         windowTable.add(storeButton).left().pad(10);
         windowTable.add(currentBalance).center();
+        windowTable.add(statisticsButton).center();
         windowTable.add(settingsButton).right().pad(10);
         windowTable.row();
 

@@ -19,6 +19,7 @@ import com.thirteensecondstoburn.CasinoPractice.Screens.MenuScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.RouletteScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SettingsScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.SplashScreen;
+import com.thirteensecondstoburn.CasinoPractice.Screens.StatisticsScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.StoreScreen;
 import com.thirteensecondstoburn.CasinoPractice.Screens.ThreeCardPokerScreen;
 import com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics;
@@ -45,6 +46,7 @@ public class CasinoPracticeGame extends Game {
     private CrapsScreen crapsScreen;
     private RouletteScreen rouletteScreen;
     private LetItRideScreen letItRideScreen;
+    private StatisticsScreen statisticsScreen;
     private double balance;
     private double sessionBalance;
     private static TableGame currentGame;
@@ -138,6 +140,12 @@ public class CasinoPracticeGame extends Game {
         if(letItRideScreen == null) letItRideScreen = new LetItRideScreen(this);
         currentGame = TableGame.LetItRide;
         return letItRideScreen;
+    }
+
+    public StatisticsScreen getStatisticsScreen() {
+        if(statisticsScreen == null) statisticsScreen = new StatisticsScreen(this);
+        currentGame = null;
+        return statisticsScreen;
     }
 
     @Override
@@ -259,6 +267,7 @@ public class CasinoPracticeGame extends Game {
         if(menuScreen != null) try {menuScreen.dispose();} catch (Exception ex) {}
         if(settingsScreen != null) try {settingsScreen.dispose();} catch (Exception ex) {}
         if(storeScreen != null) try {storeScreen.dispose();} catch (Exception ex) {}
+        if(statisticsScreen != null) try {statisticsScreen.dispose();} catch (Exception ex) {}
         saveSettings();
         billing.dispose();
     }
@@ -275,6 +284,7 @@ public class CasinoPracticeGame extends Game {
     public void addToBalance(float amount) {
         balance += amount;
         sessionBalance += amount;
+        statistics.Increment(CasinoPracticeStatistics.Balance, amount);
     }
 
     public void subtractFromBalance(long amount) {

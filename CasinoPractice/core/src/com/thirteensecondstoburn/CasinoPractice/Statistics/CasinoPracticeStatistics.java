@@ -10,10 +10,14 @@ import com.thirteensecondstoburn.CasinoPractice.TableGame;
  */
 public class CasinoPracticeStatistics {
     // standard statistic types
-    public static final StatisticType Plays = new StatisticType("plays", "Plays (Times Dealt, Spun or Rolled)");
-    public static final StatisticType Won = new StatisticType("won", "Won");
-    public static final StatisticType Lost = new StatisticType("lost", "Lost");
-    public static final StatisticType Wagered = new StatisticType("wagered", "Wagered");
+    public static final StatisticType Dealt = new StatisticType("plays", "Dealt");
+    public static final StatisticType Won = new StatisticType("won", "Total Won");
+    public static final StatisticType Lost = new StatisticType("lost", "Total Lost");
+    public static final StatisticType Wagered = new StatisticType("wagered", "Total Wagered");
+    public static final StatisticType TimesWon = new StatisticType("timesWon", "Times Won");
+    public static final StatisticType TimesLost = new StatisticType("timesLost", "Times Lost");
+    public static final StatisticType TimesPushed = new StatisticType("timesPushed", "Times Pushed");
+    public static final StatisticType Balance = new StatisticType("balance", "Balance");
 
     public CasinoPracticeStatistics() {
         gameStatistics = new HashMap<>();
