@@ -1606,10 +1606,12 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if(won > 0) {
             statistics.increment(CasinoPracticeStatistics.TimesWon);
             statistics.increment(CasinoPracticeStatistics.Won, won);
+            statistics.checkMaximumWon(won);
             leftSide.setWonColor(Color.GREEN);
         } else if(won < 0) {
             statistics.increment(CasinoPracticeStatistics.TimesLost);
             statistics.increment(CasinoPracticeStatistics.Lost, won);
+            statistics.checkMaximumLost(won);
             leftSide.setWonColor(Color.RED);
         } else {
             statistics.increment(CasinoPracticeStatistics.TimesPushed);

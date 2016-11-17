@@ -428,11 +428,13 @@ public class CaribbeanStudPokerScreen extends TableScreen implements ActionCompl
         if(total - initialBet > 0) {
             statistics.increment(CasinoPracticeStatistics.TimesWon);
             statistics.increment(CasinoPracticeStatistics.Won, total - initialBet);
+            statistics.checkMaximumWon(total - initialBet);
             leftSide.setWonColor(Color.GREEN);
         }
         else if(total - initialBet < 0) {
             statistics.increment(CasinoPracticeStatistics.TimesLost);
             statistics.increment(CasinoPracticeStatistics.Lost, initialBet);
+            statistics.checkMaximumLost(total - initialBet);
             leftSide.setWonColor(Color.RED);
         }
         else {

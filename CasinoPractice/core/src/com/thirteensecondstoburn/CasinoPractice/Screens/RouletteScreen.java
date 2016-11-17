@@ -49,7 +49,7 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
     RouletteNumberBoard numberBoard;
     public static boolean isEuropean = true;
     LinkedList<BetHistory> betHistory = new LinkedList<>();
-    BetType currentBettingType = BetType.CORNER;
+    BetType currentBettingType = BetType.ON;
     Button centerBetButton;
     Button lineBetButton;
     Button cornerBetButton;
@@ -58,9 +58,9 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
     Color notSelectedColor = Color.GRAY;
     
     public void actionCompleted(Actor caller) {
+        statistics.increment(Spun);
         numberBoard.push(wheel.getNumber());
         calculateWinnings(wheel.getNumber());
-        statistics.increment(Spun);
     }
 
     @Override
@@ -307,13 +307,15 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
 
     private void calculateWinnings(int number) {
         int won = 0;
-        int initialWager = 0;
         for (BettingSpot spot : onSpots) {
             if(spot.stack.getTotal() > 0) {
-                initialWager += spot.stack.getTotal();
                 if(spot.winningNumbers.contains(number)) {
-                    won += spot.stack.getTotal() * spot.payout;
-                    addToBalance(won  + spot.stack.getTotal());
+                    float stackWin = spot.stack.getTotal() * spot.payout;
+                    won += stackWin;
+                    System.out.println("Wager: " + spot.stack.getTotal());
+                    System.out.println("Won: " + won);
+                    System.out.println("Adding to balance: " + (stackWin + spot.stack.getTotal()));
+                    addToBalance(stackWin + spot.stack.getTotal());
                     spot.stack.popStack(true);
                 } else {
                     won -= spot.stack.getTotal();
@@ -324,10 +326,10 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
         }
         for (BettingSpot spot : lineSpots) {
             if(spot.stack.getTotal() > 0) {
-                initialWager += spot.stack.getTotal();
                 if(spot.winningNumbers.contains(number)) {
-                    won += spot.stack.getTotal() * spot.payout;
-                    addToBalance(won  + spot.stack.getTotal());
+                    float stackWin = spot.stack.getTotal() * spot.payout;
+                    won += stackWin;
+                    addToBalance(stackWin  + spot.stack.getTotal());
                     spot.stack.popStack(true);
                 } else {
                     won -= spot.stack.getTotal();
@@ -338,10 +340,10 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
         }
         for (BettingSpot spot : cornerSpots) {
             if(spot.stack.getTotal() > 0) {
-                initialWager += spot.stack.getTotal();
                 if(spot.winningNumbers.contains(number)) {
-                    won += spot.stack.getTotal() * spot.payout;
-                    addToBalance(won  + spot.stack.getTotal());
+                    float stackWin = spot.stack.getTotal() * spot.payout;
+                    won += stackWin;
+                    addToBalance(stackWin + spot.stack.getTotal());
                     spot.stack.popStack(true);
                 } else {
                     won -= spot.stack.getTotal();
@@ -354,10 +356,12 @@ public class RouletteScreen extends TableScreen implements ActionCompletedListen
         if(won > 0) {
             statistics.increment(CasinoPracticeStatistics.TimesWon);
             statistics.increment(CasinoPracticeStatistics.Won, won);
+            statistics.checkMaximumWon(won);
             leftSide.setWonColor(Color.GREEN);
         } else if(won < 0) {
             statistics.increment(CasinoPracticeStatistics.TimesLost);
             statistics.increment(CasinoPracticeStatistics.Lost, won);
+            statistics.checkMaximumWon(won);
             leftSide.setWonColor(Color.RED);
         } else {
             statistics.increment(CasinoPracticeStatistics.TimesPushed);

@@ -19,6 +19,8 @@ public class CasinoPracticeStatistics {
     public static final StatisticType TimesPushed = new StatisticType("timesPushed", "Times Pushed");
     public static final StatisticType Balance = new StatisticType("balance", "Balance");
     public static final StatisticType ReturnPerHand = new StatisticType("returnPerHand", "Return per Hand");
+    public static final StatisticType MaxWon = new StatisticType("maxWon", "Biggest Win");
+    public static final StatisticType MaxLost = new StatisticType("maxLost", "Biggest Loss");
 
     public CasinoPracticeStatistics() {
         gameStatistics = new HashMap<>();
@@ -50,6 +52,31 @@ public class CasinoPracticeStatistics {
 
     public void increment(StatisticType key) {
         increment(key, 1);
+    }
+
+    public void checkMaximumWon(double won) {
+        if(gameStatistics.keySet().contains(CasinoPracticeGame.getCurrentGame())) {
+            double currentMax = 0;
+            if(gameStatistics.get(CasinoPracticeGame.getCurrentGame()).containsKey(CasinoPracticeStatistics.MaxWon)) {
+                currentMax = gameStatistics.get(CasinoPracticeGame.getCurrentGame()).get(CasinoPracticeStatistics.MaxWon);
+            }
+
+            if(won > currentMax) {
+                gameStatistics.get(CasinoPracticeGame.getCurrentGame()).put(CasinoPracticeStatistics.MaxWon, won);
+            }
+        }
+    }
+
+    public void checkMaximumLost(double lost) {
+        if(gameStatistics.keySet().contains(CasinoPracticeGame.getCurrentGame())) {
+            double currentMax = 0;
+            if(gameStatistics.get(CasinoPracticeGame.getCurrentGame()).containsKey(CasinoPracticeStatistics.MaxLost)) {
+                currentMax = gameStatistics.get(CasinoPracticeGame.getCurrentGame()).get(CasinoPracticeStatistics.MaxLost);
+            }
+            if(lost < currentMax) {
+                gameStatistics.get(CasinoPracticeGame.getCurrentGame()).put(CasinoPracticeStatistics.MaxLost, lost);
+            }
+        }
     }
 
     // convenience since card games are all per hand
