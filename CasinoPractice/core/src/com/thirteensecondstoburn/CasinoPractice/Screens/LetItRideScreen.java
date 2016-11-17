@@ -1,6 +1,7 @@
 package com.thirteensecondstoburn.CasinoPractice.Screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -59,7 +60,6 @@ public class LetItRideScreen extends TableScreen implements ActionCompletedListe
 
     @Override
     public void setup() {
-        Gdx.input.setInputProcessor(stage);
         stage.addAction(Actions.alpha(1));
 
         lastBet = game.getTableMinimum();

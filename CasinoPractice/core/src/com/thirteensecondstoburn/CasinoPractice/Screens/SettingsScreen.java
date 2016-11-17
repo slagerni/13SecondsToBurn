@@ -1,6 +1,7 @@
 package com.thirteensecondstoburn.CasinoPractice.Screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -51,7 +52,8 @@ public class SettingsScreen  implements Screen {
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(stage);
+        InputMultiplexer multiplexer = new InputMultiplexer(stage, game.getBackButtonProcessor(stage));
+        Gdx.input.setInputProcessor(multiplexer);
         stage.addAction(Actions.fadeIn(0.5f));
 
         Texture back = assets.getTexture(Assets.TEX_NAME.BACKGROUND);

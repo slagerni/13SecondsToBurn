@@ -2,7 +2,12 @@ package com.thirteensecondstoburn.CasinoPractice;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Base64Coder;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
@@ -65,9 +70,7 @@ public class CasinoPracticeGame extends Game {
     private int blackjackDecks = 8;
     private boolean blackjackHitSoft17 = false;
     private int tableMinimum = 5;
-
     private boolean isNewInstall = false;
-
     private String rouletteType = "European";
 
     public CasinoPracticeGame(IGoogleServices googleServices, IInternalApplicationBilling billing) {
@@ -153,6 +156,8 @@ public class CasinoPracticeGame extends Game {
         // set up the in app billing
         billing.create();
 
+        Gdx.input.setCatchBackKey(true); // handle the back key
+        
         saveData = Gdx.app.getPreferences("com.thirteensecondstoburn.CasinoPractice.saveData");
         balance = Double.parseDouble(saveData.getString("balance", "5000.00"));
         if(balance < 5000)
@@ -397,4 +402,38 @@ public class CasinoPracticeGame extends Game {
     }
 
     public static TableGame getCurrentGame() {return currentGame;}
+
+    public InputProcessor getBackButtonProcessor(final Stage stage) {
+        return getBackButtonProcessor(stage, false);
+    }
+
+    public InputProcessor getBackButtonProcessor(final Stage stage, final boolean isMenuScreen) {
+
+        InputProcessor backProcessor = new InputAdapter() {
+            @Override
+            public boolean keyDown(int keycode) {
+
+                if ((keycode == Input.Keys.ESCAPE) || (keycode == Input.Keys.BACK) ) {
+                    if(isMenuScreen) {
+                        Gdx.app.exit();
+                    } else {
+                        stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
+                            @Override
+                            public void run() {
+                                MenuScreen screen = getMenuScreen();
+                                if (screen.getStage() != null) {
+                                    screen.getStage().addAction(Actions.fadeIn(0.5f));
+                                }
+                                stage.clear();
+                                setScreen(screen);
+                            }
+                        })));
+                    }
+                }
+                return false;
+            }
+        };
+
+        return backProcessor;
+    }
 }

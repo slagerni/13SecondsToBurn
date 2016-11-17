@@ -1,6 +1,7 @@
 package com.thirteensecondstoburn.CasinoPractice.Screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -19,9 +20,6 @@ import com.thirteensecondstoburn.CasinoPractice.Assets;
 import com.thirteensecondstoburn.CasinoPractice.CasinoPracticeGame;
 import com.thirteensecondstoburn.CasinoPractice.Statistics.CasinoPracticeStatistics;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 
 /**
@@ -51,7 +49,8 @@ abstract public class TableScreen implements Screen {
         // showing a new screen, reset the session balance
         game.resetSessionBalance();
 
-        Gdx.input.setInputProcessor(stage);
+        InputMultiplexer multiplexer = new InputMultiplexer(stage, game.getBackButtonProcessor(stage));
+        Gdx.input.setInputProcessor(multiplexer);
         stage.addAction(Actions.alpha(1));
 
         Texture back = assets.getTexture(Assets.TEX_NAME.BACKGROUND);
