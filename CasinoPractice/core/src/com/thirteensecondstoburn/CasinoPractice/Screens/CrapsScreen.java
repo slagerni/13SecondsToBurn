@@ -189,7 +189,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             }
                             int oldTotal = passLineOddsStack.getTotal();
                             statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                            game.subtractFromBalance(newTotal - oldTotal);
+                            subtractFromBalance(newTotal - oldTotal);
                             passLineOddsStack.setTotal(newTotal);
                         }
                     }
@@ -209,7 +209,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                             }
                             int oldTotal = dontPassLineOddsStack.getTotal();
                             statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                            game.subtractFromBalance(newTotal - oldTotal);
+                            subtractFromBalance(newTotal - oldTotal);
                             dontPassLineOddsStack.setTotal(newTotal);
                         }
                     }
@@ -297,7 +297,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = come4OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         come4OddsStack.setTotal(newTotal);
                     }
                     if (dontCome4Stack.getTotal() > 0) {
@@ -308,7 +308,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = dontCome4OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         dontCome4OddsStack.setTotal(newTotal);
                     }
                 } else if (five.contains(x, y)) {
@@ -321,7 +321,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = come5OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         come5OddsStack.setTotal(newTotal);
                     }
                     if (dontCome5Stack.getTotal() > 0) {
@@ -332,7 +332,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = dontCome5OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         dontCome5OddsStack.setTotal(newTotal);
                     }
                 } else if (six.contains(x, y)) {
@@ -345,7 +345,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = come6OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         come6OddsStack.setTotal(newTotal);
                     }
                     if (dontCome6Stack.getTotal() > 0) {
@@ -356,7 +356,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = dontCome6OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         dontCome6OddsStack.setTotal(newTotal);
                     }
                 } else if (eight.contains(x, y)) {
@@ -369,7 +369,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = come8OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         come8OddsStack.setTotal(newTotal);
                     }
                     if (dontCome8Stack.getTotal() > 0) {
@@ -380,7 +380,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = dontCome8OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         dontCome8OddsStack.setTotal(newTotal);
                     }
                 } else if (nine.contains(x, y)) {
@@ -393,7 +393,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = come9OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         come9OddsStack.setTotal(newTotal);
                     }
                     if (dontCome9Stack.getTotal() > 0) {
@@ -404,7 +404,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = dontCome9OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         dontCome9OddsStack.setTotal(newTotal);
                     }
                 } else if (ten.contains(x, y)) {
@@ -417,7 +417,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = come10OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         come10OddsStack.setTotal(newTotal);
                     }
                     if (dontCome10Stack.getTotal() > 0) {
@@ -428,7 +428,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                         }
                         int oldTotal = dontCome10OddsStack.getTotal();
                         statistics.increment(CasinoPracticeStatistics.Wagered, newTotal - oldTotal);
-                        game.subtractFromBalance(newTotal - oldTotal);
+                        subtractFromBalance(newTotal - oldTotal);
                         dontCome10OddsStack.setTotal(newTotal);
                     }
                 }
@@ -511,12 +511,12 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     if (thePoint > -1) {
                         if (passLineStack.getTotal() > 0 && comeStack.getTotal() == 0) {
                             statistics.increment(CasinoPracticeStatistics.Wagered, lastComeBet);
-                            game.subtractFromBalance(lastComeBet);
+                            subtractFromBalance(lastComeBet);
                             comeStack.setTotal(lastComeBet);
                         }
                         if (dontPassLineStack.getTotal() > 0 && dontComeStack.getTotal() == 0) {
                             statistics.increment(CasinoPracticeStatistics.Wagered, lastComeBet);
-                            game.subtractFromBalance(lastComeBet);
+                            subtractFromBalance(lastComeBet);
                             dontComeStack.setTotal(lastComeBet);
                         }
                     }
@@ -671,7 +671,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
     private void backOdds(ChipStackGroup checkStack, ChipStackGroup oddsStack, int odds) {
         if (checkStack.getTotal() > 0 && oddsStack.getTotal() == 0) {
             int oddsTotal = checkStack.getTotal() * odds;
-            game.subtractFromBalance(oddsTotal);
+            subtractFromBalance(oddsTotal);
             statistics.increment(CasinoPracticeStatistics.Wagered, oddsTotal);
 
             oddsStack.setTotal(oddsTotal);
@@ -785,7 +785,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if(thePoint == -1 && (total == 7 || total == 11)) {
             if(passLineStack.getTotal() > 0) {
                 won += passLineStack.getTotal();
-                game.addToBalance(passLineStack.getTotal() * 2); // return the original wager, then 1x bet
+                addToBalance(passLineStack.getTotal() * 2); // return the original wager, then 1x bet
                 passLineStack.popStack(true);
                 passLineStack.setTotal(0);
             }
@@ -805,9 +805,9 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
             if(dontPassLineStack.getTotal() > 0) {
                 won += dontPassLineStack.getTotal();
                 if(total == 12) {
-                    game.addToBalance(dontPassLineStack.getTotal()); // return the original wager
+                    addToBalance(dontPassLineStack.getTotal()); // return the original wager
                 } else {
-                    game.addToBalance(dontPassLineStack.getTotal() * 2); // return the original wager, then 1x bet
+                    addToBalance(dontPassLineStack.getTotal() * 2); // return the original wager, then 1x bet
                 }
                 dontPassLineStack.popStack(true);
                 dontPassLineStack.setTotal(0);
@@ -829,7 +829,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
 
             if(dontPassLineStack.getTotal() > 0) {
                 won += dontPassLineStack.getTotal();
-                game.addToBalance(dontPassLineStack.getTotal() * 2); // return the original wager, then 1x bet
+                addToBalance(dontPassLineStack.getTotal() * 2); // return the original wager, then 1x bet
                 dontPassLineStack.popStack(true);
                 dontPassLineStack.setTotal(0);
             }
@@ -843,14 +843,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     w = (dontPassLineOddsStack.getTotal() * 5) / 6;
                 }
                 won += w;
-                game.addToBalance(w + dontPassLineOddsStack.getTotal());
+                addToBalance(w + dontPassLineOddsStack.getTotal());
                 dontPassLineOddsStack.popStack(true);
                 dontPassLineOddsStack.setTotal(0);
             }
         } else if(total == thePoint) {
             if(passLineStack.getTotal() > 0) {
                 won += passLineStack.getTotal();
-                game.addToBalance(passLineStack.getTotal() * 2); // return the original wager, then 1x bet
+                addToBalance(passLineStack.getTotal() * 2); // return the original wager, then 1x bet
                 passLineStack.popStack(true);
                 passLineStack.setTotal(0);
             }
@@ -864,7 +864,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     w = (passLineOddsStack.getTotal() * 6) / 5;
                 }
                 won += w;
-                game.addToBalance(w + passLineOddsStack.getTotal());
+                addToBalance(w + passLineOddsStack.getTotal());
                 passLineOddsStack.popStack(true);
                 passLineOddsStack.setTotal(0);
             }
@@ -887,14 +887,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
             // all the place bets lose
             if(dontCome4Stack.getTotal() > 0) {
                 won += dontCome4Stack.getTotal();
-                game.addToBalance(dontCome4Stack.getTotal() * 2); // return the original wager, then 1x bet
+                addToBalance(dontCome4Stack.getTotal() * 2); // return the original wager, then 1x bet
                 dontCome4Stack.popStack(true);
                 dontCome4Stack.setTotal(0);
             }
             if(dontCome4OddsStack.getTotal() > 0) {
                 int w = dontCome4OddsStack.getTotal() / 2;
                 won += w;
-                game.addToBalance(w + dontCome4OddsStack.getTotal());
+                addToBalance(w + dontCome4OddsStack.getTotal());
                 dontCome4OddsStack.popStack(true);
                 dontCome4OddsStack.setTotal(0);
             }
@@ -911,14 +911,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
 
             if(dontCome5Stack.getTotal() > 0) {
                 won += dontCome5Stack.getTotal();
-                game.addToBalance(dontCome5Stack.getTotal() * 2); // return the original wager, then 1x bet
+                addToBalance(dontCome5Stack.getTotal() * 2); // return the original wager, then 1x bet
                 dontCome5Stack.popStack(true);
                 dontCome5Stack.setTotal(0);
             }
             if(dontCome5OddsStack.getTotal() > 0) {
                 int w = (dontCome5OddsStack.getTotal() * 2) / 3;
                 won += w;
-                game.addToBalance(w + dontCome5OddsStack.getTotal());
+                addToBalance(w + dontCome5OddsStack.getTotal());
                 dontCome5OddsStack.popStack(true);
                 dontCome5OddsStack.setTotal(0);
             }
@@ -935,14 +935,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
 
             if(dontCome6Stack.getTotal() > 0) {
                 won += dontCome6Stack.getTotal();
-                game.addToBalance(dontCome6Stack.getTotal() * 2); // return the original wager, then 1x bet
+                addToBalance(dontCome6Stack.getTotal() * 2); // return the original wager, then 1x bet
                 dontCome6Stack.popStack(true);
                 dontCome6Stack.setTotal(0);
             }
             if(dontCome6OddsStack.getTotal() > 0) {
                 int w = (dontCome6OddsStack.getTotal() * 5) / 6;
                 won += w;
-                game.addToBalance(w + dontCome6OddsStack.getTotal());
+                addToBalance(w + dontCome6OddsStack.getTotal());
                 dontCome6OddsStack.popStack(true);
                 dontCome6OddsStack.setTotal(0);
             }
@@ -959,14 +959,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
 
             if(dontCome8Stack.getTotal() > 0) {
                 won += dontCome8Stack.getTotal();
-                game.addToBalance(dontCome8Stack.getTotal() * 2); // return the original wager, then 1x bet
+                addToBalance(dontCome8Stack.getTotal() * 2); // return the original wager, then 1x bet
                 dontCome8Stack.popStack(true);
                 dontCome8Stack.setTotal(0);
             }
             if(dontCome8OddsStack.getTotal() > 0) {
                 int w = (dontCome8OddsStack.getTotal() * 5) / 6;
                 won += w;
-                game.addToBalance(w + dontCome8OddsStack.getTotal());
+                addToBalance(w + dontCome8OddsStack.getTotal());
                 dontCome8OddsStack.popStack(true);
                 dontCome8OddsStack.setTotal(0);
             }
@@ -983,14 +983,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
 
             if(dontCome9Stack.getTotal() > 0) {
                 won += dontCome9Stack.getTotal();
-                game.addToBalance(dontCome9Stack.getTotal() * 2); // return the original wager, then 1x bet
+                addToBalance(dontCome9Stack.getTotal() * 2); // return the original wager, then 1x bet
                 dontCome9Stack.popStack(true);
                 dontCome9Stack.setTotal(0);
             }
             if(dontCome9OddsStack.getTotal() > 0) {
                 int w = (dontCome9OddsStack.getTotal() * 2) / 3;
                 won += w;
-                game.addToBalance(w + dontCome9OddsStack.getTotal());
+                addToBalance(w + dontCome9OddsStack.getTotal());
                 dontCome9OddsStack.popStack(true);
                 dontCome9OddsStack.setTotal(0);
             }
@@ -1007,14 +1007,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
 
             if(dontCome10Stack.getTotal() > 0) {
                 won += dontCome10Stack.getTotal();
-                game.addToBalance(dontCome10Stack.getTotal() * 2); // return the original wager, then 1x bet
+                addToBalance(dontCome10Stack.getTotal() * 2); // return the original wager, then 1x bet
                 dontCome10Stack.popStack(true);
                 dontCome10Stack.setTotal(0);
             }
             if(dontCome10OddsStack.getTotal() > 0) {
                 int w = dontCome10OddsStack.getTotal() / 2;
                 won += w;
-                game.addToBalance(w + dontCome10OddsStack.getTotal());
+                addToBalance(w + dontCome10OddsStack.getTotal());
                 dontCome10OddsStack.popStack(true);
                 dontCome10OddsStack.setTotal(0);
             }
@@ -1065,7 +1065,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 float w = lay4Stack.getTotal() / 2.0f;
                 w = (int)(w * .95f);
                 won += w;
-                game.addToBalance(w + lay4Stack.getTotal());
+                addToBalance(w + lay4Stack.getTotal());
                 lay4Stack.popStack(true);
                 lay4Stack.setTotal(0);
             }
@@ -1073,7 +1073,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 int w = (lay5Stack.getTotal() * 2) / 3;
                 w = (int)(w * .95f);
                 won += w;
-                game.addToBalance(w + lay5Stack.getTotal());
+                addToBalance(w + lay5Stack.getTotal());
                 lay5Stack.popStack(true);
                 lay5Stack.setTotal(0);
             }
@@ -1081,7 +1081,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 int w = (lay6Stack.getTotal() * 5) / 6;
                 w = (int)(w * .95f);
                 won += w;
-                game.addToBalance(w + lay6Stack.getTotal());
+                addToBalance(w + lay6Stack.getTotal());
                 lay6Stack.popStack(true);
                 lay6Stack.setTotal(0);
             }      
@@ -1089,7 +1089,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 int w = (lay8Stack.getTotal() * 5) / 6;
                 w = (int)(w * .95f);
                 won += w;
-                game.addToBalance(w + lay8Stack.getTotal());
+                addToBalance(w + lay8Stack.getTotal());
                 lay8Stack.popStack(true);
                 lay8Stack.setTotal(0);
             }
@@ -1097,7 +1097,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 int w = (lay9Stack.getTotal() * 2) / 3;
                 w = (int)(w * .95f);
                 won += w;
-                game.addToBalance(w + lay9Stack.getTotal());
+                addToBalance(w + lay9Stack.getTotal());
                 lay9Stack.popStack(true);
                 lay9Stack.setTotal(0);
             }
@@ -1105,7 +1105,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 int w = lay10Stack.getTotal() / 2;
                 w = (int)(w * .95f);
                 won += w;
-                game.addToBalance(w + lay10Stack.getTotal());
+                addToBalance(w + lay10Stack.getTotal());
                 lay10Stack.popStack(true);
                 lay10Stack.setTotal(0);
             }
@@ -1135,14 +1135,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 case 4:
                     if(come4Stack.getTotal() > 0) {
                         won += come4Stack.getTotal();
-                        game.addToBalance(come4Stack.getTotal() * 2); // return the original wager, then 1x bet
+                        addToBalance(come4Stack.getTotal() * 2); // return the original wager, then 1x bet
                         come4Stack.popStack(true);
                         come4Stack.setTotal(0);
                     }
                     if(come4OddsStack.getTotal() > 0) {
                         int w = come4OddsStack.getTotal() * 2;
                         won += w;
-                        game.addToBalance(w + come4OddsStack.getTotal());
+                        addToBalance(w + come4OddsStack.getTotal());
                         come4OddsStack.popStack(true);
                         come4OddsStack.setTotal(0);
                     }
@@ -1164,7 +1164,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     if(buy4Stack.getTotal() > 0) {
                         int w = (int)((buy4Stack.getTotal() * 2) * .95);
                         won += w;
-                        game.addToBalance(w + buy4Stack.getTotal()); // return the original wager, then 2x bet
+                        addToBalance(w + buy4Stack.getTotal()); // return the original wager, then 2x bet
                         buy4Stack.popStack(true);
                         buy4Stack.setTotal(0);
                     }
@@ -1172,7 +1172,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     if(hard4Stack.getTotal() > 0) {
                         if(hardWay) {
                             won += hard4Stack.getTotal() * 7;
-                            game.addToBalance(hard4Stack.getTotal() * 8); // return the original wager, then 9x bet
+                            addToBalance(hard4Stack.getTotal() * 8); // return the original wager, then 9x bet
                             hard4Stack.popStack(true);
                             hard4Stack.setTotal(0);
                         } else {
@@ -1185,14 +1185,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 case 5:
                     if(come5Stack.getTotal() > 0) {
                         won += come5Stack.getTotal();
-                        game.addToBalance(come5Stack.getTotal() * 2); // return the original wager, then 1x bet
+                        addToBalance(come5Stack.getTotal() * 2); // return the original wager, then 1x bet
                         come5Stack.popStack(true);
                         come5Stack.setTotal(0);
                     }
                     if(come5OddsStack.getTotal() > 0) {
                         int w = (come5OddsStack.getTotal() * 3) / 2;
                         won += w;
-                        game.addToBalance(w + come5OddsStack.getTotal());
+                        addToBalance(w + come5OddsStack.getTotal());
                         come5OddsStack.popStack(true);
                         come5OddsStack.setTotal(0);
                     }
@@ -1214,7 +1214,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     if(place5Stack.getTotal() > 0) {
                         int w = (place5Stack.getTotal() * 7) / 5;
                         won += w;
-                        game.addToBalance(w + place5Stack.getTotal());
+                        addToBalance(w + place5Stack.getTotal());
                         place5Stack.popStack(true);
                         place5Stack.setTotal(0);
                     }
@@ -1222,14 +1222,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 case 6:
                     if(come6Stack.getTotal() > 0) {
                         won += come6Stack.getTotal();
-                        game.addToBalance(come6Stack.getTotal() * 2); // return the original wager, then 1x bet
+                        addToBalance(come6Stack.getTotal() * 2); // return the original wager, then 1x bet
                         come6Stack.popStack(true);
                         come6Stack.setTotal(0);
                     }
                     if(come6OddsStack.getTotal() > 0) {
                         int w = (come6OddsStack.getTotal() * 6) / 5;
                         won += w;
-                        game.addToBalance(w + come6OddsStack.getTotal());
+                        addToBalance(w + come6OddsStack.getTotal());
                         come6OddsStack.popStack(true);
                         come6OddsStack.setTotal(0);
                     }
@@ -1251,7 +1251,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     if(place6Stack.getTotal() > 0) {
                         int w = (place6Stack.getTotal() * 7) / 6;
                         won += w;
-                        game.addToBalance(w + place6Stack.getTotal());
+                        addToBalance(w + place6Stack.getTotal());
                         place6Stack.popStack(true);
                         place6Stack.setTotal(0);
                     }
@@ -1259,7 +1259,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     if(hard6Stack.getTotal() > 0) {
                         if(hardWay) {
                             won += hard6Stack.getTotal() * 9;
-                            game.addToBalance(hard6Stack.getTotal() * 10); // return the original wager, then 9x bet
+                            addToBalance(hard6Stack.getTotal() * 10); // return the original wager, then 9x bet
                             hard6Stack.popStack(true);
                             hard6Stack.setTotal(0);
                         } else {
@@ -1273,14 +1273,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 case 8:
                     if(come8Stack.getTotal() > 0) {
                         won += come8Stack.getTotal();
-                        game.addToBalance(come8Stack.getTotal() * 2); // return the original wager, then 1x bet
+                        addToBalance(come8Stack.getTotal() * 2); // return the original wager, then 1x bet
                         come8Stack.popStack(true);
                         come8Stack.setTotal(0);
                     }
                     if(come8OddsStack.getTotal() > 0) {
                         int w = (come8OddsStack.getTotal() * 6) / 5;
                         won += w;
-                        game.addToBalance(w + come8OddsStack.getTotal());
+                        addToBalance(w + come8OddsStack.getTotal());
                         come8OddsStack.popStack(true);
                         come8OddsStack.setTotal(0);
                     }
@@ -1302,14 +1302,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     if(place8Stack.getTotal() > 0) {
                         int w = (place8Stack.getTotal() * 7) / 6;
                         won += w;
-                        game.addToBalance(w + place8Stack.getTotal());
+                        addToBalance(w + place8Stack.getTotal());
                         place8Stack.popStack(true);
                         place8Stack.setTotal(0);
                     }
                     if(hard8Stack.getTotal() > 0) {
                         if(hardWay) {
                             won += hard8Stack.getTotal() * 9;
-                            game.addToBalance(hard8Stack.getTotal() * 10); // return the original wager, then 9x bet
+                            addToBalance(hard8Stack.getTotal() * 10); // return the original wager, then 9x bet
                             hard8Stack.popStack(true);
                             hard8Stack.setTotal(0);
                         } else {
@@ -1322,14 +1322,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 case 9:
                     if(come9Stack.getTotal() > 0) {
                         won += come9Stack.getTotal();
-                        game.addToBalance(come9Stack.getTotal() * 2); // return the original wager, then 1x bet
+                        addToBalance(come9Stack.getTotal() * 2); // return the original wager, then 1x bet
                         come9Stack.popStack(true);
                         come9Stack.setTotal(0);
                     }
                     if(come9OddsStack.getTotal() > 0) {
                         int w = (come9OddsStack.getTotal() * 3) / 2;
                         won += w;
-                        game.addToBalance(w + come9OddsStack.getTotal());
+                        addToBalance(w + come9OddsStack.getTotal());
                         come9OddsStack.popStack(true);
                         come9OddsStack.setTotal(0);
                     }
@@ -1351,7 +1351,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     if(place9Stack.getTotal() > 0) {
                         int w = (place9Stack.getTotal() * 7) / 5;
                         won += w;
-                        game.addToBalance(w + place9Stack.getTotal());
+                        addToBalance(w + place9Stack.getTotal());
                         place9Stack.popStack(true);
                         place9Stack.setTotal(0);
                     }
@@ -1359,14 +1359,14 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                 case 10:
                     if(come10Stack.getTotal() > 0) {
                         won += come10Stack.getTotal();
-                        game.addToBalance(come10Stack.getTotal() * 2); // return the original wager, then 1x bet
+                        addToBalance(come10Stack.getTotal() * 2); // return the original wager, then 1x bet
                         come10Stack.popStack(true);
                         come10Stack.setTotal(0);
                     }
                     if(come10OddsStack.getTotal() > 0) {
                         int w = come10OddsStack.getTotal() * 2;
                         won += w;
-                        game.addToBalance(w + come10OddsStack.getTotal());
+                        addToBalance(w + come10OddsStack.getTotal());
                         come10OddsStack.popStack(true);
                         come10OddsStack.setTotal(0);
                     }
@@ -1388,7 +1388,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     if(buy10Stack.getTotal() > 0) {
                         int w = (int)((buy10Stack.getTotal() * 2) * .95);
                         won += w;
-                        game.addToBalance(w + buy10Stack.getTotal()); // return the original wager, then 2x bet
+                        addToBalance(w + buy10Stack.getTotal()); // return the original wager, then 2x bet
                         buy10Stack.popStack(true);
                         buy10Stack.setTotal(0);
                     }
@@ -1396,7 +1396,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
                     if(hard10Stack.getTotal() > 0) {
                         if(hardWay) {
                             won += hard10Stack.getTotal() * 7;
-                            game.addToBalance(hard10Stack.getTotal() * 8); // return the original wager, then 9x bet
+                            addToBalance(hard10Stack.getTotal() * 8); // return the original wager, then 9x bet
                             hard10Stack.popStack(true);
                             hard10Stack.setTotal(0);
                         } else {
@@ -1414,7 +1414,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if((total == 7 || total == 11)) {
             if(comeStack.getTotal() > 0) {
                 won += comeStack.getTotal();
-                game.addToBalance(comeStack.getTotal() * 2); // return the original wager, then 1x bet
+                addToBalance(comeStack.getTotal() * 2); // return the original wager, then 1x bet
                 comeStack.popStack(true);
                 comeStack.setTotal(0);
             }
@@ -1434,9 +1434,9 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
             if(dontComeStack.getTotal() > 0) {
                 won += dontComeStack.getTotal();
                 if(total == 12) {
-                    game.addToBalance(dontComeStack.getTotal()); // return the original wager
+                    addToBalance(dontComeStack.getTotal()); // return the original wager
                 } else {
-                    game.addToBalance(dontComeStack.getTotal() * 2); // return the original wager, then 1x bet
+                    addToBalance(dontComeStack.getTotal() * 2); // return the original wager, then 1x bet
                 }
                 dontComeStack.popStack(true);
                 dontComeStack.setTotal(0);
@@ -1505,7 +1505,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if(any7Stack.getTotal() > 0) {
             if(total == 7) {
                 won += any7Stack.getTotal() * 4;
-                game.addToBalance(any7Stack.getTotal() * 5);
+                addToBalance(any7Stack.getTotal() * 5);
                 any7Stack.popStack(true);
                 any7Stack.setTotal(0);
             } else {
@@ -1518,7 +1518,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if(anyCrapsStack.getTotal() > 0) {
             if(total == 2 || total == 3 || total == 12) {
                 won += anyCrapsStack.getTotal() * 7;
-                game.addToBalance(anyCrapsStack.getTotal() * 8);
+                addToBalance(anyCrapsStack.getTotal() * 8);
                 anyCrapsStack.popStack(true);
                 anyCrapsStack.setTotal(0);
             } else {
@@ -1531,7 +1531,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if(snakeEyesStack.getTotal() > 0) {
             if(total == 2) {
                 won += snakeEyesStack.getTotal() * 30;
-                game.addToBalance(snakeEyesStack.getTotal() * 31);
+                addToBalance(snakeEyesStack.getTotal() * 31);
                 snakeEyesStack.popStack(true);
                 snakeEyesStack.setTotal(0);
             } else {
@@ -1544,7 +1544,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if(boxCarsStack.getTotal() > 0) {
             if(total == 12) {
                 won += boxCarsStack.getTotal() * 30;
-                game.addToBalance(boxCarsStack.getTotal() * 31);
+                addToBalance(boxCarsStack.getTotal() * 31);
                 boxCarsStack.popStack(true);
                 boxCarsStack.setTotal(0);
             } else {
@@ -1557,7 +1557,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if(threeStack.getTotal() > 0) {
             if(total == 3) {
                 won += threeStack.getTotal() * 15;
-                game.addToBalance(threeStack.getTotal() * 16);
+                addToBalance(threeStack.getTotal() * 16);
                 threeStack.popStack(true);
                 threeStack.setTotal(0);
             } else {
@@ -1570,7 +1570,7 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if(elevenStack.getTotal() > 0) {
             if(total == 11) {
                 won += elevenStack.getTotal() * 15;
-                game.addToBalance(elevenStack.getTotal() * 16);
+                addToBalance(elevenStack.getTotal() * 16);
                 elevenStack.popStack(true);
                 elevenStack.setTotal(0);
             } else {
@@ -1583,17 +1583,17 @@ public class CrapsScreen extends TableScreen implements ActionCompletedListener 
         if(fieldStack.getTotal() > 0) {
             if(total == 2) {
                 won += fieldStack.getTotal() * 2;
-                game.addToBalance(fieldStack.getTotal() * 3);
+                addToBalance(fieldStack.getTotal() * 3);
                 fieldStack.popStack(true);
                 fieldStack.setTotal(0);
             } else if(total == 12) {
                 won += fieldStack.getTotal() * 3;
-                game.addToBalance(fieldStack.getTotal() * 4);
+                addToBalance(fieldStack.getTotal() * 4);
                 fieldStack.popStack(true);
                 fieldStack.setTotal(0);
             } else if(total == 3 || total == 4 || total == 9 || total == 10 || total == 11) {
                 won += fieldStack.getTotal();
-                game.addToBalance(fieldStack.getTotal() * 2);
+                addToBalance(fieldStack.getTotal() * 2);
                 fieldStack.popStack(true);
                 fieldStack.setTotal(0);
             } else {

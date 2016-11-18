@@ -11,6 +11,7 @@ import java.io.IOException;
  * Created by Nick on 10/19/2016.
  */
 public class TableGame {
+    public final static TableGame Miscellaneous = new TableGame (0, "Miscellaneous Stats", null);
     public final static TableGame ThreeCardPoker = new TableGame(1, "Three Card Poker", Assets.TEX_NAME.THREE_CARD_POKER_TITLE);
     public final static TableGame Crazy4Poker = new TableGame(2, "Crazy 4 Poker", Assets.TEX_NAME.CRAZY_FOUR_POKER_TITLE);
     public final static TableGame CaribbeanStudPoker = new TableGame(3, "Caribbean Stud Poker", Assets.TEX_NAME.CARIBBEAN_STUD_POKER_TITLE);

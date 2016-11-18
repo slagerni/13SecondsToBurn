@@ -81,25 +81,25 @@ public class CasinoPracticeGame extends Game {
 
     public SplashScreen getSplashScreen() {
         if(splashScreen == null) splashScreen = new SplashScreen(this);
-        currentGame = null;
+        currentGame = TableGame.Miscellaneous;
         return splashScreen;
     }
 
     public MenuScreen getMenuScreen() {
         if(menuScreen == null) menuScreen = new MenuScreen(this);
-        currentGame = null;
+        currentGame = TableGame.Miscellaneous;
         return menuScreen;
     }
 
     public SettingsScreen getSettingsScreen() {
         if(settingsScreen == null) settingsScreen = new SettingsScreen(this);
-        currentGame = null;
+        currentGame = TableGame.Miscellaneous;
         return settingsScreen;
     }
 
     public StoreScreen getStoreScreen() {
         if(storeScreen == null) storeScreen = new StoreScreen(this);
-        currentGame = null;
+        currentGame = TableGame.Miscellaneous;
         return storeScreen;
     }
 
@@ -147,7 +147,7 @@ public class CasinoPracticeGame extends Game {
 
     public StatisticsScreen getStatisticsScreen() {
         if(statisticsScreen == null) statisticsScreen = new StatisticsScreen(this);
-        currentGame = null;
+        currentGame = TableGame.Miscellaneous;
         return statisticsScreen;
     }
 
@@ -293,8 +293,7 @@ public class CasinoPracticeGame extends Game {
     }
 
     public void subtractFromBalance(long amount) {
-        balance -= amount;
-        sessionBalance -= amount;
+        addToBalance(-amount);
     }
 
     public double getBalance() {

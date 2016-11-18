@@ -86,9 +86,18 @@ public class CasinoPracticeStatistics {
 
     public void updateReturnPerHand(StatisticType perRound, StatisticType countType) {
         if(gameStatistics.keySet().contains(CasinoPracticeGame.getCurrentGame())) {
-            double balance = gameStatistics.get(CasinoPracticeGame.getCurrentGame()).get(CasinoPracticeStatistics.Balance);
-            double count = gameStatistics.get(CasinoPracticeGame.getCurrentGame()).get(countType);
-            gameStatistics.get(CasinoPracticeGame.getCurrentGame()).put(perRound, balance / count);
+            double balance = 0;
+            if(gameStatistics.get(CasinoPracticeGame.getCurrentGame()).keySet().contains(CasinoPracticeStatistics.Balance)) {
+                balance = gameStatistics.get(CasinoPracticeGame.getCurrentGame()).get(CasinoPracticeStatistics.Balance);
+            }
+            double count = 0;
+            if(gameStatistics.get(CasinoPracticeGame.getCurrentGame()).keySet().contains(countType)) {
+                count = gameStatistics.get(CasinoPracticeGame.getCurrentGame()).get(countType);
+            }
+
+            if(count > 0) {
+                gameStatistics.get(CasinoPracticeGame.getCurrentGame()).put(perRound, balance / count);
+            }
         }
     }
 
